@@ -69,7 +69,6 @@ def test_comparison():
         assert ulid1 < ulid2
         assert ulid1 < ulid2.int
         assert ulid1 < ulid2.bytes
-        assert (ulid1 < 0.0) is False
 
 
 def test_repr():
