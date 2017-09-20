@@ -1,0 +1,11 @@
+*.pyc
+__pycache__
+*.egg-info
+
+/.tox
+/.coverage
+/.cache
+/.eggs
+/coverage.xml
+/AUTHORS
+/ChangeLog
