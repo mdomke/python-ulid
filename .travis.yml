@@ -2,9 +2,11 @@ language: python
 python:
 - '2.7'
 install:
-- pip install -U pip wheel tox-travis twine
+- pip install -U pip wheel tox-travis twine codecov
 script:
 - tox
+after_success:
+- codecov
 deploy:
   provider: pypi
   user: mdomke

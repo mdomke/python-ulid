@@ -1,9 +1,12 @@
-.. image:: https://img.shields.io/pypi/v/python-ulid.svg
+.. image:: https://img.shields.io/pypi/v/python-ulid.svg?style=flat-square
     :target: https://pypi.python.org/pypi/python-ulid
-.. image:: https://travis-ci.org/mdomke/python-ulid.svg?branch=master
+.. image:: https://img.shields.io/travis/mdomke/python-ulid/master.svg?style=flat-square
     :target: https://travis-ci.org/mdomke/python-ulid
-.. image:: https://img.shields.io/pypi/l/python-ulid.svg
+.. image:: https://img.shields.io/pypi/l/python-ulid.svg?style=flat-square
     :target: https://pypi.python.org/pypi/python-ulid
+.. image:: https://img.shields.io/codecov/c/github/mdomke/python-ulid.svg?style=flat-square
+    :target: https://codecov.io/gh/mdomke/python-ulid
+
 
 What is this?
 =============
@@ -23,12 +26,11 @@ A ULID is a *universally unique lexicographically sortable identifier*. It is
 In general the structure of a ULID is as follows:
 
 .. code-block:: txt
-		
-		 01AN4Z07BY      79KA1307SR9X4MV3
 
+		 01AN4Z07BY      79KA1307SR9X4MV3
 		|----------|    |----------------|
 		 Timestamp          Randomness
-				48bits             80bits
+       48bits             80bits
 
 
 For more information have a look at the original specification_.
@@ -61,7 +63,7 @@ Other implementations
 
 - `ahawker/ulid <https://github.com/ahawker/ulid>`_
 - `valohai/ulid2 <https://github.com/valohai/ulid2>`_
-- `mdipierro/ulid <https://github.com/mdipierro/ulid>`
+- `mdipierro/ulid <https://github.com/mdipierro/ulid>`_
 
 
 .. _ULID: https://github.com/alizain/ulid
