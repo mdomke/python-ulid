@@ -9,3 +9,5 @@ __pycache__
 /coverage.xml
 /AUTHORS
 /ChangeLog
+/dist/
+/build/
