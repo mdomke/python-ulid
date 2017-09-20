@@ -8,7 +8,7 @@ script:
 deploy:
   provider: pypi
   user: mdomke
-  distributions: sdist bidst_wheel
+  distributions: sdist bdist_wheel
   on:
     tags: true
     all_branches: true
