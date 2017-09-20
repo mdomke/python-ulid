@@ -1,0 +1,17 @@
+language: python
+python:
+- '2.7'
+install:
+- pip install -U pip wheel tox-travis twine
+script:
+- tox
+deploy:
+  provider: pypi
+  user: mdomke
+  distributions: sdist bidst_wheel
+  on:
+    tags: true
+    all_branches: true
+    repo: mdomke/python-ulid
+  password:
+    secure: iHedVcAgU8ECMnDHq8Q4yg1bXxsiZkHFbl22wZvOrhwGTotTM3jax8Ns3aESkNXEfRiFhEfE+IZHQQBCdp76uxbWrKeRgZHKIp7AaPxSMYRbo0cSS+Cg0CqrAge3W0TSom2sPpFpfJKT8JE8mAVFGF/xAlz6bo8qtCuoSGeU4UDhGIDW6/KjG9yZkbB0oj7frPvRFYf12OEr6CEPGANgqnZQMdZNmMuo5IHJTK95c2Ls6lAcd7tkyvqGpDEfhFA88euw6sDeqTrr8mjscEhHuhVkMMVAhDqbYdV14LTstVh8pDPO5hT0ZOxA5wWVEr5C5pivzAY55VOp+tZeJs6lmcKOcq3H+I6zB56mwrVU9XiDyI7uaAYXHR/IewkTc/GPpgh6mfq8vjnqPCo/PTWVE1ikOpS954jboU625Bqiv2Ip5cqbFPA4VE+EGETx6rMzBO+EjP+1zlsz88b0keGSWLaOxxip8RzZvM+0vv5qaBmZB5FlA2icNCOhccROm5IoVISj8Uk+HwVJBCOSozxUvfmr0ZboAKoVbqhTeT9lu5hjgB6W5xOAQt3bK5k9VZH8xD+VsQiJ+HVPVUWZnjwmzpSz4Tx77cO3gnwv+5Q/GhF4znPENgiT0aE3cIT0zcyHGdcx9Xaq8rtP02vN1n/nFq5E+YJFesBLZEdrH8sqoVE=
