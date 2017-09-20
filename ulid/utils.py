@@ -24,6 +24,7 @@ def int_to_bytes(value, length, byteorder=None):
 
 def int_from_bytes(value, byteorder=None):
     """Convert a byte string into an integer value.
+
     Examples::
         >>> b1 = int_to_bytes(123456, 6, byteorder='big')
         >>> int_from_bytes(b1, byteorder='big')
@@ -82,6 +83,5 @@ def timestamp_to_datetime(value):
 
 
 def current_timestamp():
-    """Get the current epoch time in milliseconds.
-    """
+    """Get the current epoch time in milliseconds."""
     return int(time.time() * MILLISECS_IN_SECS)

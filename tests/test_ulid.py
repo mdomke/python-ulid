@@ -5,9 +5,9 @@ import uuid
 from freezegun import freeze_time
 import pytest
 
-from ulid import ULID
 from ulid import base32
 from ulid import constants
+from ulid import ULID
 from ulid import utils
 
 
