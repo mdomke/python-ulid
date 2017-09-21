@@ -47,6 +47,7 @@ def test_ulid_monotonic_sorting(tick):
     assert_sorted(ulids)
     assert_sorted(map(str, ulids))
     assert_sorted(map(int, ulids))
+    assert_sorted(map(lambda u: u.bytes, ulids))
 
 
 def assert_sorted(seq):
@@ -62,7 +63,7 @@ def test_comparison():
         assert ulid1 == ulid1
         assert ulid1 == ulid1.int
         assert ulid1 == ulid1.bytes
-        assert (ulid1 == 1.2) is False
+        assert (ulid1 == object()) is False
 
         frozen_time.tick()
         ulid2 = ULID.new()
@@ -100,7 +101,13 @@ def test_ulid_new():
 
 @pytest.mark.parametrize('constructor, value', [
     (ULID, b'sdf'),
-    (ULID.new, b'sdf'),
+    (ULID.new, b'not-a-timestamp'),
+    (ULID.from_bytes, b'not-enough'),
+    (ULID.from_bytes, 123),
+    (ULID.from_str, 'not-enough'),
+    (ULID.from_str, 123),
+    (ULID.from_int, 'not-an-int'),
+    (ULID.from_uuid, 'not-a-uuid'),
 ])
 def test_ulid_invalid_input(constructor, value):
     with pytest.raises(ValueError):

@@ -15,6 +15,7 @@ def int_to_bytes(value, length, byteorder=None):
         >>> int_to_bytes(123456, 6, byteorder='big')
         '\\x00\\x00\\x00\\x01\\xe2@'
     """
+    assert isinstance(value, (int, long))
     byteorder = byteorder or sys.byteorder
     sequence = [value >> (i * 8) & 0xFF for i in range(length)]
     if byteorder == 'big':
@@ -35,6 +36,7 @@ def int_from_bytes(value, byteorder=None):
         >>> b1 == b2
         False
     """
+    assert isinstance(value, bytes)
     byteorder = byteorder or sys.byteorder
     value = bytearray(value)
     if byteorder == 'little':

@@ -8,6 +8,24 @@ from ulid import constants
 from ulid import utils
 
 
+class validate_type(object):
+    def __init__(self, types):
+        if not isinstance(types, tuple):
+            self.types = (types,)
+        else:
+            self.types = types
+
+    def __call__(self, func):
+        @functools.wraps(func)
+        def wrapped(cls, value):
+            if not isinstance(value, self.types):
+                message = "Value has to be of type "
+                message += " or ".join([t.__name__ for t in self.types])
+                raise ValueError(message)
+            return func(cls, value)
+        return wrapped
+
+
 @functools.total_ordering
 class ULID(object):
     def __init__(self, bytes):
@@ -30,18 +48,22 @@ class ULID(object):
         return cls.from_bytes(timestamp + randomness)
 
     @classmethod
-    def from_uuid(cls, uuid):
-        return cls(uuid.bytes)
+    @validate_type(uuid.UUID)
+    def from_uuid(cls, value):
+        return cls(value.bytes)
 
     @classmethod
+    @validate_type(bytes)
     def from_bytes(cls, bytes_):
         return cls(bytes_)
 
     @classmethod
+    @validate_type(str)
     def from_str(cls, string):
         return cls(base32.decode(string))
 
     @classmethod
+    @validate_type((int, long))
     def from_int(cls, value):
         return cls(utils.int_to_bytes(value, constants.BYTES_LEN, 'big'))
 
