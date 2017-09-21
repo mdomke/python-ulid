@@ -2,6 +2,8 @@ from datetime import datetime
 import sys
 import time
 
+import pytz
+
 
 MILLISECS_IN_SECS = 1000
 
@@ -58,15 +60,15 @@ def datetime_to_timestamp(value):
     """Convert a datetime object to an integer representing milliseconds.
 
     Examples::
-        >>> import datetime
-        >>> epoch = datetime.datetime(1970, 1, 1)
+        >>> import datetime, pytz
+        >>> epoch = datetime.datetime(1970, 1, 1, tzinfo=pytz.UTC)
         >>> datetime_to_timestamp(epoch)
         0
         >>> datetime_to_timestamp(epoch + datetime.timedelta(hours=1))
         3600000
     """
     assert isinstance(value, datetime)
-    epoch = datetime(1970, 1, 1)
+    epoch = datetime(1970, 1, 1, tzinfo=pytz.UTC)
     return int((value - epoch).total_seconds() * MILLISECS_IN_SECS)
 
 
@@ -74,14 +76,13 @@ def timestamp_to_datetime(value):
     """Convert a timestamp in milliseconds to a datetime object.
 
     Examples::
-        >>> import datetime
         >>> timestamp_to_datetime(0)
-        datetime.datetime(1970, 1, 1, 0, 0)
+        datetime.datetime(1970, 1, 1, 0, 0, tzinfo=<UTC>)
         >>> timestamp_to_datetime(3600000)
-        datetime.datetime(1970, 1, 1, 1, 0)
+        datetime.datetime(1970, 1, 1, 1, 0, tzinfo=<UTC>)
     """
     assert isinstance(value, int)
-    return datetime.utcfromtimestamp(value / float(MILLISECS_IN_SECS))
+    return datetime.utcfromtimestamp(value / float(MILLISECS_IN_SECS)).replace(tzinfo=pytz.UTC)
 
 
 def current_timestamp():

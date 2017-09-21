@@ -4,11 +4,16 @@ import uuid
 
 from freezegun import freeze_time
 import pytest
+import pytz
 
 from ulid import base32
 from ulid import constants
 from ulid import ULID
 from ulid import utils
+
+
+def utcnow():
+    return datetime.datetime.utcnow().replace(tzinfo=pytz.UTC)
 
 
 def crop_microseconds(value):
@@ -20,7 +25,7 @@ def test_ulid():
     ulid = ULID.new()
 
     t = utils.current_timestamp()
-    now = crop_microseconds(datetime.datetime.now())
+    now = crop_microseconds(utcnow())
 
     assert len(ulid.bytes) == constants.BYTES_LEN
     assert len(ulid.str) == constants.REPR_LEN
@@ -38,7 +43,7 @@ def test_ulid():
 @pytest.mark.parametrize('tick', [1, 60, 3600, 86400])
 def test_ulid_monotonic_sorting(tick):
     ulids = []
-    initial_time = datetime.datetime.now()
+    initial_time = utcnow()
     with freeze_time(initial_time) as frozen_time:
         for i in range(1, 11):
             ulids.append(ULID.new())
@@ -88,9 +93,9 @@ def test_ulid_stability():
 @freeze_time()
 def test_ulid_new():
     ulid1 = ULID.new(time.time())
-    ulid2 = ULID.new(datetime.datetime.now())
+    ulid2 = ULID.new(utcnow())
 
-    now = crop_microseconds(datetime.datetime.now())
+    now = crop_microseconds(utcnow())
     t = int(time.time() * 1000) / 1000.
 
     assert ulid1.timestamp == t
