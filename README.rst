@@ -6,6 +6,8 @@
     :target: https://pypi.python.org/pypi/python-ulid
 .. image:: https://img.shields.io/codecov/c/github/mdomke/python-ulid.svg?style=flat-square
     :target: https://codecov.io/gh/mdomke/python-ulid
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square
+    :target: https://black.readthedocs.io/en/stable/index.html
 
 
 What is this?
@@ -27,10 +29,10 @@ In general the structure of a ULID is as follows:
 
 .. code-block:: txt
 
-    01AN4Z07BY      79KA1307SR9X4MV3
-    |----------|    |----------------|
-     Timestamp          Randomness
-       48bits             80bits
+   01AN4Z07BY      79KA1307SR9X4MV3
+  |----------|    |----------------|
+   Timestamp          Randomness
+     48bits             80bits
 
 
 For more information have a look at the original specification_.
@@ -40,14 +42,14 @@ Basic Usage
 
 .. code-block:: python
 
-		>>> from ulid import ULID
-		>>> ulid = ULID.new()
-		>>> ulid.str
-		'01BTGNYV6HRNK8K8VKZASZCFPE'
-		>>> ulid.timestamp
-		1505945939.153
-		>>> ulid.datetime
-		datetime.datetime(2017, 9, 20, 22, 18, 59, 153000)
+  >>> from ulid import ULID
+  >>> ulid = ULID.new()
+  >>> ulid.str
+  '01BTGNYV6HRNK8K8VKZASZCFPE'
+  >>> ulid.timestamp
+  1505945939.153
+  >>> ulid.datetime
+  datetime.datetime(2017, 9, 20, 22, 18, 59, 153000)
 
 
 Installation

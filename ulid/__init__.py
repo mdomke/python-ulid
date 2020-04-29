@@ -1,7 +1,7 @@
-from datetime import datetime
 import functools
 import os
 import uuid
+from datetime import datetime
 
 from ulid import base32
 from ulid import constants
@@ -23,6 +23,7 @@ class validate_type(object):
                 message += " or ".join([t.__name__ for t in self.types])
                 raise ValueError(message)
             return func(cls, value)
+
         return wrapped
 
 
@@ -43,7 +44,7 @@ class ULID(object):
             timestamp = int(timestamp * 1000)
         else:
             raise ValueError("Invalid timestamp value.")
-        timestamp = utils.int_to_bytes(timestamp, constants.TIMESTAMP_LEN, 'big')
+        timestamp = utils.int_to_bytes(timestamp, constants.TIMESTAMP_LEN, "big")
         randomness = os.urandom(constants.RANDOMNESS_LEN)
         return cls.from_bytes(timestamp + randomness)
 
@@ -65,7 +66,7 @@ class ULID(object):
     @classmethod
     @validate_type((int, long))
     def from_int(cls, value):
-        return cls(utils.int_to_bytes(value, constants.BYTES_LEN, 'big'))
+        return cls(utils.int_to_bytes(value, constants.BYTES_LEN, "big"))
 
     @property
     def str(self):
@@ -73,7 +74,7 @@ class ULID(object):
 
     @property
     def int(self):
-        return utils.int_from_bytes(self.bytes, byteorder='big')
+        return utils.int_from_bytes(self.bytes, byteorder="big")
 
     @property
     def uuid(self):
@@ -81,11 +82,11 @@ class ULID(object):
 
     @property
     def milliseconds(self):
-        return utils.int_from_bytes(self.bytes[:constants.TIMESTAMP_LEN], byteorder='big')
+        return utils.int_from_bytes(self.bytes[: constants.TIMESTAMP_LEN], byteorder="big")
 
     @property
     def timestamp(self):
-        return self.milliseconds / 1000.
+        return self.milliseconds / 1000.0
 
     @property
     def datetime(self):
@@ -110,7 +111,7 @@ class ULID(object):
         return NotImplemented
 
     def __repr__(self):
-        return '<{0.__class__.__name__}: {0.str}>'.format(self)
+        return "<{0.__class__.__name__}: {0.str}>".format(self)
 
     def __str__(self):
         return self.str

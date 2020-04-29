@@ -1,9 +1,8 @@
-from datetime import datetime
 import sys
 import time
+from datetime import datetime
 
 import pytz
-
 
 MILLISECS_IN_SECS = 1000
 
@@ -20,7 +19,7 @@ def int_to_bytes(value, length, byteorder=None):
     assert isinstance(value, (int, long))
     byteorder = byteorder or sys.byteorder
     sequence = [value >> (i * 8) & 0xFF for i in range(length)]
-    if byteorder == 'big':
+    if byteorder == "big":
         sequence = reversed(sequence)
     return to_byte_string(sequence)
 
@@ -41,9 +40,9 @@ def int_from_bytes(value, byteorder=None):
     assert isinstance(value, bytes)
     byteorder = byteorder or sys.byteorder
     value = bytearray(value)
-    if byteorder == 'little':
+    if byteorder == "little":
         value.reverse()
-    return int(bytes(value).encode('hex'), 16)
+    return int(bytes(value).encode("hex"), 16)
 
 
 def to_byte_string(l):
@@ -53,7 +52,7 @@ def to_byte_string(l):
         >>> to_byte_string([1, 2, 3, 4])
         '\\x01\\x02\\x03\\x04'
     """
-    return bytes(b''.join(chr(b) for b in l))
+    return bytes(b"".join(chr(b) for b in l))
 
 
 def datetime_to_timestamp(value):

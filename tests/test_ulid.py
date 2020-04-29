@@ -2,10 +2,10 @@ import datetime
 import time
 import uuid
 
-from freezegun import freeze_time
-import pytest
 import pytz
 
+import pytest
+from freezegun import freeze_time
 from ulid import base32
 from ulid import constants
 from ulid import ULID
@@ -34,13 +34,13 @@ def test_ulid():
     assert isinstance(ulid.uuid, uuid.UUID)
 
     assert isinstance(ulid.timestamp, float)
-    assert ulid.timestamp == t / 1000.
+    assert ulid.timestamp == t / 1000.0
 
     assert isinstance(ulid.datetime, datetime.datetime)
     assert ulid.datetime == now
 
 
-@pytest.mark.parametrize('tick', [1, 60, 3600, 86400])
+@pytest.mark.parametrize("tick", [1, 60, 3600, 86400])
 def test_ulid_monotonic_sorting(tick):
     ulids = []
     initial_time = utcnow()
@@ -79,7 +79,7 @@ def test_comparison():
 
 def test_repr():
     ulid = ULID.new()
-    assert '<ULID: {}>'.format(ulid.str) == repr(ulid)
+    assert "<ULID: {}>".format(ulid.str) == repr(ulid)
 
 
 def test_ulid_stability():
@@ -96,7 +96,7 @@ def test_ulid_new():
     ulid2 = ULID.new(utcnow())
 
     now = crop_microseconds(utcnow())
-    t = int(time.time() * 1000) / 1000.
+    t = int(time.time() * 1000) / 1000.0
 
     assert ulid1.timestamp == t
     assert ulid1.datetime == now
@@ -104,16 +104,19 @@ def test_ulid_new():
     assert ulid2.datetime == now
 
 
-@pytest.mark.parametrize('constructor, value', [
-    (ULID, b'sdf'),
-    (ULID.new, b'not-a-timestamp'),
-    (ULID.from_bytes, b'not-enough'),
-    (ULID.from_bytes, 123),
-    (ULID.from_str, 'not-enough'),
-    (ULID.from_str, 123),
-    (ULID.from_int, 'not-an-int'),
-    (ULID.from_uuid, 'not-a-uuid'),
-])
+@pytest.mark.parametrize(
+    "constructor, value",
+    [
+        (ULID, b"sdf"),
+        (ULID.new, b"not-a-timestamp"),
+        (ULID.from_bytes, b"not-enough"),
+        (ULID.from_bytes, 123),
+        (ULID.from_str, "not-enough"),
+        (ULID.from_str, 123),
+        (ULID.from_int, "not-an-int"),
+        (ULID.from_uuid, "not-a-uuid"),
+    ],
+)
 def test_ulid_invalid_input(constructor, value):
     with pytest.raises(ValueError):
         constructor(value)
