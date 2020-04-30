@@ -10,6 +10,8 @@
     :target: https://pypi.python.org/pypi/python-ulid
 .. image:: https://img.shields.io/codecov/c/github/mdomke/python-ulid.svg?style=flat-square
     :target: https://codecov.io/gh/mdomke/python-ulid
+.. image:: https://readthedocs.org/projects/python-ulid/badge/?version=latest&style=flat-square
+    :target: https://python-ulid.readthedocs.io
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square
     :target: https://black.readthedocs.io/en/stable/index.html
 
