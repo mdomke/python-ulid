@@ -6,6 +6,8 @@ sys.path.insert(0, os.path.abspath(".."))
 project = ""
 copyright = "2020, Martin Domke"
 author = "Martin Domke"
+master_doc = "index"
+source_suffix = [".rst", ".md"]
 
 # The full version, including alpha/beta/rc tags
 release = "1.0.0"
