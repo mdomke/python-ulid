@@ -1,11 +1,8 @@
 language: python
-
 install:
   - pip install -U pip wheel tox codecov
-
 script:
   - tox
-
 matrix:
   include:
     - name: Python 3.7
@@ -20,20 +17,18 @@ matrix:
     - name: Check format
       python: 3.8
       env: TOXENV=fmt
-
 after_success:
   - codecov
-
 deploy:
   provider: pypi
   user: __token__
   password:
-    secure: iHedVcAgU8ECMnDHq8Q4yg1bXxsiZkHFbl22wZvOrhwGTotTM3jax8Ns3aESkNXEfRiFhEfE+IZHQQBCdp76uxbWrKeRgZHKIp7AaPxSMYRbo0cSS+Cg0CqrAge3W0TSom2sPpFpfJKT8JE8mAVFGF/xAlz6bo8qtCuoSGeU4UDhGIDW6/KjG9yZkbB0oj7frPvRFYf12OEr6CEPGANgqnZQMdZNmMuo5IHJTK95c2Ls6lAcd7tkyvqGpDEfhFA88euw6sDeqTrr8mjscEhHuhVkMMVAhDqbYdV14LTstVh8pDPO5hT0ZOxA5wWVEr5C5pivzAY55VOp+tZeJs6lmcKOcq3H+I6zB56mwrVU9XiDyI7uaAYXHR/IewkTc/GPpgh6mfq8vjnqPCo/PTWVE1ikOpS954jboU625Bqiv2Ip5cqbFPA4VE+EGETx6rMzBO+EjP+1zlsz88b0keGSWLaOxxip8RzZvM+0vv5qaBmZB5FlA2icNCOhccROm5IoVISj8Uk+HwVJBCOSozxUvfmr0ZboAKoVbqhTeT9lu5hjgB6W5xOAQt3bK5k9VZH8xD+VsQiJ+HVPVUWZnjwmzpSz4Tx77cO3gnwv+5Q/GhF4znPENgiT0aE3cIT0zcyHGdcx9Xaq8rtP02vN1n/nFq5E+YJFesBLZEdrH8sqoVE=
+    secure: xJdHpE+llZPcb03rw1ZWQi4Q4thoNOQXgRfZik3V1iTIHmqEUGMVjgGrKIS9+044fE7VYDYxWjWZsJcS+hg9SyJnAfjBbpMjHiVPw0z+DmI5RcB+kvtX1aHqUAQ6smdQw488MayX25rmSSNm+Hju36P0hArnMPqVaUk6rQGS//AdWpABRbWLxAX9x2bnmzKwTE7fVvAtL5S3Cm/GVoz+B/hBbl+WXBwBt/zcmxp03cknrMklXBmnBbGmyfKHkkFFxySwMA5f2XnmW4uGXWRlmcbWJy6byNW59l1zN+D1EZgnVfQBwjF3LsVbXLs1PYjsCpTwHQ4ws15vIjo1e5DI/qW+CRSrosDlOLG5eSyTRhtWnMV7xU+8Qn82MP2qgSS+2wlT6lfRcsUJvETK2Ce/hrF7MAZR2Tt6/3FWrx7xoLnjxi3X2Q6WUIqtXSEVIuigo4uwRlGubM6llg1euouoBzAtFiT1fsBOrA9GK2/KzO4Oh7DB08wrORbIxZDKpQBvCA9EJIEVpX5MnWOXlNAOyzJ2IEAfFzYPIalI/BQ7GpEpYRXJXt7y3tR9Lpbr8LYuvbNRqZUkke/1sltun+z7up8KkUFoAIw6sD61cfaiQwWdJJVDhsANAp+t5WnpA1+hlTaUNhKRNDW/apEupaeyhoRjkhWwoNd1Z0Se9jF9YGI=
   distributions: sdist bdist_wheel
   docs_dir: docs/build/html
   skip_existing: true
   on:
-    tags: true
+    branch: master
     python: "3.8"
-    condition: $TOXENV = py38
+    condition: "$TOXENV = py38"
     repo: mdomke/python-ulid
