@@ -1,3 +1,7 @@
+.. image:: logo.png
+    :width: 360px
+    :align: center
+
 .. image:: https://img.shields.io/pypi/v/python-ulid.svg?style=flat-square
     :target: https://pypi.python.org/pypi/python-ulid
 .. image:: https://img.shields.io/travis/mdomke/python-ulid/master.svg?style=flat-square
