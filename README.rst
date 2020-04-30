@@ -70,3 +70,39 @@ Other implementations
 
 .. _ULID: https://github.com/alizain/ulid
 .. _specification: https://github.com/alizain/ulid#specification
+
+
+Changelog
+=========
+
+Version 1.0.0
+-------------
+
+- Dropped support for Python 2. Only Python 3.6+ is supported.
+- Added type annotations
+- Added the named constructors `ULID.from_datetime`, `ULID.from_timestamp` and `from_hex`.
+- The named constructor `ULID.new` has been removed. Use one of the specifc named constructors
+  instead. For a new `ULID` created from the current timestamp use the standard constructor.
+
+  .. code-block:: python
+    # old
+    ulid = ULID.new()
+    ulid = ULID.new(time.time())
+    ulid = ULID.new(datetime.now())
+
+    # new
+    ulid = ULID()
+    ulid = ULID.from_timestamp(time.time())
+    ulid = ULID.from_datetime(datetime.now())
+
+- The `ULID.str` and `ULID.int` methods have been removed in favour of the more Pythonic special
+  dunder-methods. Use `str(ulid)` and `int(ulid)` instead.
+- Added the property `ULID.hex` that returns a hex representation of the `ULID`.
+
+  .. code-block:: bash
+    >>> ULID().hex
+    '0171caa5459a8631a6894d072c8550a8'
+
+- Equality checks and ordering now also work with `str`-instances.
+- The package now has no external dependencies.
+- The test-coverage has been raised to 100%.

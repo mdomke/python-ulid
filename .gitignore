@@ -6,6 +6,7 @@ __pycache__
 /.coverage
 /.cache
 /.eggs
+/.mypy_cache
 /coverage.xml
 /AUTHORS
 /ChangeLog

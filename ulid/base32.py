@@ -1,11 +1,12 @@
+from typing import Sequence
+
 from ulid import constants
-from ulid import utils
 
 # The encoding and decoding arithmetics are based on the implementation of RobThree
 # https://github.com/RobThree/NUlid/blob/89f5a9fc827d191ae5adafe42547575ed3a47723/NUlid/Ulid.cs#L168
 
-ENCODE = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
-DECODE = [
+ENCODE: str = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
+DECODE: Sequence[int] = [
     0xFF,
     0xFF,
     0xFF,
@@ -139,7 +140,7 @@ DECODE = [
 ]
 
 
-def encode(binary):
+def encode(binary: bytes) -> str:
     if len(binary) != constants.BYTES_LEN:
         raise ValueError("ULID has to be exactly 16 bytes long")
     return encode_timestamp(binary[: constants.TIMESTAMP_LEN]) + encode_randomness(
@@ -147,55 +148,53 @@ def encode(binary):
     )
 
 
-def encode_timestamp(binary):
+def encode_timestamp(binary: bytes) -> str:
     if len(binary) != constants.TIMESTAMP_LEN:
         raise ValueError("Timestamp value has to be exactly 6 bytes long.")
     lut = ENCODE
-    values = [ord(b) for b in binary]
     return "".join(
         [
-            lut[(values[0] & 224) >> 5],
-            lut[(values[0] & 31)],
-            lut[(values[1] & 248) >> 3],
-            lut[((values[1] & 7) << 2) | ((values[2] & 192) >> 6)],
-            lut[((values[2] & 62) >> 1)],
-            lut[((values[2] & 1) << 4) | ((values[3] & 240) >> 4)],
-            lut[((values[3] & 15) << 1) | ((values[4] & 128) >> 7)],
-            lut[(values[4] & 124) >> 2],
-            lut[((values[4] & 3) << 3) | ((values[5] & 224) >> 5)],
-            lut[(values[5] & 31)],
+            lut[(binary[0] & 224) >> 5],
+            lut[(binary[0] & 31)],
+            lut[(binary[1] & 248) >> 3],
+            lut[((binary[1] & 7) << 2) | ((binary[2] & 192) >> 6)],
+            lut[((binary[2] & 62) >> 1)],
+            lut[((binary[2] & 1) << 4) | ((binary[3] & 240) >> 4)],
+            lut[((binary[3] & 15) << 1) | ((binary[4] & 128) >> 7)],
+            lut[(binary[4] & 124) >> 2],
+            lut[((binary[4] & 3) << 3) | ((binary[5] & 224) >> 5)],
+            lut[(binary[5] & 31)],
         ]
     )
 
 
-def encode_randomness(binary):
+def encode_randomness(binary: bytes) -> str:
     if len(binary) != constants.RANDOMNESS_LEN:
         raise ValueError("Randomness value has to be exactly 10 bytes long.")
     lut = ENCODE
-    values = [ord(b) for b in binary]
     return "".join(
         [
-            lut[(values[0] & 248) >> 3],
-            lut[((values[0] & 7) << 2) | ((values[1] & 192) >> 6)],
-            lut[(values[1] & 62) >> 1],
-            lut[((values[1] & 1) << 4) | ((values[2] & 240) >> 4)],
-            lut[((values[2] & 15) << 1) | ((values[3] & 128) >> 7)],
-            lut[(values[3] & 124) >> 2],
-            lut[((values[3] & 3) << 3) | ((values[4] & 224) >> 5)],
-            lut[(values[4] & 31)],
-            lut[(values[5] & 248) >> 3],
-            lut[((values[5] & 7) << 2) | ((values[6] & 192) >> 6)],
-            lut[(values[6] & 62) >> 1],
-            lut[((values[6] & 1) << 4) | ((values[7] & 240) >> 4)],
-            lut[((values[7] & 15) << 1) | ((values[8] & 128) >> 7)],
-            lut[(values[8] & 124) >> 2],
-            lut[((values[8] & 3) << 3) | ((values[9] & 224) >> 5)],
-            lut[(values[9] & 31)],
+            lut[(binary[0] & 248) >> 3],
+            lut[((binary[0] & 7) << 2) | ((binary[1] & 192) >> 6)],
+            lut[(binary[1] & 62) >> 1],
+            lut[((binary[1] & 1) << 4) | ((binary[2] & 240) >> 4)],
+            lut[((binary[2] & 15) << 1) | ((binary[3] & 128) >> 7)],
+            lut[(binary[3] & 124) >> 2],
+            lut[((binary[3] & 3) << 3) | ((binary[4] & 224) >> 5)],
+            lut[(binary[4] & 31)],
+            lut[(binary[5] & 248) >> 3],
+            lut[((binary[5] & 7) << 2) | ((binary[6] & 192) >> 6)],
+            lut[(binary[6] & 62) >> 1],
+            lut[((binary[6] & 1) << 4) | ((binary[7] & 240) >> 4)],
+            lut[((binary[7] & 15) << 1) | ((binary[8] & 128) >> 7)],
+            lut[(binary[8] & 124) >> 2],
+            lut[((binary[8] & 3) << 3) | ((binary[9] & 224) >> 5)],
+            lut[(binary[9] & 31)],
         ]
     )
 
 
-def decode(encoded):
+def decode(encoded: str) -> bytes:
     if len(encoded) != constants.REPR_LEN:
         raise ValueError("Encoded ULID has to be exactly 26 characters long.")
     return decode_timestamp(encoded[: constants.TIMESTAMP_REPR_LEN]) + decode_randomness(
@@ -203,12 +202,12 @@ def decode(encoded):
     )
 
 
-def decode_timestamp(encoded):
+def decode_timestamp(encoded: str) -> bytes:
     if len(encoded) != constants.TIMESTAMP_REPR_LEN:
         raise ValueError("ULID timestamp has to be exactly 10 characters long.")
     lut = DECODE
-    values = [ord(c) for c in encoded]
-    return utils.to_byte_string(
+    values: bytes = bytes(encoded, "ascii")
+    return bytes(
         [
             ((lut[values[0]] << 5) | lut[values[1]]) & 0xFF,
             ((lut[values[2]] << 3) | (lut[values[3]] >> 2)) & 0xFF,
@@ -220,12 +219,12 @@ def decode_timestamp(encoded):
     )
 
 
-def decode_randomness(encoded):
+def decode_randomness(encoded: str) -> bytes:
     if len(encoded) != constants.RANDOMNESS_REPR_LEN:
         raise ValueError("ULID randomness has to be exactly 16 characters long.")
     lut = DECODE
-    values = [ord(c) for c in encoded]
-    return utils.to_byte_string(
+    values = bytes(encoded, "ascii")
+    return bytes(
         [
             ((lut[values[0]] << 3) | (lut[values[1]] >> 2)) & 0xFF,
             ((lut[values[1]] << 6) | (lut[values[2]] << 1) | (lut[values[3]] >> 4)) & 0xFF,

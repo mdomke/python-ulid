@@ -1,12 +1,13 @@
 import os
+from typing import Any, Callable
 
 import pytest
-from ulid import base32
-from ulid import constants
+
+from ulid import base32, constants
 
 
 @pytest.mark.parametrize(
-    "func, value",
+    "func,value",
     [
         (base32.encode, os.urandom(constants.BYTES_LEN - 1)),
         (base32.encode, os.urandom(constants.BYTES_LEN + 1)),
@@ -22,6 +23,6 @@ from ulid import constants
         (base32.decode_randomness, "A" * (constants.RANDOMNESS_REPR_LEN + 1)),
     ],
 )
-def test_invalid_input(func, value):
+def test_invalid_input(func: Callable, value: Any) -> None:
     with pytest.raises(ValueError):
         func(value)
