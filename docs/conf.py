@@ -39,7 +39,7 @@ html_logo = "../logo.png"
 html_theme = "alabaster"
 html_theme_options = {
     "github_user": "mdomke",
-    "github_repo": "ulid",
+    "github_repo": "python-ulid",
     "description": "A library for working with ULIDs",
     "sidebar_collapse": False,
     "logo_text_align": "center",
