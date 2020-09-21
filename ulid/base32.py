@@ -2,6 +2,7 @@ from typing import Sequence
 
 from ulid import constants
 
+
 # The encoding and decoding arithmetics are based on the implementation of RobThree
 # https://github.com/RobThree/NUlid/blob/89f5a9fc827d191ae5adafe42547575ed3a47723/NUlid/Ulid.cs#L168
 
