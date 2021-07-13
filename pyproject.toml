@@ -1,2 +1,8 @@
 [tool.black]
 line-length = 100
+
+[tool.setuptools_scm]
+
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.0"]
+build-backend = "setuptools.build_meta"
