@@ -1,9 +1,11 @@
 import os
-from typing import Any, Callable
+from typing import Any
+from typing import Callable
 
 import pytest
 
-from ulid import base32, constants
+from ulid import base32
+from ulid import constants
 
 
 @pytest.mark.parametrize(

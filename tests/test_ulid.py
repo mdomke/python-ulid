@@ -1,11 +1,15 @@
 import time
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
 
 import pytest
 from freezegun import freeze_time
 
-from ulid import base32, constants, ULID
+from ulid import base32
+from ulid import constants
+from ulid import ULID
 
 
 def utcnow():

@@ -4,10 +4,15 @@ import functools
 import os
 import time
 import uuid
-from datetime import datetime, timezone
-from typing import Any, Callable, Optional, Union
+from datetime import datetime
+from datetime import timezone
+from typing import Any
+from typing import Callable
+from typing import Optional
+from typing import Union
 
-from ulid import base32, constants
+from ulid import base32
+from ulid import constants
 
 
 class validate_type:
