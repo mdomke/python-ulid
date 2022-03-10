@@ -1,6 +1,8 @@
 Python ULID
 ===========
 
+Release v\ |release|
+
 A :class:`ULID` is a *universally unique lexicographically sortable identifier*. It is
 
 * 128-bit compatible with `UUID`

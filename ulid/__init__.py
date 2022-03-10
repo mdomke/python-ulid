@@ -15,6 +15,15 @@ from ulid import base32
 from ulid import constants
 
 
+try:
+    from importlib.metadata import version
+except ImportError:
+    from importlib_metadata import version  # type: ignore
+
+
+__version__ = version(__name__)
+
+
 class validate_type:
     def __init__(self, *types: Any) -> None:
         self.types = types

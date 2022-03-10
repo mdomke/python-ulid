@@ -5,13 +5,17 @@ from datetime import datetime
 
 sys.path.insert(0, os.path.abspath(".."))
 
+import ulid  # noqa
+
+
 copyright = f"{datetime.now().year}, Martin Domke"
 author = "Martin Domke"
 master_doc = "index"
 source_suffix = [".rst", ".md"]
 
 # The full version, including alpha/beta/rc tags
-release = "1.0.0"
+release = ulid.__version__
+version = release.rsplit(".", 1)[0]
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
