@@ -3,10 +3,10 @@
 Changelog
 =========
 
-Versions follow `SemVer <http://www.semver.org>`_
+Versions follow `Semantic Versioning <http://www.semver.org>`_
 
-`1.1.0` - 2022-03-10
---------------------
+`1.1.0`_ - 2022-03-10
+---------------------
 
 Added
 ~~~~~
