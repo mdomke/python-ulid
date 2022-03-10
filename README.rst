@@ -1,20 +1,30 @@
-.. image:: logo.png
-   :align: center
-   :width: 360px
-   :alt: ulid
+.. raw:: html
 
-.. image:: https://img.shields.io/pypi/v/python-ulid.svg?style=flat-square
-   :target: https://pypi.python.org/pypi/python-ulid
-.. image:: https://img.shields.io/travis/mdomke/python-ulid/master.svg?style=flat-square
-   :target: https://travis-ci.org/mdomke/python-ulid
-.. image:: https://img.shields.io/pypi/l/python-ulid.svg?style=flat-square
-   :target: https://pypi.python.org/pypi/python-ulid
-.. image:: https://img.shields.io/codecov/c/github/mdomke/python-ulid.svg?style=flat-square
-   :target: https://codecov.io/gh/mdomke/python-ulid
-.. image:: https://readthedocs.org/projects/python-ulid/badge/?version=latest&style=flat-square
-   :target: https://python-ulid.readthedocs.io
-.. image:: https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square
-   :target: https://black.readthedocs.io/en/stable/index.html
+   <p align="center">
+      <a href=""https://python-ulid.readthedocs.io>
+         <img src="./logo.png" width="360" alt="ulid" />
+      </a>
+      <br />
+      <br />
+   </p>
+   <p align="center">
+      <a href="https://pypi.python.org/pypi/python-ulid">
+         <img src="https://img.shields.io/pypi/v/python-ulid.svg?style=flat-square" />
+      </a>
+      <a href="https://img.shields.io/codecov/c/github/mdomke/python-ulid.svg?style=flat-square">
+         <img src="https://codecov.io/gh/mdomke/python-ulid" />
+      </a>
+      <a href="https://img.shields.io/github/workflow/status/mdomke/python-ulid/lint-and-test?style=flat-square">
+         <img src="https://github.com/mdomke/python-ulid/actions?query=workflow%3Alint-and-test" />
+      </a>
+      <a href="https://readthedocs.org/projects/python-ulid/badge/?version=latest&style=flat-square">
+         <img src="https://python-ulid.readthedocs.io" />
+      </a>
+      <a href="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square">
+         <img src="https://black.readthedocs.io/en/stable/index.html" />
+      </a>
+   </p>
+
 
 What is this?
 =============
