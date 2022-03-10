@@ -1,11 +1,11 @@
 import os
 import sys
+from datetime import datetime
 
 
 sys.path.insert(0, os.path.abspath(".."))
 
-project = ""
-copyright = "2020, Martin Domke"
+copyright = f"{datetime.now().year}, Martin Domke"
 author = "Martin Domke"
 master_doc = "index"
 source_suffix = [".rst", ".md"]
@@ -37,7 +37,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # a list of builtin themes.
 #
 html_logo = "../logo.png"
-html_theme = "alabaster"
+html_theme = "furo"
 html_theme_options = {
     "github_user": "mdomke",
     "github_repo": "python-ulid",
@@ -45,8 +45,31 @@ html_theme_options = {
     "sidebar_collapse": False,
     "logo_text_align": "center",
 }
+
+# If false, no index is generated.
+html_use_index = True
+
+# If true, the index is split into individual pages for each letter.
+html_split_index = False
+
+# If true, links to the reST sources are added to the pages.
+html_show_sourcelink = True
+
+# If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
+html_show_sphinx = True
+
+# If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
+html_show_copyright = True
+
 html_sidebars = {
-    "**": ["about.html", "navigation.html", "relations.html", "searchbox.html", "donate.html"]
+    "**": [
+        "sidebar/scroll-start.html",
+        "sidebar/brand.html",
+        "sidebar/search.html",
+        "sidebar/navigation.html",
+        "sidebar/ethical-ads.html",
+        "sidebar/scroll-end.html",
+    ]
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -54,3 +77,5 @@ html_sidebars = {
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 pygments_style = "sphinx"
+
+autodoc_member_order = "groupwise"
