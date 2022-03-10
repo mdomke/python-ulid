@@ -50,6 +50,8 @@ html_theme_options = {
     "logo_text_align": "center",
 }
 
+html_title = "Python ULID docs"
+
 # If false, no index is generated.
 html_use_index = True
 
