@@ -1,7 +1,7 @@
 Python ULID
 ===========
 
-Release v\ |release|
+Release v\ |release| (:ref:`What's new <changelog>`)
 
 A :class:`ULID` is a *universally unique lexicographically sortable identifier*. It is
 
@@ -72,5 +72,10 @@ API documentation
    :maxdepth: 2
 
    api
+
+.. toctree::
+   :maxdepth: 1
+
+   changelog
 
 .. _specification: https://github.com/alizain/ulid#specification
