@@ -9,15 +9,12 @@ on:
 jobs:
   lint-code:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.10]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.10"
       - name: Install dependencies
         run: pip install tox
       - name: Lint code
@@ -25,15 +22,12 @@ jobs:
 
   lint-style:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.10]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.10"
       - name: Install dependencies
         run: pip install tox
       - name: Lint style
@@ -41,15 +35,12 @@ jobs:
 
   lint-typing:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.10]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.10"
       - name: Install dependencies
         run: pip install tox
       - name: Lint typing
@@ -59,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9, 3.10]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
