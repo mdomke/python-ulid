@@ -21,9 +21,9 @@ What is this?
 
 .. teaser-begin
 
-A :class:`ULID` is a *universally unique lexicographically sortable identifier*. It is
+A :class:`.ULID` is a *universally unique lexicographically sortable identifier*. It is
 
-* 128-bit compatible with `UUID`
+* 128-bit compatible with ``UUID``
 * 1.21e+24 unique ULIDs per millisecond
 * Lexicographically sortable!
 * Canonically encoded as a 26 character string, as opposed to the 36 character UUID
@@ -41,7 +41,9 @@ In general the structure of a ULID is as follows:
      48bits             80bits
 
 
-For more information have a look at the original `specification <https://github.com/alizain/ulid#specification>`_
+For more information have a look at the original
+`specification <https://github.com/alizain/ulid#specification>`_.
+
 .. teaser-end
 
 .. installation-begin
@@ -62,7 +64,7 @@ Use ``pip`` to install the library
 Basic Usage
 -----------
 
-Create a new :class:`ULID` object from the current timestamp
+Create a new :class:`.ULID` object from the current timestamp
 
 .. code-block:: pycon
 
@@ -80,7 +82,7 @@ or use one of the named constructors
    >>> ULID.from_datetime(datetime.datetime.now())
    ULID(01E75J2XBK390V2XRH44EHC10X)
 
-There are several options for encoding the :class:`ULID` object (e.g. string, hex, int),
+There are several options for encoding the :class:`.ULID` object (e.g. string, hex, int),
 as well as to access the timestamp attribute in different formats:
 
 .. code-block:: pycon
@@ -105,5 +107,3 @@ Other implementations
 * `ahawker/ulid <https://github.com/ahawker/ulid>`_
 * `valohai/ulid2 <https://github.com/valohai/ulid2>`_
 * `mdipierro/ulid <https://github.com/mdipierro/ulid>`_
-
-
