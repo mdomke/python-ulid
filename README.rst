@@ -1,9 +1,11 @@
 .. raw:: html
 
    <p align="center">
+      <br />
       <a href=""https://python-ulid.readthedocs.io>
          <img src="./logo.png" width="360" alt="ulid" />
       </a>
+      <br />
       <br />
       <br />
    </p>
@@ -11,27 +13,24 @@
       <a href="https://pypi.python.org/pypi/python-ulid">
          <img src="https://img.shields.io/pypi/v/python-ulid.svg?style=flat-square" />
       </a>
-      <a href="https://img.shields.io/codecov/c/github/mdomke/python-ulid.svg?style=flat-square">
-         <img src="https://codecov.io/gh/mdomke/python-ulid" />
+      <a href="https://codecov.io/gh/mdomke/python-ulid">
+         <img src="https://img.shields.io/codecov/c/github/mdomke/python-ulid.svg?style=flat-square" />
       </a>
-      <a href="https://img.shields.io/github/workflow/status/mdomke/python-ulid/lint-and-test?style=flat-square">
-         <img src="https://github.com/mdomke/python-ulid/actions?query=workflow%3Alint-and-test" />
+      <a href="https://github.com/mdomke/python-ulid/actions?query=workflow%3Alint-and-test">
+         <img src="https://img.shields.io/github/workflow/status/mdomke/python-ulid/lint-and-test?style=flat-square" />
       </a>
-      <a href="https://readthedocs.org/projects/python-ulid/badge/?version=latest&style=flat-square">
-         <img src="https://python-ulid.readthedocs.io" />
+      <a href="https://python-ulid.readthedocs.io">
+         <img src="https://readthedocs.org/projects/python-ulid/badge/?version=latest&style=flat-square" />
       </a>
-      <a href="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square">
-         <img src="https://black.readthedocs.io/en/stable/index.html" />
+      <a href="https://black.readthedocs.io/en/stable/index.html">
+         <img src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square" />
       </a>
    </p>
 
 
-What is this?
-=============
-
 .. teaser-begin
 
-A :class:`.ULID` is a *universally unique lexicographically sortable identifier*. It is
+A ``ULID`` is a *universally unique lexicographically sortable identifier*. It is
 
 * 128-bit compatible with ``UUID``
 * 1.21e+24 unique ULIDs per millisecond
@@ -74,7 +73,7 @@ Use ``pip`` to install the library
 Basic Usage
 -----------
 
-Create a new :class:`.ULID` object from the current timestamp
+Create a new ``ULID`` object from the current timestamp
 
 .. code-block:: pycon
 
@@ -92,7 +91,7 @@ or use one of the named constructors
    >>> ULID.from_datetime(datetime.datetime.now())
    ULID(01E75J2XBK390V2XRH44EHC10X)
 
-There are several options for encoding the :class:`.ULID` object (e.g. string, hex, int),
+There are several options for encoding the ``ULID`` object (e.g. string, hex, int),
 as well as to access the timestamp attribute in different formats:
 
 .. code-block:: pycon
