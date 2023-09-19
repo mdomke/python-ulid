@@ -4,12 +4,10 @@ import functools
 import os
 import time
 import uuid
+from collections.abc import Callable
 from datetime import datetime
-from datetime import timezone
+from datetime import UTC
 from typing import Any
-from typing import Callable
-from typing import Optional
-from typing import Union
 
 from ulid import base32
 from ulid import constants
@@ -24,7 +22,7 @@ except ImportError:
 __version__ = version("python-ulid")
 
 
-class validate_type:
+class validate_type:  # noqa: N801
     def __init__(self, *types: Any) -> None:
         self.types = types
 
@@ -60,7 +58,7 @@ class ULID:
         '01E75PVKXA3GFABX1M1J9NZZNF'
     """
 
-    def __init__(self, value: Optional[bytes] = None) -> None:
+    def __init__(self, value: bytes | None = None) -> None:
         if value is not None and len(value) != constants.BYTES_LEN:
             raise ValueError("ULID has to be exactly 16 bytes long.")
         self.bytes = value or ULID.from_timestamp(time.time()).bytes
@@ -81,7 +79,7 @@ class ULID:
 
     @classmethod
     @validate_type(int, float)
-    def from_timestamp(cls, value: Union[int, float]) -> ULID:
+    def from_timestamp(cls, value: int | float) -> ULID:
         """Create a new :class:`ULID`-object from a timestamp. The timestamp can be either a
         `float` representing the time in seconds (as it would be returned by :func:`time.time()`)
         or an `int` in milliseconds.
@@ -167,7 +165,7 @@ class ULID:
             >>> ulid.datetime
             datetime.datetime(2020, 4, 30, 14, 33, 27, 560000, tzinfo=datetime.timezone.utc)
         """
-        return datetime.fromtimestamp(self.timestamp, timezone.utc)
+        return datetime.fromtimestamp(self.timestamp, UTC)
 
     @property
     def hex(self) -> str:
@@ -213,4 +211,3 @@ class ULID:
 
     def __hash__(self) -> int:
         return hash(self.bytes)
-

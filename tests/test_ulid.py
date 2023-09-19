@@ -1,8 +1,9 @@
 import time
 import uuid
+from collections.abc import Callable
 from datetime import datetime
 from datetime import timedelta
-from datetime import timezone
+from datetime import UTC
 
 import pytest
 from freezegun import freeze_time
@@ -12,16 +13,16 @@ from ulid import constants
 from ulid import ULID
 
 
-def utcnow():
-    return datetime.now(timezone.utc)
+def utcnow() -> datetime:
+    return datetime.now(UTC)
 
 
-def datetimes_almost_equal(a, b):
+def datetimes_almost_equal(a: datetime, b: datetime) -> None:
     assert a.replace(microsecond=0) == b.replace(microsecond=0)
 
 
 @freeze_time()
-def test_ulid():
+def test_ulid() -> None:
     ulid = ULID()
 
     t = time.time()
@@ -41,7 +42,7 @@ def test_ulid():
 
 
 @pytest.mark.parametrize("tick", [1, 60, 3600, 86400])
-def test_ulid_monotonic_sorting(tick):
+def test_ulid_monotonic_sorting(tick: int) -> None:
     ulids = []
     initial_time = utcnow()
     with freeze_time(initial_time) as frozen_time:
@@ -55,14 +56,14 @@ def test_ulid_monotonic_sorting(tick):
     assert_sorted([v.bytes for v in ulids])
 
 
-def assert_sorted(seq: list):
+def assert_sorted(seq: list) -> None:
     last = seq[0]
     for item in seq[1:]:
         assert last < item
         last = item
 
 
-def test_comparison():
+def test_comparison() -> None:
     with freeze_time() as frozen_time:
         ulid1 = ULID()
         assert ulid1 == ulid1
@@ -78,15 +79,15 @@ def test_comparison():
         assert ulid1 < ulid2.bytes
         assert ulid1 < str(ulid2)
         with pytest.raises(TypeError):
-            ulid1 < object()
+            ulid1 < object()  # noqa: B015
 
 
-def test_repr():
+def test_repr() -> None:
     ulid = ULID()
-    assert f"ULID({str(ulid)})" == repr(ulid)
+    assert f"ULID({ulid!s})" == repr(ulid)
 
 
-def test_idempotency():
+def test_idempotency() -> None:
     ulid = ULID()
     assert ULID.from_bytes(ulid.bytes) == ulid
     assert ULID.from_str(str(ulid)) == ulid
@@ -95,7 +96,7 @@ def test_idempotency():
     assert ULID.from_hex(ulid.hex) == ulid
 
 
-def test_hash():
+def test_hash() -> None:
     ulid1 = ULID()
     ulid2 = ULID()
     assert isinstance(hash(ulid1), int)
@@ -105,7 +106,7 @@ def test_hash():
 
 
 @freeze_time()
-def test_ulid_from_time():
+def test_ulid_from_time() -> None:
     ulid1 = ULID.from_timestamp(time.time())
     ulid2 = ULID.from_datetime(utcnow())
 
@@ -120,7 +121,7 @@ def test_ulid_from_time():
 
 
 @freeze_time()
-def test_ulid_from_timestamp():
+def test_ulid_from_timestamp() -> None:
     t = time.time()
     ulid1 = ULID.from_timestamp(t)
     ulid2 = ULID.from_timestamp(int(t * constants.MILLISECS_IN_SECS))
@@ -128,7 +129,7 @@ def test_ulid_from_timestamp():
 
 
 @pytest.mark.parametrize(
-    "constructor,value",
+    ("constructor", "value"),
     [
         (ULID, b"sdf"),
         (ULID.from_timestamp, b"not-a-timestamp"),
@@ -141,6 +142,6 @@ def test_ulid_from_timestamp():
         (ULID.from_uuid, "not-a-uuid"),
     ],
 )
-def test_ulid_invalid_input(constructor, value):
-    with pytest.raises(ValueError):
+def test_ulid_invalid_input(constructor: Callable, value: bytes | str | int | float) -> None:
+    with pytest.raises(ValueError):  # noqa: PT011
         constructor(value)

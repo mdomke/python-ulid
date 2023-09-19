@@ -1,6 +1,6 @@
 import os
+from collections.abc import Callable
 from typing import Any
-from typing import Callable
 
 import pytest
 
@@ -9,7 +9,7 @@ from ulid import constants
 
 
 @pytest.mark.parametrize(
-    "func,value",
+    ("func", "value"),
     [
         (base32.encode, os.urandom(constants.BYTES_LEN - 1)),
         (base32.encode, os.urandom(constants.BYTES_LEN + 1)),
@@ -26,5 +26,5 @@ from ulid import constants
     ],
 )
 def test_invalid_input(func: Callable, value: Any) -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         func(value)

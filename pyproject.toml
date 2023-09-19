@@ -1,8 +1,68 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "python-ulid"
+dynamic = ["version"]
+readme = "README.rst"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    { name = "Martin Domke", email = "mail@martindomke.net" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries",
+]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "ulid",
+]
+
 [tool.black]
 line-length = 100
 
-[tool.setuptools_scm]
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+select = ["A", "B", "C", "C4", "E", "F", "I", "N", "PT", "Q", "RUF", "S", "SIM", "T10", "UP", "W", "YTT"]
+fixable = ["RUF100", "I001"]
+ignore = [
+    "S101",   # Allow usage of asserts
+    "A001",   # Allow shadowing bultins 
+    "A003",   # Allow shadowing bultins on classes
+]
 
-[build-system]
-requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.0"]
-build-backend = "setuptools.build_meta"
+[tool.ruff.mccabe]
+max-complexity = 15
+
+[tool.ruff.isort]
+force-single-line = true
+lines-after-imports = 2
+order-by-type = false
+
+[tool.isort]
+profile = "black"
+force_alphabetical_sort_within_sections = true
+force_single_line = true
+lines_after_imports = 2
+line_length = 100
+
+[tool.coverage.run]
+branch = true
+parallel = true
+source = ["ulid"]

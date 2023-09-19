@@ -16,22 +16,9 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install dependencies
-        run: pip install tox
+        run: pip install hatch
       - name: Lint code
-        run: tox -e lint
-
-  lint-style:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
-      - name: Install dependencies
-        run: pip install tox
-      - name: Lint style
-        run: tox -e fmt
+        run: hatch run lint:style
 
   lint-typing:
     runs-on: ubuntu-latest
@@ -42,15 +29,15 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install dependencies
-        run: pip install tox
+        run: pip install hatch
       - name: Lint typing
-        run: tox -e mypy
+        run: hatch run lint:typing
 
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: [3.9", "3.10", "3.11"]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
@@ -58,6 +45,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
-        run: pip install tox
+        run: pip install hatch
       - name: Test
-        run: tox -e py
+        run: hatch run test
