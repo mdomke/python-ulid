@@ -51,7 +51,7 @@ class ULID:
        Timestamp          Randomness
          48bits             80bits
 
-    You usually create a new :class:`ULID`-object by calling the default constructor with now
+    You usually create a new :class:`ULID`-object by calling the default constructor with no
     arguments. In that case it will fill the timestamp part with the current datetime. To encode the
     object you usually convert it to a string:
 
