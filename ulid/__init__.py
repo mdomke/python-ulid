@@ -210,3 +210,7 @@ class ULID:
         elif isinstance(other, str):
             return str(self) == other
         return NotImplemented
+
+    def __hash__(self) -> int:
+        return hash(self.bytes)
+

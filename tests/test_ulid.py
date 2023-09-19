@@ -95,6 +95,15 @@ def test_idempotency():
     assert ULID.from_hex(ulid.hex) == ulid
 
 
+def test_hash():
+    ulid1 = ULID()
+    ulid2 = ULID()
+    assert isinstance(hash(ulid1), int)
+    assert hash(ulid1) == hash(ulid1)
+    assert hash(ulid1) == hash(ULID.from_bytes(ulid1.bytes))
+    assert hash(ulid1) != hash(ulid2)
+
+
 @freeze_time()
 def test_ulid_from_time():
     ulid1 = ULID.from_timestamp(time.time())
