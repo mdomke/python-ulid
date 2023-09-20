@@ -6,7 +6,7 @@ import time
 import uuid
 from collections.abc import Callable
 from datetime import datetime
-from datetime import UTC
+from datetime import timezone
 from typing import Any
 
 from ulid import base32
@@ -165,7 +165,7 @@ class ULID:
             >>> ulid.datetime
             datetime.datetime(2020, 4, 30, 14, 33, 27, 560000, tzinfo=datetime.timezone.utc)
         """
-        return datetime.fromtimestamp(self.timestamp, UTC)
+        return datetime.fromtimestamp(self.timestamp, timezone.utc)
 
     @property
     def hex(self) -> str:

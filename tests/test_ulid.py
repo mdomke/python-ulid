@@ -3,7 +3,7 @@ import uuid
 from collections.abc import Callable
 from datetime import datetime
 from datetime import timedelta
-from datetime import UTC
+from datetime import timezone
 
 import pytest
 from freezegun import freeze_time
@@ -14,7 +14,7 @@ from ulid import ULID
 
 
 def utcnow() -> datetime:
-    return datetime.now(UTC)
+    return datetime.now(timezone.utc)
 
 
 def datetimes_almost_equal(a: datetime, b: datetime) -> None:
