@@ -8,6 +8,7 @@ from datetime import timezone
 from functools import partial
 from uuid import UUID
 
+import ulid
 from ulid import ULID
 
 
@@ -38,6 +39,7 @@ def make_parser(prog: str | None = None) -> argparse.ArgumentParser:
         ),
     )
     parser.set_defaults(func=lambda _: parser.print_help())
+    parser.add_argument("--version", "-V", action="version", version=ulid.__version__)
 
     subparsers = parser.add_subparsers(title="subcommands")
     b = subparsers.add_parser(
