@@ -6,6 +6,7 @@ from collections.abc import Callable
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
+from typing import Union
 
 import pytest
 from freezegun import freeze_time
@@ -130,7 +131,7 @@ def test_ulid_from_timestamp() -> None:
     assert ulid1.timestamp == ulid2.timestamp
 
 
-Params = bytes | str | int | float
+Params = Union[bytes, str, int, float]
 
 
 @pytest.mark.parametrize(
