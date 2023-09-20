@@ -109,6 +109,34 @@ as well as to access the timestamp attribute in different formats:
 
 .. usage-end
 
+.. cli-begin
+
+Command line interface
+-----------------------
+
+The package comes with a CLI interface that can be invoked either by the script name
+`ulid` or as python module `python -m ulid`. The CLI allows you to generate, inspect
+and convert ULIDs, e.g.
+
+.. code-block:: bash
+
+   $ ulid build
+   01HASFKBN8SKZTSVVS03K5AMMS
+
+   $ ulid build --from-datetime=2023-09-23T10:20:30
+   01HB0J0F5GCKEXNSWVAD5PEAC1
+
+   $ ulid show 01HASFKBN8SKZTSVVS03K5AMMS
+   ULID:      01HASFKBN8SKZTSVVS03K5AMMS
+   Hex:       018ab2f9aea8ccffacef7900e6555299
+   Int:       2049395013039097460549394558635823769
+   Timestamp: 1695219822.248
+   Datetime:  2023-09-20 14:23:42.248000+00:00
+
+   $ echo 01HASFKBN8SKZTSVVS03K5AMMS | ulid show --uuid -
+   018ab2f9-aea8-ccff-acef-7900e6555299
+
+.. cli-end
 
 Other implementations
 ---------------------

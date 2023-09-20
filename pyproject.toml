@@ -25,6 +25,9 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
 ]
 
+[project.scripts]
+ulid = "ulid.__main__:entrypoint"
+
 [tool.hatch.version]
 source = "vcs"
 
@@ -66,3 +69,6 @@ line_length = 100
 branch = true
 parallel = true
 source = ["ulid"]
+
+[tool.doc8]
+max-line-length = 100
