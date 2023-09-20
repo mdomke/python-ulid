@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import time
 import uuid
 from collections.abc import Callable
@@ -128,6 +130,9 @@ def test_ulid_from_timestamp() -> None:
     assert ulid1.timestamp == ulid2.timestamp
 
 
+Params = bytes | str | int | float
+
+
 @pytest.mark.parametrize(
     ("constructor", "value"),
     [
@@ -142,6 +147,6 @@ def test_ulid_from_timestamp() -> None:
         (ULID.from_uuid, "not-a-uuid"),
     ],
 )
-def test_ulid_invalid_input(constructor: Callable, value: bytes | str | int | float) -> None:
+def test_ulid_invalid_input(constructor: Callable[[Params], ULID], value: Params) -> None:
     with pytest.raises(ValueError):  # noqa: PT011
         constructor(value)
