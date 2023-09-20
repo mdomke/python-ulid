@@ -7,13 +7,7 @@ dependencies = [
 
 [envs.default.scripts]
 test = "pytest {args:.}"
-cov-test = "pytest --cov {args:ulid}"
-cov-combine = [
-  "coverage combine",
-  "coverage xml",
-]
-cov-report = "coverage report --show-missing"
-cov = ["cov-test", "cov-report"]
+cov-test = "pytest --cov {args:ulid} --cov-report=term-missing --cov-report=xml"
 
 [envs.lint]
 dependencies = [

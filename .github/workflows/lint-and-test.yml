@@ -47,4 +47,4 @@ jobs:
       - name: Install dependencies
         run: pip install hatch
       - name: Test
-        run: hatch run test
+        run: hatch run cov-test
