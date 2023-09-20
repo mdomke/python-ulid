@@ -4,6 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "python-ulid"
+description = "Universally unique lexicographically sortable identifier"
 dynamic = ["version", "readme"]
 license = "MIT"
 requires-python = ">=3.9"
