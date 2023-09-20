@@ -1,11 +1,10 @@
 [build-system]
-requires = ["hatchling", "hatch-vcs"]
+requires = ["hatchling", "hatch-vcs", "hatch-fancy-pypi-readme"]
 build-backend = "hatchling.build"
 
 [project]
 name = "python-ulid"
-dynamic = ["version"]
-readme = "README.rst"
+dynamic = ["version", "readme"]
 license = "MIT"
 requires-python = ">=3.9"
 authors = [
@@ -72,3 +71,10 @@ source = ["ulid"]
 
 [tool.doc8]
 max-line-length = 100
+
+[tool.hatch.metadata.hooks.fancy-pypi-readme]
+content-type = "text/x-rst"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.rst"
+start-after = ".. teaser-begin"

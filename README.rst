@@ -1,3 +1,5 @@
+.. begin-html-header
+
 .. raw:: html
 
    <p align="center">
@@ -27,6 +29,7 @@
       </a>
    </p>
 
+.. end-html-header
 
 .. teaser-begin
 
