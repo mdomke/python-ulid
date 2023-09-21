@@ -67,7 +67,7 @@ class ULID:
     def __init__(self, value: bytes | None = None) -> None:
         if value is not None and len(value) != constants.BYTES_LEN:
             raise ValueError("ULID has to be exactly 16 bytes long.")
-        self.bytes = value or ULID.from_timestamp(time.time()).bytes
+        self.bytes: bytes = value or ULID.from_timestamp(time.time()).bytes
 
     @classmethod
     @validate_type(datetime)
