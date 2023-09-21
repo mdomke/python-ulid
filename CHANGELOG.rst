@@ -13,6 +13,12 @@ Added
 * The new method :meth:`.ULID.to_uuid4` can be used to create an RFC 4122 compliant ``UUID`` from
   an existing :class:`.ULID`.
 
+Changed
+~~~~~~~
+* The ``validate_types``-decorator that is used for all ``ULID.from_*``-methods to check type
+  correctness at runtime has now better support for type hints.
+  Thanks to `@johnpaulett <https://github.com/johnpaulett>`_
+
 
 `2.0.0`_ - 2023-09-20
 ---------------------
@@ -36,7 +42,7 @@ Added
   The CLI can also be invoked as a module ``python -m ulid``.
   For more information see ``ulid --help``.
 
-* Make :class:`.ULID`-instances hashable.
+* Make :class:`.ULID`-instances hashable. Thanks to `bendykst <https://github.com/bendykst>`_.
 * Added support for Python 3.11.
 
 
