@@ -176,6 +176,22 @@ class ULID:
         """Convert the :class:`ULID` to a :class:`uuid.UUID`."""
         return uuid.UUID(bytes=self.bytes)
 
+    def to_uuid4(self) -> uuid.UUID:
+        """Convert the :class:`ULID` to a :class:`uuid.UUID` compliant to version 4 of RFC 4122.
+
+        This conversion is destructive in the sense that the :class:`uuid.UUID` cannot be converted
+        back to the same :class:`ULID`. This is because the bits for the `variant` and `version`
+        information have to be set accordingly changing the original byte sequence.
+
+        Examples:
+
+            >>> ulid = ULID()
+            >>> uuid = ulid.to_uuid4()
+            >>> uuid.version
+            4
+        """
+        return uuid.UUID(bytes=self.bytes, version=4)
+
     def __repr__(self) -> str:
         return f"ULID({self!s})"
 

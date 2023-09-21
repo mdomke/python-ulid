@@ -97,6 +97,13 @@ def test_idempotency() -> None:
     assert ULID.from_hex(ulid.hex) == ulid
 
 
+def test_to_uuid4() -> None:
+    ulid = ULID()
+    uuid = ulid.to_uuid4()
+    assert uuid.version == 4
+    assert ULID.from_uuid(uuid) != ulid
+
+
 def test_hash() -> None:
     ulid1 = ULID()
     ulid2 = ULID()

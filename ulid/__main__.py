@@ -4,7 +4,6 @@ import sys
 import textwrap
 from collections.abc import Sequence
 from datetime import datetime
-from datetime import timezone
 from functools import partial
 from uuid import UUID
 
@@ -122,7 +121,7 @@ def build(args: argparse.Namespace) -> None:
     elif args.from_uuid is not None:
         ulid = ULID.from_uuid(args.from_uuid)
     else:
-        ulid = ULID.from_datetime(datetime.now(timezone.utc))
+        ulid = ULID()
     print(ulid)
 
 

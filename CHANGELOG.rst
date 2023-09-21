@@ -5,6 +5,15 @@ Changelog
 
 Versions follow `Semantic Versioning <http://www.semver.org>`_
 
+`2.1.0`_ - 2023-09-21
+---------------------
+
+Added
+~~~~~
+* The new method :meth:`.ULID.to_uuid4` can be used to create an RFC 4122 compliant ``UUID`` from
+  an existing :class:`.ULID`.
+
+
 `2.0.0`_ - 2023-09-20
 ---------------------
 
@@ -98,6 +107,7 @@ Changed
 * The package now has no external dependencies.
 * The test-coverage has been raised to 100%.
 
+.. _2.1.0: https://github.com/mdomke/python-ulid/compare/2.0.0...2.1.0
 .. _2.0.0: https://github.com/mdomke/python-ulid/compare/1.1.0...2.0.0
 .. _1.1.0: https://github.com/mdomke/python-ulid/compare/1.0.3...1.1.0
 .. _1.0.3: https://github.com/mdomke/python-ulid/compare/1.0.2...1.0.3
