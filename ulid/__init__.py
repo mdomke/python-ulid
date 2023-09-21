@@ -7,7 +7,7 @@ import uuid
 from collections.abc import Callable
 from datetime import datetime
 from datetime import timezone
-from typing import Any
+from typing import Any, Generic, Self, TypeVar
 
 from ulid import base32
 from ulid import constants
@@ -22,13 +22,17 @@ except ImportError:
 __version__ = version("python-ulid")
 
 
-class validate_type:  # noqa: N801
-    def __init__(self, *types: Any) -> None:
+T = TypeVar("T", bound=type)
+ReturnType = TypeVar("ReturnType")
+
+
+class validate_type(Generic[T]):  # noqa: N801
+    def __init__(self, *types: T) -> None:
         self.types = types
 
-    def __call__(self, func: Callable) -> Callable:
+    def __call__(self, func: Callable[..., ReturnType]) -> Callable[..., ReturnType]:
         @functools.wraps(func)
-        def wrapped(cls, value):
+        def wrapped(cls: Self, value: T) -> ReturnType:
             if not isinstance(value, self.types):
                 message = "Value has to be of type "
                 message += " or ".join([t.__name__ for t in self.types])
@@ -203,7 +207,7 @@ class ULID:
         """Encode this object as an integer."""
         return int.from_bytes(self.bytes, byteorder="big")
 
-    def __lt__(self, other) -> bool:
+    def __lt__(self, other: Any) -> bool:
         if isinstance(other, ULID):
             return self.bytes < other.bytes
         elif isinstance(other, int):
@@ -214,7 +218,7 @@ class ULID:
             return str(self) < other
         return NotImplemented
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         if isinstance(other, ULID):
             return self.bytes == other.bytes
         elif isinstance(other, int):
