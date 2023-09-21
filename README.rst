@@ -118,7 +118,7 @@ Command line interface
 -----------------------
 
 The package comes with a CLI interface that can be invoked either by the script name
-`ulid` or as python module `python -m ulid`. The CLI allows you to generate, inspect
+``ulid`` or as python module ``python -m ulid``. The CLI allows you to generate, inspect
 and convert ULIDs, e.g.
 
 .. code-block:: bash
