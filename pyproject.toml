@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling", "hatch-vcs", "hatch-fancy-pypi-readme"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
@@ -73,9 +73,9 @@ source = ["ulid"]
 [tool.doc8]
 max-line-length = 100
 
-[tool.hatch.metadata.hooks.fancy-pypi-readme]
-content-type = "text/x-rst"
+# [tool.hatch.metadata.hooks.fancy-pypi-readme]
+# content-type = "text/x-rst"
 
-[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
-path = "README.rst"
-start-after = ".. teaser-begin"
+# [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+# path = "readme.rst"
+# start-after = ".. teaser-begin"
