@@ -18,7 +18,7 @@ jobs:
       - name: Install dependencies
         run: pip install hatch
       - name: Lint code
-        run: hatch run lint:style
+        run: hatch -vvv run lint:style
 
   lint-typing:
     runs-on: ubuntu-latest
@@ -31,7 +31,7 @@ jobs:
       - name: Install dependencies
         run: pip install hatch
       - name: Lint typing
-        run: hatch run lint:typing
+        run: hatch -vvv run lint:typing
 
   test:
     runs-on: ubuntu-latest
@@ -47,4 +47,4 @@ jobs:
       - name: Install dependencies
         run: pip install hatch
       - name: Test
-        run: hatch run cov-test
+        run: hatch -vvv run cov-test
