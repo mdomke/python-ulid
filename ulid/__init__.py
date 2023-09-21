@@ -7,7 +7,9 @@ import uuid
 from collections.abc import Callable
 from datetime import datetime
 from datetime import timezone
-from typing import Any, Generic, Self, TypeVar
+from typing import Any
+from typing import Generic
+from typing import TypeVar
 
 from ulid import base32
 from ulid import constants
@@ -32,7 +34,7 @@ class validate_type(Generic[T]):  # noqa: N801
 
     def __call__(self, func: Callable[..., R]) -> Callable[..., R]:
         @functools.wraps(func)
-        def wrapped(cls: Self, value: T) -> R:
+        def wrapped(cls: Any, value: T) -> R:
             if not isinstance(value, self.types):
                 message = "Value has to be of type "
                 message += " or ".join([t.__name__ for t in self.types])
