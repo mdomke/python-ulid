@@ -23,16 +23,16 @@ __version__ = version("python-ulid")
 
 
 T = TypeVar("T", bound=type)
-ReturnType = TypeVar("ReturnType")
+R = TypeVar("R")
 
 
 class validate_type(Generic[T]):  # noqa: N801
     def __init__(self, *types: T) -> None:
         self.types = types
 
-    def __call__(self, func: Callable[..., ReturnType]) -> Callable[..., ReturnType]:
+    def __call__(self, func: Callable[..., R]) -> Callable[..., R]:
         @functools.wraps(func)
-        def wrapped(cls: Self, value: T) -> ReturnType:
+        def wrapped(cls: Self, value: T) -> R:
             if not isinstance(value, self.types):
                 message = "Value has to be of type "
                 message += " or ".join([t.__name__ for t in self.types])
