@@ -5,6 +5,21 @@ Changelog
 
 Versions follow `Semantic Versioning <http://www.semver.org>`_
 
+`2.2.0`_ - 2023-09-21
+---------------------
+
+Added
+~~~~~
+* Added a new flag ``--uuid4`` to the CLI ``show`` command, that converts the provided ``ULID``
+  into an RFC 4122 compliant ``UUID``.
+* The `ulid build` command allows the use of the special value ``-`` for all options to read its
+  inputs from ``stdin``. E.g.
+
+  .. code-block:: bash
+
+    $ date --iso-8601 | python -m ulid build --from-datetime -
+    01HAT9PVR02T3S13XB48S7GEHE
+
 `2.1.0`_ - 2023-09-21
 ---------------------
 
@@ -113,6 +128,7 @@ Changed
 * The package now has no external dependencies.
 * The test-coverage has been raised to 100%.
 
+.. _2.2.0: https://github.com/mdomke/python-ulid/compare/2.1.0...2.2.0
 .. _2.1.0: https://github.com/mdomke/python-ulid/compare/2.0.0...2.1.0
 .. _2.0.0: https://github.com/mdomke/python-ulid/compare/1.1.0...2.0.0
 .. _1.1.0: https://github.com/mdomke/python-ulid/compare/1.0.3...1.1.0

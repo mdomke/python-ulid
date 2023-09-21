@@ -2,9 +2,12 @@ import argparse
 import shutil
 import sys
 import textwrap
+from collections.abc import Callable
 from collections.abc import Sequence
 from datetime import datetime
 from functools import partial
+from typing import Any
+from typing import Optional
 from uuid import UUID
 
 import ulid
@@ -47,37 +50,31 @@ def make_parser(prog: str | None = None) -> argparse.ArgumentParser:
     )
     b.add_argument(
         "--from-int",
-        type=int,
         metavar="<int>",
         help="create from integer",
     )
     b.add_argument(
         "--from-hex",
-        type=str,
         metavar="<str>",
         help="create from 32 character hex value",
     )
     b.add_argument(
         "--from-str",
-        type=str,
         metavar="<str>",
         help="create from base32 encoded string of length 26",
     )
     b.add_argument(
         "--from-timestamp",
-        type=parse_numeric,
         metavar="<int|float>",
         help="create from timestamp either as float in secs or int as millis",
     )
     b.add_argument(
         "--from-datetime",
-        type=datetime.fromisoformat,
         metavar="<iso8601>",
         help="create from datetime. The timestamp part of the ULID will be taken from the datetime",
     )
     b.add_argument(
         "--from-uuid",
-        type=UUID,
         metavar="<uuid>",
         help="create from given UUID. The timestamp part will be random.",
     )
@@ -85,13 +82,26 @@ def make_parser(prog: str | None = None) -> argparse.ArgumentParser:
 
     s = subparsers.add_parser("show", help="show properties of a ULID")
     s.add_argument("ulid", help="the ULID to inspect. The special value - reads from stdin")
-    s.add_argument("--uuid", action="store_true", help="convert to UUID")
+    s.add_argument("--uuid", action="store_true", help="convert to fully random UUID")
+    s.add_argument("--uuid4", action="store_true", help="convert to RFC 4122 compliant UUIDv4")
     s.add_argument("--hex", action="store_true", help="convert to hex")
     s.add_argument("--int", action="store_true", help="convert to int")
     s.add_argument("--timestamp", "--ts", action="store_true", help="show timestamp")
     s.add_argument("--datetime", "--dt", action="store_true", help="show datetime")
     s.set_defaults(func=show)
     return parser
+
+
+def main(argv: Sequence[str], prog: str | None = None) -> None:
+    args = make_parser(prog).parse_args(argv)
+    args.func(args)
+
+
+def from_value_or_stdin(value: str, convert: Optional[Callable[[str], Any]] = None) -> Any:
+    value = sys.stdin.readline().strip() if value == "-" else value
+    if convert is not None:
+        return convert(value)
+    return value
 
 
 def parse_numeric(s: str) -> int | float:
@@ -101,35 +111,31 @@ def parse_numeric(s: str) -> int | float:
         return float(s)
 
 
-def main(argv: Sequence[str], prog: str | None = None) -> None:
-    args = make_parser(prog).parse_args(argv)
-    args.func(args)
-
-
 def build(args: argparse.Namespace) -> None:
     ulid: ULID
     if args.from_int is not None:
-        ulid = ULID.from_int(args.from_int)
+        ulid = ULID.from_int(from_value_or_stdin(args.from_int, int))
     elif args.from_hex is not None:
-        ulid = ULID.from_hex(args.from_hex)
+        ulid = ULID.from_hex(from_value_or_stdin(args.from_hex))
     elif args.from_str is not None:
-        ulid = ULID.from_str(args.from_str)
+        ulid = ULID.from_str(from_value_or_stdin(args.from_str))
     elif args.from_timestamp is not None:
-        ulid = ULID.from_timestamp(args.from_timestamp)
+        ulid = ULID.from_timestamp(from_value_or_stdin(args.from_timestamp, parse_numeric))
     elif args.from_datetime is not None:
-        ulid = ULID.from_datetime(args.from_datetime)
+        ulid = ULID.from_datetime(from_value_or_stdin(args.from_datetime, datetime.fromisoformat))
     elif args.from_uuid is not None:
-        ulid = ULID.from_uuid(args.from_uuid)
+        ulid = ULID.from_uuid(from_value_or_stdin(args.from_uuid, UUID))
     else:
         ulid = ULID()
     print(ulid)
 
 
 def show(args: argparse.Namespace) -> None:
-    value = sys.stdin.readline().strip() if args.ulid == "-" else args.ulid
-    ulid: ULID = ULID.from_str(value)
+    ulid: ULID = ULID.from_str(from_value_or_stdin(args.ulid))
     if args.uuid:
         print(ulid.to_uuid())
+    elif args.uuid4:
+        print(ulid.to_uuid4())
     elif args.hex:
         print(ulid.hex)
     elif args.int:

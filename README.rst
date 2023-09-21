@@ -136,8 +136,15 @@ and convert ULIDs, e.g.
    Timestamp: 1695219822.248
    Datetime:  2023-09-20 14:23:42.248000+00:00
 
+The special character ``-`` allows to read values from ``stdin`` so that they can be piped. E.g.
+
+.. code-block:: bash
+
    $ echo 01HASFKBN8SKZTSVVS03K5AMMS | ulid show --uuid -
-   018ab2f9-aea8-ccff-acef-7900e6555299
+   018ab2f9-aea8-4cff-acef-7900e6555299
+
+   $ date --iso-8601 | python -m ulid build --from-datetime -
+   01HAT9PVR02T3S13XB48S7GEHE
 
 .. cli-end
 
