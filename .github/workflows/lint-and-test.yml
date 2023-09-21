@@ -21,7 +21,7 @@ jobs:
           pip install hatch-vcs
           pip install hatch-fancy-pypi-readme
       - name: Lint code
-        run: hatch -vvv run lint:style
+        run: hatch run lint:style
 
   lint-typing:
     runs-on: ubuntu-latest
@@ -37,7 +37,7 @@ jobs:
           pip install hatch-vcs
           pip install hatch-fancy-pypi-readme
       - name: Lint typing
-        run: hatch -vvv run lint:typing
+        run: hatch run lint:typing
 
   test:
     runs-on: ubuntu-latest
@@ -56,4 +56,4 @@ jobs:
           pip install hatch-vcs
           pip install hatch-fancy-pypi-readme
       - name: Test
-        run: hatch -vvv run cov-test
+        run: hatch run cov-test
