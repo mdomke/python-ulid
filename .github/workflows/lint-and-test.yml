@@ -16,7 +16,11 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install dependencies
-        run: pip install hatch
+        run: |
+          pip install hatch
+          pip install hatch-vcs
+          pip install hatch-fancy-pypi-readme
+          python -u -m hatchling metadata --app
       - name: Lint code
         run: hatch -vvv run lint:style
 
