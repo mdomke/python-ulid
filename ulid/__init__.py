@@ -44,6 +44,9 @@ class validate_type(Generic[T]):  # noqa: N801
         return wrapped
 
 
+U = TypeVar("U", bound="ULID")
+
+
 @functools.total_ordering
 class ULID:
     """The :class:`ULID` object consists of a timestamp part of 48 bits and of 80 random bits.
@@ -71,7 +74,7 @@ class ULID:
 
     @classmethod
     @validate_type(datetime)
-    def from_datetime(cls, value: datetime) -> ULID:
+    def from_datetime(cls: type[U], value: datetime) -> U:
         """Create a new :class:`ULID`-object from a :class:`datetime`. The timestamp part of the
         `ULID` will be set to the corresponding timestamp of the datetime.
 
@@ -85,7 +88,7 @@ class ULID:
 
     @classmethod
     @validate_type(int, float)
-    def from_timestamp(cls, value: int | float) -> ULID:
+    def from_timestamp(cls: type[U], value: int | float) -> U:
         """Create a new :class:`ULID`-object from a timestamp. The timestamp can be either a
         `float` representing the time in seconds (as it would be returned by :func:`time.time()`)
         or an `int` in milliseconds.
@@ -104,7 +107,7 @@ class ULID:
 
     @classmethod
     @validate_type(uuid.UUID)
-    def from_uuid(cls, value: uuid.UUID) -> ULID:
+    def from_uuid(cls: type[U], value: uuid.UUID) -> U:
         """Create a new :class:`ULID`-object from a :class:`uuid.UUID`. The timestamp part will be
         random in that case.
 
@@ -118,25 +121,25 @@ class ULID:
 
     @classmethod
     @validate_type(bytes)
-    def from_bytes(cls, bytes_: bytes) -> ULID:
+    def from_bytes(cls: type[U], bytes_: bytes) -> U:
         """Create a new :class:`ULID`-object from sequence of 16 bytes."""
         return cls(bytes_)
 
     @classmethod
     @validate_type(str)
-    def from_hex(cls, value: str) -> ULID:
+    def from_hex(cls: type[U], value: str) -> U:
         """Create a new :class:`ULID`-object from 32 character string of hex values."""
         return cls.from_bytes(bytes.fromhex(value))
 
     @classmethod
     @validate_type(str)
-    def from_str(cls, string: str) -> ULID:
+    def from_str(cls: type[U], string: str) -> U:
         """Create a new :class:`ULID`-object from a 26 char long string representation."""
         return cls(base32.decode(string))
 
     @classmethod
     @validate_type(int)
-    def from_int(cls, value: int) -> ULID:
+    def from_int(cls: type[U], value: int) -> U:
         """Create a new :class:`ULID`-object from an `int`."""
         return cls(int.to_bytes(value, constants.BYTES_LEN, "big"))
 
