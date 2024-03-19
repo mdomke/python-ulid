@@ -154,3 +154,7 @@ Other implementations
 * `ahawker/ulid <https://github.com/ahawker/ulid>`_
 * `valohai/ulid2 <https://github.com/valohai/ulid2>`_
 * `mdipierro/ulid <https://github.com/mdipierro/ulid>`_
+* `oklog/ulid <https://github.com/oklog/ulid>`_
+* `ulid/javascript <https://github.com/ulid/javascript>`_
+* `RobThree/NUlid <https://github.com/RobThree/NUlid>`_
+* `imdario/go-ulid <https://github.com/imdario/go-ulid>`_
