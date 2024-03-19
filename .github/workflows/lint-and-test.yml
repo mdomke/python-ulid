@@ -57,3 +57,4 @@ jobs:
           pip install hatch-fancy-pypi-readme
       - name: Test
         run: hatch run cov-test
+      - uses: codecov/codecov-action@v4
