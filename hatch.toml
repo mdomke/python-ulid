@@ -1,8 +1,8 @@
 [envs.default]
 dependencies = [
-  "freezegun==1.2.*",
+  "freezegun==1.4.*",
   "pytest-cov==4.1.*",
-  "pytest==7.3.*",
+  "pytest==8.1.*",
 ]
 
 [envs.default.scripts]
@@ -11,18 +11,17 @@ cov-test = "pytest --cov {args:ulid} --cov-report=term-missing --cov-report=xml"
 
 [envs.lint]
 dependencies = [
-  "ruff==0.0.290",
-  "black==23.9.*",
-  "mypy==1.5.*",
+  "ruff==0.3.*",
+  "mypy==1.9.*",
 ]
 
 [envs.lint.scripts]
 typing = "mypy --install-types --non-interactive {args:ulid}"
 style = [
-  "black --check --diff {args:.}",
-  "ruff {args:.}",
+  "ruff format --check --diff {args:.}",
+  "ruff check {args:.}",
 ]
 fmt = [
-  "black {args:.}",
-  "ruff --fix {args:.}",
+  "ruff format {args:.}",
+  "ruff check --fix {args:.}",
 ]

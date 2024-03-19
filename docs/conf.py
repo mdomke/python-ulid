@@ -5,7 +5,7 @@ from datetime import datetime
 
 sys.path.insert(0, os.path.abspath(".."))
 
-import ulid  # noqa
+import ulid
 
 
 copyright = f"{datetime.now().year}, Martin Domke"
