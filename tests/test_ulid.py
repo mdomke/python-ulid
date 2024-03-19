@@ -115,7 +115,8 @@ def test_hash() -> None:
 @freeze_time()
 def test_ulid_from_time() -> None:
     ulid1 = ULID.from_timestamp(time.time())
-    ulid2 = ULID.from_datetime(utcnow())
+    ulid2 = ULID.from_timestamp(time.time_ns() // 1000000)
+    ulid3 = ULID.from_datetime(utcnow())
 
     now = utcnow()
     t = time.time()
@@ -125,6 +126,9 @@ def test_ulid_from_time() -> None:
 
     assert ulid2.timestamp == pytest.approx(t)
     datetimes_almost_equal(ulid2.datetime, now)
+
+    assert ulid2.timestamp == pytest.approx(t)
+    datetimes_almost_equal(ulid3.datetime, now)
 
 
 @freeze_time()
