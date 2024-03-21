@@ -214,6 +214,10 @@ class ULID:
         """Encode this object as an integer."""
         return int.from_bytes(self.bytes, byteorder="big")
 
+    def __bytes__(self) -> bytes:
+        """Encode this object as byte sequence."""
+        return self.bytes
+
     def __lt__(self, other: Any) -> bool:
         if isinstance(other, ULID):
             return self.bytes < other.bytes
