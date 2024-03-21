@@ -82,7 +82,7 @@ to include Pydantic support install the optional dependency like so
 Basic Usage
 -----------
 
-Create a new :class:`.ULID` object from the current timestamp
+Create a new ``ULID`` object from the current timestamp
 
 .. code-block:: pycon
 
@@ -100,7 +100,7 @@ or use one of the named constructors
    >>> ULID.from_datetime(datetime.datetime.now())
    ULID(01E75J2XBK390V2XRH44EHC10X)
 
-There are several options for encoding the :class:`.ULID` object
+There are several options for encoding the ``ULID`` object
 (e.g. string, hex, int, bytes, UUID):
 
 .. code-block:: pycon
@@ -116,8 +116,8 @@ There are several options for encoding the :class:`.ULID` object
    >>> ulid.to_uuid()
    UUID('015ea15f-6cd1-c566-89a3-73fab3f63ece')
 
-It is also possible to directly access the timestamp component of a :class:`.ULID`,
-either in UNIX epoch or as :class:`datetime.datetime`
+It is also possible to directly access the timestamp component of a ``ULID``,
+either in UNIX epoch or as ``datetime.datetime``
 
 .. code-block:: pycon
 
@@ -133,7 +133,7 @@ either in UNIX epoch or as :class:`datetime.datetime`
 Pydantic integration
 ---------------------
 
-The :class:`.ULID` class can be directly used for the popular data validation library
+The ``ULID`` class can be directly used for the popular data validation library
 `Pydantic <https://docs.pydantic.dev/latest/>`_ like so
 
 .. code-block:: python
