@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import argparse
 import shutil
 import sys
@@ -7,7 +9,6 @@ from collections.abc import Sequence
 from datetime import datetime
 from functools import partial
 from typing import Any
-from typing import Optional
 from uuid import UUID
 
 import ulid
@@ -97,7 +98,7 @@ def main(argv: Sequence[str], prog: str | None = None) -> str:
     return args.func(args)
 
 
-def from_value_or_stdin(value: str, convert: Optional[Callable[[str], Any]] = None) -> Any:
+def from_value_or_stdin(value: str, convert: Callable[[str], Any] | None = None) -> Any:
     value = sys.stdin.readline().strip() if value == "-" else value
     if convert is not None:
         return convert(value)
