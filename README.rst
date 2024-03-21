@@ -174,6 +174,14 @@ and convert ULIDs, e.g.
    Timestamp: 1695219822.248
    Datetime:  2023-09-20 14:23:42.248000+00:00
 
+There are several flags to select specific output formats for the ``show`` command, e.g.
+
+
+.. code-block:: bash
+
+   $ ulid show --datetime 01HASFKBN8SKZTSVVS03K5AMMS
+   2023-09-20 14:23:42.248000+00:00
+
 The special character ``-`` allows to read values from ``stdin`` so that they can be piped. E.g.
 
 .. code-block:: bash
@@ -183,6 +191,9 @@ The special character ``-`` allows to read values from ``stdin`` so that they ca
 
    $ date --iso-8601 | python -m ulid build --from-datetime -
    01HAT9PVR02T3S13XB48S7GEHE
+
+For a full overview of flags for the ``build`` and ``show`` commands use the ``--help`` option
+(e.g. ``ulid show --help``).
 
 .. cli-end
 
