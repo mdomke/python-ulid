@@ -9,11 +9,17 @@ from datetime import datetime
 from datetime import timezone
 from typing import Any
 from typing import Generic
+from typing import TYPE_CHECKING
 from typing import TypeVar
 
 from ulid import base32
 from ulid import constants
 
+
+if TYPE_CHECKING:
+    from pydantic import GetCoreSchemaHandler
+    from pydantic import ValidatorFunctionWrapHandler
+    from pydantic_core import CoreSchema
 
 try:
     from importlib.metadata import version
@@ -242,3 +248,34 @@ class ULID:
 
     def __hash__(self) -> int:
         return hash(self.bytes)
+
+    @classmethod
+    def __get_pydantic_core_schema__(cls, source: Any, handler: GetCoreSchemaHandler) -> CoreSchema:
+        from pydantic_core import core_schema
+
+        return core_schema.no_info_wrap_validator_function(
+            cls._pydantic_validate,
+            core_schema.union_schema(
+                [
+                    core_schema.is_instance_schema(ULID),
+                    core_schema.no_info_plain_validator_function(ULID),
+                ]
+            ),
+        )
+
+    @classmethod
+    def _pydantic_validate(cls, value: Any, handler: ValidatorFunctionWrapHandler) -> Any:
+        from pydantic_core import PydanticCustomError
+
+        try:
+            if isinstance(value, int):
+                ulid = cls.from_int(value)
+            elif isinstance(value, str):
+                ulid = cls.from_str(value)
+            elif isinstance(value, ULID):
+                ulid = value
+            else:
+                ulid = cls.from_bytes(value)
+        except ValueError as err:
+            raise PydanticCustomError("ulid_format", "Unrecognized format") from err
+        return handler(ulid)

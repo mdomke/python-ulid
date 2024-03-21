@@ -26,6 +26,11 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
 ]
 
+[project.optional-dependencies]
+pydantic = [
+    "pydantic>=2.0"
+]
+
 [project.scripts]
 ulid = "ulid.__main__:entrypoint"
 

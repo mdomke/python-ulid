@@ -8,6 +8,8 @@ from typing import Union
 
 import pytest
 from freezegun import freeze_time
+from pydantic import BaseModel
+from pydantic import ValidationError
 
 from ulid import base32
 from ulid import constants
@@ -159,3 +161,19 @@ Params = Union[bytes, str, int, float]
 def test_ulid_invalid_input(constructor: Callable[[Params], ULID], value: Params) -> None:
     with pytest.raises(ValueError):  # noqa: PT011
         constructor(value)
+
+
+def test_pydantic_protocol() -> None:
+    ulid = ULID()
+
+    class Model(BaseModel):
+        ulid: ULID
+
+    for value in [ulid, str(ulid), int(ulid), bytes(ulid)]:
+        model = Model(ulid=value)
+        assert isinstance(model.ulid, ULID)
+        assert model.ulid == ulid
+
+    for value in [b"not-enough", "not-enough"]:
+        with pytest.raises(ValidationError):
+            Model(ulid=value)

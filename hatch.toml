@@ -4,6 +4,9 @@ dependencies = [
   "pytest-cov==4.1.*",
   "pytest==8.1.*",
 ]
+features = [
+  "pydantic"
+]
 
 [envs.default.scripts]
 test = "pytest {args:.}"
