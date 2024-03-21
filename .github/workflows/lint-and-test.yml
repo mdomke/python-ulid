@@ -9,6 +9,7 @@ on:
 jobs:
   lint-code:
     runs-on: ubuntu-latest
+    name: Lint code
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -25,6 +26,7 @@ jobs:
 
   lint-typing:
     runs-on: ubuntu-latest
+    name: Lint type annotations
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -41,6 +43,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    name: Run tests
     strategy:
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
