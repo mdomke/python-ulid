@@ -92,9 +92,9 @@ def make_parser(prog: str | None = None) -> argparse.ArgumentParser:
     return parser
 
 
-def main(argv: Sequence[str], prog: str | None = None) -> None:
+def main(argv: Sequence[str], prog: str | None = None) -> str:
     args = make_parser(prog).parse_args(argv)
-    args.func(args)
+    return args.func(args)
 
 
 def from_value_or_stdin(value: str, convert: Optional[Callable[[str], Any]] = None) -> Any:
@@ -111,7 +111,7 @@ def parse_numeric(s: str) -> int | float:
         return float(s)
 
 
-def build(args: argparse.Namespace) -> None:
+def build(args: argparse.Namespace) -> str:
     ulid: ULID
     if args.from_int is not None:
         ulid = ULID.from_int(from_value_or_stdin(args.from_int, int))
@@ -127,40 +127,38 @@ def build(args: argparse.Namespace) -> None:
         ulid = ULID.from_uuid(from_value_or_stdin(args.from_uuid, UUID))
     else:
         ulid = ULID()
-    print(ulid)
+    return str(ulid)
 
 
-def show(args: argparse.Namespace) -> None:
+def show(args: argparse.Namespace) -> str:
     ulid: ULID = ULID.from_str(from_value_or_stdin(args.ulid))
     if args.uuid:
-        print(ulid.to_uuid())
+        return str(ulid.to_uuid())
     elif args.uuid4:
-        print(ulid.to_uuid4())
+        return str(ulid.to_uuid4())
     elif args.hex:
-        print(ulid.hex)
+        return ulid.hex
     elif args.int:
-        print(int(ulid))
+        return str(int(ulid))
     elif args.timestamp:
-        print(ulid.timestamp)
+        return str(ulid.timestamp)
     elif args.datetime:
-        print(ulid.datetime)
+        return ulid.datetime.isoformat()
     else:
-        print(
-            textwrap.dedent(
-                f"""
-                ULID:      {ulid!s}
-                Hex:       {ulid.hex}
-                Int:       {int(ulid)}
-                Timestamp: {ulid.timestamp}
-                Datetime:  {ulid.datetime}
-                """
-            ).strip()
-        )
+        return textwrap.dedent(
+            f"""
+            ULID:      {ulid!s}
+            Hex:       {ulid.hex}
+            Int:       {int(ulid)}
+            Timestamp: {ulid.timestamp}
+            Datetime:  {ulid.datetime.isoformat()}
+            """
+        ).strip()
 
 
-def entrypoint() -> None:
-    main(sys.argv[1:])
+def entrypoint() -> None:  # pragma: no cover
+    print(main(sys.argv[1:]))
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main(sys.argv[1:], "python -m ulid")

@@ -16,14 +16,14 @@ from ulid import base32
 from ulid import constants
 
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from pydantic import GetCoreSchemaHandler
     from pydantic import ValidatorFunctionWrapHandler
     from pydantic_core import CoreSchema
 
 try:
     from importlib.metadata import version
-except ImportError:
+except ImportError:  # pragma: no cover
     from importlib_metadata import version  # type: ignore
 
 
