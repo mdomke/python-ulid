@@ -69,6 +69,12 @@ Use ``pip`` to install the library
 
   $ pip install python-ulid
 
+to include Pydantic support install the optional dependency like so
+
+.. code-block:: bash
+
+  $ pip install python-ulid[pydantic]
+
 .. installation-end
 
 .. usage-begin
@@ -76,7 +82,7 @@ Use ``pip`` to install the library
 Basic Usage
 -----------
 
-Create a new ``ULID`` object from the current timestamp
+Create a new :class:`.ULID` object from the current timestamp
 
 .. code-block:: pycon
 
@@ -94,8 +100,8 @@ or use one of the named constructors
    >>> ULID.from_datetime(datetime.datetime.now())
    ULID(01E75J2XBK390V2XRH44EHC10X)
 
-There are several options for encoding the ``ULID`` object (e.g. string, hex, int),
-as well as to access the timestamp attribute in different formats:
+There are several options for encoding the :class:`.ULID` object
+(e.g. string, hex, int, bytes, UUID):
 
 .. code-block:: pycon
 
@@ -103,14 +109,46 @@ as well as to access the timestamp attribute in different formats:
    '01BTGNYV6HRNK8K8VKZASZCFPE'
    >>> ulid.hex
    '015ea15f6cd1c56689a373fab3f63ece'
+   >>> int(ulid)
+   1820576928786795198723644692628913870
+   >>> bytes(ulid)
+   b'\x01^\xa1_l\xd1\xc5f\x89\xa3s\xfa\xb3\xf6>\xce'
+   >>> ulid.to_uuid()
+   UUID('015ea15f-6cd1-c566-89a3-73fab3f63ece')
+
+It is also possible to directly access the timestamp component of a :class:`.ULID`,
+either in UNIX epoch or as :class:`datetime.datetime`
+
+.. code-block:: pycon
+
    >>> ulid.timestamp
    1505945939.153
    >>> ulid.datetime
    datetime.datetime(2017, 9, 20, 22, 18, 59, 153000, tzinfo=datetime.timezone.utc)
-   >>> ulid.to_uuid()
-   UUID('015ea15f-6cd1-c566-89a3-73fab3f63ece')
 
 .. usage-end
+
+.. pydantic-begin
+
+Pydantic integration
+---------------------
+
+The :class:`.ULID` class can be directly used for the popular data validation library
+`Pydantic <https://docs.pydantic.dev/latest/>`_ like so
+
+.. code-block:: python
+
+  from pydantic import BaseModel
+  from ulid import ULID
+
+
+  class Model(BaseModel):
+    ulid: ULID
+
+  model = Model(ulid="DX89370400440532013000")  # OK
+  model = Model(ulid="not-a-ulid")  # Raises ValidationError
+
+.. pydantic-end
 
 .. cli-begin
 

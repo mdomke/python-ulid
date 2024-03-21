@@ -5,6 +5,21 @@ Changelog
 
 Versions follow `Semantic Versioning <http://www.semver.org>`_
 
+`2.3.0`_ - 2023-09-21
+---------------------
+
+Added
+~~~~~
+* :class:`.ULID` objects can now be converted to bytes with ``bytes(ulid)``.
+* The Pydantic v2 protocol is now supported, so that the :class:`.ULID` class can be directly used
+  as type annotations in `Pydantic models <https://docs.pydantic.dev/latest/concepts/models/#basic-model-usage>`_
+
+Changed
+~~~~~~~
+* The type annotations have been adapted, so that the classmethod constructors properly reflect the
+  type for :class:`.ULID` subclasses. Thanks to `@johnpaulett <https://github.com/johnpaulett>`_
+
+
 `2.2.0`_ - 2023-09-21
 ---------------------
 
@@ -128,6 +143,7 @@ Changed
 * The package now has no external dependencies.
 * The test-coverage has been raised to 100%.
 
+.. _2.3.0: https://github.com/mdomke/python-ulid/compare/2.2.0...2.3.0
 .. _2.2.0: https://github.com/mdomke/python-ulid/compare/2.1.0...2.2.0
 .. _2.1.0: https://github.com/mdomke/python-ulid/compare/2.0.0...2.1.0
 .. _2.0.0: https://github.com/mdomke/python-ulid/compare/1.1.0...2.0.0

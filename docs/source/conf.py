@@ -3,7 +3,7 @@ import sys
 from datetime import datetime
 
 
-sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, os.path.abspath("../.."))
 
 import ulid
 
@@ -24,6 +24,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
+    "sphinx_copybutton",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -32,7 +33,7 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = []
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -40,15 +41,8 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_logo = "../logo.png"
+html_logo = "../../logo.png"
 html_theme = "furo"
-html_theme_options = {
-    "github_user": "mdomke",
-    "github_repo": "python-ulid",
-    "description": "A library for working with ULIDs",
-    "sidebar_collapse": False,
-    "logo_text_align": "center",
-}
 
 html_title = "Python ULID docs"
 

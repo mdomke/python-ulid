@@ -16,6 +16,7 @@ cov-test = "pytest --cov {args:ulid} --cov-report=term-missing --cov-report=xml"
 dependencies = [
   "ruff==0.3.*",
   "mypy==1.9.*",
+  "doc8==1.1.*",
 ]
 
 [envs.lint.scripts]
@@ -28,3 +29,4 @@ fmt = [
   "ruff format {args:.}",
   "ruff check --fix {args:.}",
 ]
+docs = "doc8 docs"
