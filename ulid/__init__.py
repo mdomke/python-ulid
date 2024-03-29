@@ -261,6 +261,11 @@ class ULID:
                     core_schema.no_info_plain_validator_function(ULID),
                 ]
             ),
+            serialization=core_schema.plain_serializer_function_ser_schema(
+                cls._serialize,
+                info_arg=False,
+                return_schema=core_schema.str_schema()
+            )
         )
 
     @classmethod
@@ -279,3 +284,7 @@ class ULID:
         except ValueError as err:
             raise PydanticCustomError("ulid_format", "Unrecognized format") from err
         return handler(ulid)
+
+    @staticmethod
+    def _serialize(value: Any) -> str:
+        return str(value)
