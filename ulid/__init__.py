@@ -261,6 +261,9 @@ class ULID:
                     core_schema.no_info_plain_validator_function(ULID),
                 ]
             ),
+            serialization=core_schema.to_string_ser_schema(
+                when_used="json-unless-none",
+            ),
         )
 
     @classmethod

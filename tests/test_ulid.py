@@ -1,3 +1,4 @@
+import json
 import time
 import uuid
 from collections.abc import Callable
@@ -177,3 +178,13 @@ def test_pydantic_protocol() -> None:
     for value in [b"not-enough", "not-enough"]:
         with pytest.raises(ValidationError):
             Model(ulid=value)
+
+    model_dict = model.model_dump()
+    ulid_from_dict = model_dict["ulid"]
+    assert ulid_from_dict == ulid
+    assert isinstance(ulid_from_dict, ULID)
+    assert Model(**model_dict) == model
+
+    model_json = model.model_dump_json()
+    assert isinstance(json.loads(model_json)["ulid"], str)
+    assert Model.model_validate_json(model_json) == model
