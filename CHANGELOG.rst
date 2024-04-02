@@ -5,7 +5,15 @@ Changelog
 
 Versions follow `Semantic Versioning <http://www.semver.org>`_
 
-`2.3.0`_ - 2023-09-21
+`2.4.0`_ - 2024-04-02
+---------------------
+
+Added
+~~~~~
+* :class:`.ULID` objects are now properly serialized when used as Pydantic types `@Avihais12344 <https://github.com/Avihais12344>`_.
+
+
+`2.3.0`_ - 2024-03-21
 ---------------------
 
 Added
@@ -143,6 +151,7 @@ Changed
 * The package now has no external dependencies.
 * The test-coverage has been raised to 100%.
 
+.. _2.4.0: https://github.com/mdomke/python-ulid/compare/2.3.0...2.4.0
 .. _2.3.0: https://github.com/mdomke/python-ulid/compare/2.2.0...2.3.0
 .. _2.2.0: https://github.com/mdomke/python-ulid/compare/2.1.0...2.2.0
 .. _2.1.0: https://github.com/mdomke/python-ulid/compare/2.0.0...2.1.0
