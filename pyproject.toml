@@ -26,6 +26,11 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
 ]
 
+[project.urls]
+Homepage = "https://github.com/mdomke/python-ulid"
+Repository = "https://github.com/mdomke/python-ulid"
+Documentation = "https://python-ulid.readthedocs.io/"
+
 [project.optional-dependencies]
 pydantic = [
     "pydantic>=2.0"
