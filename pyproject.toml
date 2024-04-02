@@ -28,8 +28,11 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://github.com/mdomke/python-ulid"
+Documentation = "https://python-ulid.readthedocs.io"
+Changelog = "https://python-ulid.readthedocs.io/en/latest/changelog.html"
+Issues = "https://github.com/mdomke/python-ulid/issues"
+CI = "https://github.com/mdomke/python-ulid/actions"
 Repository = "https://github.com/mdomke/python-ulid"
-Documentation = "https://python-ulid.readthedocs.io/"
 
 [project.optional-dependencies]
 pydantic = [
