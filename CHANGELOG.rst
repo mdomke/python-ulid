@@ -5,9 +5,15 @@ Changelog
 
 Versions follow `Semantic Versioning <http://www.semver.org>`_
 
+`2.5.0`_ - tbd
+---------------------
+Changed
+~~~~~~~
+* Generate a more accurate JSON schema with Pydantic's ``BaseModel.model_json_schema()``. This
+  includes a specification for string and byte representations.
+
 `2.4.0`_ - 2024-04-02
 ---------------------
-
 Added
 ~~~~~
 * :class:`.ULID` objects are now properly serialized when used as Pydantic types `@Avihais12344 <https://github.com/Avihais12344>`_.
@@ -151,6 +157,7 @@ Changed
 * The package now has no external dependencies.
 * The test-coverage has been raised to 100%.
 
+.. _2.5.0: https://github.com/mdomke/python-ulid/compare/2.4.0...2.5.0
 .. _2.4.0: https://github.com/mdomke/python-ulid/compare/2.3.0...2.4.0
 .. _2.3.0: https://github.com/mdomke/python-ulid/compare/2.2.0...2.3.0
 .. _2.2.0: https://github.com/mdomke/python-ulid/compare/2.1.0...2.2.0

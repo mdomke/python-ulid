@@ -168,7 +168,7 @@ def test_pydantic_protocol() -> None:
     ulid = ULID()
 
     class Model(BaseModel):
-        ulid: ULID
+        ulid: ULID | None = None
 
     for value in [ulid, str(ulid), int(ulid), bytes(ulid)]:
         model = Model(ulid=value)
@@ -188,3 +188,23 @@ def test_pydantic_protocol() -> None:
     model_json = model.model_dump_json()
     assert isinstance(json.loads(model_json)["ulid"], str)
     assert Model.model_validate_json(model_json) == model
+
+    model_json_schema = model.model_json_schema()
+    assert "properties" in model_json_schema
+    assert "ulid" in model_json_schema["properties"]
+    assert "anyOf" in model_json_schema["properties"]["ulid"]
+    assert {
+        "maxLength": 26,
+        "minLength": 26,
+        "pattern": "[A-Z0-9]{26}",
+        "type": "string",
+    } in model_json_schema["properties"]["ulid"]["anyOf"]
+    assert {
+        "maxLength": 16,
+        "minLength": 16,
+        "type": "string",
+        "format": "binary",
+    } in model_json_schema["properties"]["ulid"]["anyOf"]
+    assert {
+        "type": "null",
+    } in model_json_schema["properties"]["ulid"]["anyOf"]
