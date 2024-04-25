@@ -5,6 +5,7 @@ from collections.abc import Callable
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
+from typing import Optional
 from typing import Union
 
 import pytest
@@ -168,7 +169,7 @@ def test_pydantic_protocol() -> None:
     ulid = ULID()
 
     class Model(BaseModel):
-        ulid: ULID | None = None
+        ulid: Optional[ULID] = None
 
     for value in [ulid, str(ulid), int(ulid), bytes(ulid)]:
         model = Model(ulid=value)
