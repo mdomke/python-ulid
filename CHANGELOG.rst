@@ -5,8 +5,9 @@ Changelog
 
 Versions follow `Semantic Versioning <http://www.semver.org>`_
 
-`2.5.0`_ - tbd
+`2.5.0`_ - 2024-04-26
 ---------------------
+
 Changed
 ~~~~~~~
 * Generate a more accurate JSON schema with Pydantic's ``BaseModel.model_json_schema()``. This
@@ -14,6 +15,7 @@ Changed
 
 `2.4.0`_ - 2024-04-02
 ---------------------
+
 Added
 ~~~~~
 * :class:`.ULID` objects are now properly serialized when used as Pydantic types `@Avihais12344 <https://github.com/Avihais12344>`_.
