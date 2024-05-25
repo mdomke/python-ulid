@@ -5,6 +5,14 @@ Changelog
 
 Versions follow `Semantic Versioning <http://www.semver.org>`_
 
+`2.6.0`_ - 2024-05-26
+---------------------
+Changed
+~~~~~~~
+* Provide more sophisticated validation when creating ``ULID``s from user input. When using
+  ``ULID.from_str`` we will check if the characters match the base32 alphabet. In general, it is
+  ensured that the timestamp part of the ULID is not out of range.
+
 `2.5.0`_ - 2024-04-26
 ---------------------
 
@@ -159,6 +167,7 @@ Changed
 * The package now has no external dependencies.
 * The test-coverage has been raised to 100%.
 
+.. _2.6.0: https://github.com/mdomke/python-ulid/compare/2.5.0...2.6.0
 .. _2.5.0: https://github.com/mdomke/python-ulid/compare/2.4.0...2.5.0
 .. _2.4.0: https://github.com/mdomke/python-ulid/compare/2.3.0...2.4.0
 .. _2.3.0: https://github.com/mdomke/python-ulid/compare/2.2.0...2.3.0

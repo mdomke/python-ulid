@@ -149,15 +149,17 @@ Params = Union[bytes, str, int, float]
 @pytest.mark.parametrize(
     ("constructor", "value"),
     [
-        (ULID, b"sdf"),
-        (ULID.from_timestamp, b"not-a-timestamp"),
-        (ULID.from_datetime, time.time()),
-        (ULID.from_bytes, b"not-enough"),
-        (ULID.from_bytes, 123),
-        (ULID.from_str, "not-enough"),
-        (ULID.from_str, 123),
-        (ULID.from_int, "not-an-int"),
-        (ULID.from_uuid, "not-a-uuid"),
+        (ULID, b"sdf"),  # invalid length
+        (ULID.from_timestamp, b"not-a-timestamp"),  # invalid type
+        (ULID.from_datetime, time.time()),  # invalid type
+        (ULID.from_bytes, b"not-enough"),  # invalid length
+        (ULID.from_bytes, 123),  # invalid type
+        (ULID.from_str, "not-enough"),  # invalid length
+        (ULID.from_str, 123),  # inavlid type
+        (ULID.from_str, "notavalidulidnotavalidulid"),  # invalid alphabet
+        (ULID.from_str, "Z" * 26),  # invalid timestamp
+        (ULID.from_int, "not-an-int"),  # invalid type
+        (ULID.from_uuid, "not-a-uuid"),  # invalid type
     ],
 )
 def test_ulid_invalid_input(constructor: Callable[[Params], ULID], value: Params) -> None:

@@ -198,6 +198,8 @@ def encode_randomness(binary: bytes) -> str:
 def decode(encoded: str) -> bytes:
     if len(encoded) != constants.REPR_LEN:
         raise ValueError("Encoded ULID has to be exactly 26 characters long.")
+    if any((c not in ENCODE) for c in encoded):
+        raise ValueError(f"Encoded ULID can only consist of letters in {ENCODE}.")
     return decode_timestamp(encoded[: constants.TIMESTAMP_REPR_LEN]) + decode_randomness(
         encoded[constants.TIMESTAMP_REPR_LEN :]
     )
