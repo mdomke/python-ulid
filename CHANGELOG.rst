@@ -9,9 +9,9 @@ Versions follow `Semantic Versioning <http://www.semver.org>`_
 ---------------------
 Changed
 ~~~~~~~
-* Provide more sophisticated validation when creating ``ULID``s from user input. When using
-  ``ULID.from_str`` we will check if the characters match the base32 alphabet. In general, it is
-  ensured that the timestamp part of the ULID is not out of range.
+* Use stricter validation when a :class:`.ULID` value from user input. When using
+  :meth:`.ULID.from_str` we will check if the characters match the base32 alphabet. In general,
+  it is ensured that the timestamp part of the ULID is not out of range.
 
 `2.5.0`_ - 2024-04-26
 ---------------------
