@@ -167,6 +167,37 @@ def test_ulid_invalid_input(constructor: Callable[[Params], ULID], value: Params
         constructor(value)
 
 
+@pytest.mark.parametrize(
+    ("constructor", "value"),
+    [
+        (ULID, b"\x00" * 16),
+        (ULID.from_timestamp, 0),
+        (ULID.from_bytes, b"\x00" * 16),
+        (ULID.from_str, "0" * 26),
+        (ULID.from_hex, "0" * 32),
+        (ULID.from_uuid, uuid.UUID("0" * 32)),
+    ],
+)
+def test_ulid_min_input(constructor: Callable[[Params], ULID], value: Params) -> None:
+    constructor(value)
+
+
+@pytest.mark.parametrize(
+    ("constructor", "value"),
+    [
+        (ULID, b"\xff" * 16),
+        (ULID.from_timestamp, 281474976710655),
+        (ULID.from_datetime, datetime.max.replace(tzinfo=timezone.utc)),
+        (ULID.from_bytes, b"\xff" * 16),
+        (ULID.from_str, "7" + "Z" * 25),
+        (ULID.from_hex, "f" * 32),
+        (ULID.from_uuid, uuid.UUID("f" * 32)),
+    ],
+)
+def test_ulid_max_input(constructor: Callable[[Params], ULID], value: Params) -> None:
+    constructor(value)
+
+
 def test_pydantic_protocol() -> None:
     ulid = ULID()
 

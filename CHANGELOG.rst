@@ -5,6 +5,13 @@ Changelog
 
 Versions follow `Semantic Versioning <http://www.semver.org>`_
 
+`2.7.0`_ - 2024-06-16
+---------------------
+Changed
+~~~~~~~
+* Ensure that the validation of ULID's timestamp component aligns more closely with
+  the ULID specification.
+
 `2.6.0`_ - 2024-05-26
 ---------------------
 Changed
@@ -167,6 +174,7 @@ Changed
 * The package now has no external dependencies.
 * The test-coverage has been raised to 100%.
 
+.. _2.7.0: https://github.com/mdomke/python-ulid/compare/2.6.0...2.7.0
 .. _2.6.0: https://github.com/mdomke/python-ulid/compare/2.5.0...2.6.0
 .. _2.5.0: https://github.com/mdomke/python-ulid/compare/2.4.0...2.5.0
 .. _2.4.0: https://github.com/mdomke/python-ulid/compare/2.3.0...2.4.0

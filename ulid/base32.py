@@ -210,6 +210,9 @@ def decode_timestamp(encoded: str) -> bytes:
         raise ValueError("ULID timestamp has to be exactly 10 characters long.")
     lut = DECODE
     values: bytes = bytes(encoded, "ascii")
+    # https://github.com/ulid/spec?tab=readme-ov-file#overflow-errors-when-parsing-base32-strings
+    if lut[values[0]] > 7:
+        raise ValueError(f"Timestamp value {encoded} is too large and will overflow 128-bits.")
     return bytes(
         [
             ((lut[values[0]] << 5) | lut[values[1]]) & 0xFF,

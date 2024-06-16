@@ -74,23 +74,17 @@ class ULID:
 
     Args:
         value (bytes, None):  A sequence of 16 bytes representing an encoded ULID.
-        validate (bool): If set to `True` validate if the timestamp part is valid.
 
     Raises:
         ValueError: If the provided value is not a valid encoded ULID.
     """
 
-    def __init__(self, value: bytes | None = None, validate: bool = True) -> None:
+    def __init__(self, value: bytes | None = None) -> None:
         if value is not None and len(value) != constants.BYTES_LEN:
             raise ValueError("ULID has to be exactly 16 bytes long.")
         self.bytes: bytes = (
             value or ULID.from_timestamp(time.time_ns() // constants.NANOSECS_IN_MILLISECS).bytes
         )
-        if value is not None and validate:
-            try:
-                self.datetime  # noqa: B018
-            except ValueError as err:
-                raise ValueError("ULID timestamp is out of range.") from err
 
     @classmethod
     @validate_type(datetime)
@@ -137,7 +131,7 @@ class ULID:
             >>> ULID.from_uuid(uuid4())
             ULID(27Q506DP7E9YNRXA0XVD8Z5YSG)
         """
-        return cls(value.bytes, validate=False)
+        return cls(value.bytes)
 
     @classmethod
     @validate_type(bytes)
