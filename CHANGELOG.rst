@@ -5,7 +5,7 @@ Changelog
 
 Versions follow `Semantic Versioning <http://www.semver.org>`_
 
-`2.7.0`_ - 2024-06-16
+`2.7.0`_ - 2024-06-17
 ---------------------
 Changed
 ~~~~~~~
