@@ -21,6 +21,7 @@ from ulid import constants
         (base32.decode, "A" * (constants.REPR_LEN + 1)),
         (base32.decode_timestamp, "A" * (constants.TIMESTAMP_REPR_LEN - 1)),
         (base32.decode_timestamp, "A" * (constants.TIMESTAMP_REPR_LEN + 1)),
+        (base32.decode_timestamp, "Z" * constants.TIMESTAMP_REPR_LEN),
         (base32.decode_randomness, "A" * (constants.RANDOMNESS_REPR_LEN - 1)),
         (base32.decode_randomness, "A" * (constants.RANDOMNESS_REPR_LEN + 1)),
     ],
