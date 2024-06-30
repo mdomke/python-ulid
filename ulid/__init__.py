@@ -29,7 +29,6 @@ except ImportError:  # pragma: no cover
 
 __version__ = version("python-ulid")
 
-
 T = TypeVar("T", bound=type)
 R = TypeVar("R")
 
@@ -156,6 +155,39 @@ class ULID:
     def from_int(cls: type[U], value: int) -> U:
         """Create a new :class:`ULID`-object from an `int`."""
         return cls(int.to_bytes(value, constants.BYTES_LEN, "big"))
+
+    @classmethod
+    def parse(cls: type[U], value: Any) -> U:
+        """Create a new :class:`ULID`-object from a given value.
+
+        .. note:: This method should only be used when the caller is trying to parse a ULID from
+        a value when they're unsure what format/primitive type it will be given in.
+        """
+        if isinstance(value, ULID):
+            return value
+        if isinstance(value, uuid.UUID):
+            return cls.from_uuid(value)
+        if isinstance(value, str):
+            len_value = len(value)
+            if len_value in [36, 32]:
+                return cls.from_uuid(uuid.UUID(value))
+            if len_value == 26:
+                return cls.from_str(value)
+            if len_value == 16:
+                return cls.from_hex(value)
+            raise ValueError(f"Cannot parse ULID from string of length {len_value}")
+        if isinstance(value, int):
+            if len(str(value)) == 13:
+                return cls.from_timestamp(value)
+            else:
+                return cls.from_int(value)
+        if isinstance(value, float):
+            return cls.from_timestamp(value)
+        if isinstance(value, datetime):
+            return cls.from_datetime(value)
+        if isinstance(value, bytes):
+            return cls.from_bytes(value)
+        raise ValueError(f"Cannot parse ULID from type {type(value)}")
 
     @property
     def milliseconds(self) -> int:
