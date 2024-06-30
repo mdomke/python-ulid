@@ -43,7 +43,7 @@ class validate_type(Generic[T]):  # noqa: N801
             if not isinstance(value, self.types):
                 message = "Value has to be of type "
                 message += " or ".join([t.__name__ for t in self.types])
-                raise ValueError(message)
+                raise TypeError(message)
             return func(cls, value)
 
         return wrapped
