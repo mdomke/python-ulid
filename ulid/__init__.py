@@ -43,7 +43,7 @@ class validate_type(Generic[T]):  # noqa: N801
             if not isinstance(value, self.types):
                 message = "Value has to be of type "
                 message += " or ".join([t.__name__ for t in self.types])
-                raise TypeError(message)
+                raise ValueError(message)
             return func(cls, value)
 
         return wrapped
@@ -187,7 +187,7 @@ class ULID:
             return cls.from_datetime(value)
         if isinstance(value, bytes):
             return cls.from_bytes(value)
-        raise ValueError(f"Cannot parse ULID from type {type(value)}")
+        raise TypeError(f"Cannot parse ULID from type {type(value)}")
 
     @property
     def milliseconds(self) -> int:
