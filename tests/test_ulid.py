@@ -254,4 +254,6 @@ def test_pydantic_protocol() -> None:
     } in model_json_schema["properties"]["ulid"]["anyOf"]
     assert {
         "type": "null",
-    } in model_json_schema["properties"]["ulid"]["anyOf"]
+    } in model_json_schema["properties"][
+        "ulid"
+    ]["anyOf"]
