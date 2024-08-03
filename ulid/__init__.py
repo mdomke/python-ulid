@@ -163,7 +163,7 @@ class ULID:
 
         Examples:
 
-            >>> ulid.timestamp
+            >>> ulid.milliseconds
             1588257207560
         """
         return int.from_bytes(self.bytes[: constants.TIMESTAMP_LEN], byteorder="big")
