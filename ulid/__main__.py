@@ -151,17 +151,18 @@ def show(args: argparse.Namespace) -> str:
         return ulid.datetime.isoformat()
     return textwrap.dedent(
         f"""
-            ULID:      {ulid!s}
-            Hex:       {ulid.hex}
-            Int:       {int(ulid)}
-            Timestamp: {ulid.timestamp}
-            Datetime:  {ulid.datetime.isoformat()}
-            """
+        ULID:      {ulid!s}
+        Hex:       {ulid.hex}
+        Int:       {int(ulid)}
+        Timestamp: {ulid.timestamp}
+        Datetime:  {ulid.datetime.isoformat()}
+        """
     ).strip()
 
 
 def entrypoint() -> None:  # pragma: no cover
-    pass
+    if (value := main(sys.argv[1:])) is not None:
+        print(value)  # noqa: T201
 
 
 if __name__ == "__main__":  # pragma: no cover

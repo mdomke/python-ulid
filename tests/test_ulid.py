@@ -1,12 +1,11 @@
-from __future__ import annotations
-
 import json
 import time
 import uuid
+from collections.abc import Callable
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
-from typing import TYPE_CHECKING
+from typing import Optional
 from typing import Union
 
 import pytest
@@ -17,10 +16,6 @@ from pydantic import ValidationError
 from ulid import base32
 from ulid import constants
 from ulid import ULID
-
-
-if TYPE_CHECKING:  # pragma: no cover
-    from collections.abc import Callable
 
 
 def utcnow() -> datetime:
@@ -220,7 +215,7 @@ def test_pydantic_protocol() -> None:
     ulid = ULID()
 
     class Model(BaseModel):
-        ulid: ULID | None = None
+        ulid: Optional[ULID, None] = None  # noqa: FA100
 
     for value in [ulid, str(ulid), int(ulid), bytes(ulid)]:
         model = Model(ulid=value)

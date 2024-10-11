@@ -179,7 +179,9 @@ class ULID:
                 return cls.from_hex(value)
             raise ValueError(f"Cannot parse ULID from string of length {len_value}")
         if isinstance(value, int):
-            return cls.from_int(value)
+            if len(str(value)) == constants.INT_REPR_LEN:
+                return cls.from_int(value)
+            return cls.from_timestamp(value)
         if isinstance(value, float):
             return cls.from_timestamp(value)
         if isinstance(value, datetime):
