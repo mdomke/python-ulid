@@ -215,7 +215,7 @@ def test_pydantic_protocol() -> None:
     ulid = ULID()
 
     class Model(BaseModel):
-        ulid: Optional[ULID, None] = None  # noqa: FA100
+        ulid: Optional[ULID] = None  # noqa: FA100
 
     for value in [ulid, str(ulid), int(ulid), bytes(ulid)]:
         model = Model(ulid=value)
