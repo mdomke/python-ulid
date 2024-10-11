@@ -7,39 +7,46 @@ on:
     branches: [main]
 
 jobs:
+  lint-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install hatch
+        uses: pypa/hatch@install
+      - name: Lint documentation
+        run: hatch run docs:check
+
   lint-code:
     runs-on: ubuntu-latest
     name: Lint code
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install dependencies
-        run: |
-          pip install hatch
-          pip install hatch-vcs
-          pip install hatch-fancy-pypi-readme
+      - name: Install hatch
+        uses: pypa/hatch@install
       - name: Lint code
-        run: hatch run lint:style
+        run: hatch fmt --check
 
   lint-typing:
     runs-on: ubuntu-latest
     name: Lint type annotations
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install dependencies
-        run: |
-          pip install hatch
-          pip install hatch-vcs
-          pip install hatch-fancy-pypi-readme
+      - name: Install hatch
+        uses: pypa/hatch@install
       - name: Lint typing
-        run: hatch run lint:typing
+        run: hatch run types:check
 
   test:
     runs-on: ubuntu-latest
@@ -53,13 +60,10 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          pip install hatch
-          pip install hatch-vcs
-          pip install hatch-fancy-pypi-readme
+      - name: Install hatch
+        uses: pypa/hatch@install
       - name: Test
-        run: hatch run cov-test
+        run: hatch test --cover --python ${{ matrix.python-version }}
       - uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
