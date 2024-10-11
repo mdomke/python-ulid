@@ -171,12 +171,12 @@ class ULID:
             return cls.from_uuid(value)
         if isinstance(value, str):
             len_value = len(value)
-            if len_value in {constants.UUID_REPR_LEN, constants.UUID_LEN}:
+            if len_value == constants.UUID_REPR_LEN:
                 return cls.from_uuid(uuid.UUID(value))
+            if len_value == constants.HEX_REPR_LEN:
+                return cls.from_hex(value)
             if len_value == constants.REPR_LEN:
                 return cls.from_str(value)
-            if len_value == constants.BYTES_LEN:
-                return cls.from_hex(value)
             raise ValueError(f"Cannot parse ULID from string of length {len_value}")
         if isinstance(value, int):
             if len(str(value)) == constants.INT_REPR_LEN:

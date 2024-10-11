@@ -14,7 +14,7 @@ import ulid
 from ulid import ULID
 
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from collections.abc import Callable
     from collections.abc import Sequence
 
