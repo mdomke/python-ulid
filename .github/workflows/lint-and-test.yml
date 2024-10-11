@@ -60,13 +60,50 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+
       - name: Install hatch
         uses: pypa/hatch@install
+
       - name: Test
         run: hatch test --cover --python ${{ matrix.python-version }}
+
+      - name: Disambiguate coverage filename
+        run: mv .coverage ".coverage.${{ matrix.os }}.${{ matrix.python-version }}"
+
+      - name: Upload coverage data
+        uses: actions/upload-artifact@v4
+        with:
+          include-hidden-files: true
+          name: coverage-${{ matrix.os }}-${{ matrix.python-version }}
+          path: .coverage*
+
+
+  coverage:
+    runs-on: ubuntu-latest
+    name: Report coverage
+    needs:
+      - run
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Hatch
+        uses: pypa/hatch@install
+
+      - name: Download coverage data
+        uses: actions/download-artifact@v4
+        with:
+          pattern: coverage-*
+          merge-multiple: true
+
+      - name: Combine coverage data
+        run: hatch run coverage:combine
+
+      - name: Export coverage reports
+        run: hatch run coverage:xml
+
       - uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+
 
   package:
     name: Build & verify package

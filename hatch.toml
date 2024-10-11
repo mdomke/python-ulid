@@ -16,6 +16,17 @@ features = [
   "pydantic"
 ]
 
+[envs.coverage]
+detached = true
+dependencies = [
+  "coverage[toml]>=6.2",
+  "lxml",
+]
+
+[envs.coverage.scripts]
+combine = "coverage combine {args}"
+xml = "coverage xml"
+
 [envs.types]
 extra-dependencies = [
   "mypy==1.11.*",
