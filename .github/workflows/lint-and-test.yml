@@ -82,7 +82,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Report coverage
     needs:
-      - run
+      - test
     steps:
       - uses: actions/checkout@v4
       - name: Install Hatch
