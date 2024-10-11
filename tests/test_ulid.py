@@ -99,6 +99,17 @@ def test_idempotency() -> None:
     assert ULID.from_uuid(ulid.to_uuid()) == ulid
     assert ULID.from_int(int(ulid)) == ulid
     assert ULID.from_hex(ulid.hex) == ulid
+    assert ULID.parse(ulid) == ulid
+    assert ULID.parse(ulid.to_uuid()) == ulid
+    assert ULID.parse(str(ulid.to_uuid())) == ulid
+    assert ULID.parse(ulid.to_uuid().hex) == ulid
+    assert ULID.parse(str(ulid)) == ulid
+    assert ULID.parse(ulid.hex) == ulid
+    assert ULID.parse(ulid.to_uuid().int) == ulid
+    assert ULID.parse(ulid.milliseconds).milliseconds == ulid.milliseconds
+    assert ULID.parse(ulid.timestamp).timestamp == ulid.timestamp
+    assert ULID.parse(ulid.datetime).datetime == ulid.datetime
+    assert ULID.parse(ulid.bytes) == ulid
 
 
 def test_to_uuid4() -> None:
@@ -160,10 +171,12 @@ Params = Union[bytes, str, int, float]
         (ULID.from_str, "Z" * 26),  # invalid timestamp
         (ULID.from_int, "not-an-int"),  # invalid type
         (ULID.from_uuid, "not-a-uuid"),  # invalid type
+        (ULID.parse, "not-a-uuid"),  # invalid length
+        (ULID.parse, []),  # invalid type
     ],
 )
 def test_ulid_invalid_input(constructor: Callable[[Params], ULID], value: Params) -> None:
-    with pytest.raises(ValueError):  # noqa: PT011
+    with pytest.raises((ValueError, TypeError)):
         constructor(value)
 
 
@@ -241,4 +254,6 @@ def test_pydantic_protocol() -> None:
     } in model_json_schema["properties"]["ulid"]["anyOf"]
     assert {
         "type": "null",
-    } in model_json_schema["properties"]["ulid"]["anyOf"]
+    } in model_json_schema["properties"][
+        "ulid"
+    ]["anyOf"]
