@@ -1,32 +1,29 @@
 [envs.default]
-dependencies = [
-  "freezegun==1.4.*",
-  "pytest-cov==4.1.*",
-  "pytest==8.1.*",
+installer = "uv"
+features = [
+  "pydantic"
+]
+
+[envs.hatch-static-analysis]
+dependencies = ["ruff==0.6.*"]
+config-path = ".ruff_defaults.toml"
+
+[envs.hatch-test]
+extra-dependencies = [
+  "freezegun==1.5.*",
 ]
 features = [
   "pydantic"
 ]
 
-[envs.default.scripts]
-test = "pytest {args:.}"
-cov-test = "pytest --cov {args:ulid} --cov-report=term-missing --cov-report=xml"
+[envs.types]
+extra-dependencies = [
+  "mypy==1.11.*",
+]
+scripts = { check = "mypy --install-types --non-interactive {args:ulid}" }
 
-[envs.lint]
-dependencies = [
-  "ruff==0.3.*",
-  "mypy==1.9.*",
+[envs.docs]
+extra-dependencies = [
   "doc8==1.1.*",
 ]
-
-[envs.lint.scripts]
-typing = "mypy --install-types --non-interactive {args:ulid}"
-style = [
-  "ruff format --check --diff {args:.}",
-  "ruff check {args:.}",
-]
-fmt = [
-  "ruff format {args:.}",
-  "ruff check --fix {args:.}",
-]
-docs = "doc8 docs"
+scripts = { check = "doc8 docs" }

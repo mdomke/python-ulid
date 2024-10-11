@@ -7,9 +7,11 @@ __pycache__
 /.cache
 /.eggs
 /.mypy_cache
+/.pytest_cache
+/.ruff_cache
+/.devbox
+
 /coverage.xml
-/AUTHORS
-/ChangeLog
 /dist/
 /build/
 /docs/build

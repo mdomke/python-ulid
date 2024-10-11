@@ -4,10 +4,10 @@ import functools
 import os
 import time
 import uuid
-from collections.abc import Callable
 from datetime import datetime
 from datetime import timezone
 from typing import Any
+from typing import cast
 from typing import Generic
 from typing import TYPE_CHECKING
 from typing import TypeVar
@@ -17,6 +17,8 @@ from ulid import constants
 
 
 if TYPE_CHECKING:  # pragma: no cover
+    from collections.abc import Callable
+
     from pydantic import GetCoreSchemaHandler
     from pydantic import ValidatorFunctionWrapHandler
     from pydantic_core import CoreSchema
@@ -43,7 +45,7 @@ class validate_type(Generic[T]):  # noqa: N801
             if not isinstance(value, self.types):
                 message = "Value has to be of type "
                 message += " or ".join([t.__name__ for t in self.types])
-                raise ValueError(message)
+                raise TypeError(message)
             return func(cls, value)
 
         return wrapped
@@ -101,7 +103,7 @@ class ULID:
 
     @classmethod
     @validate_type(int, float)
-    def from_timestamp(cls: type[U], value: int | float) -> U:
+    def from_timestamp(cls: type[U], value: float) -> U:
         """Create a new :class:`ULID`-object from a timestamp. The timestamp can be either a
         `float` representing the time in seconds (as it would be returned by :func:`time.time()`)
         or an `int` in milliseconds.
@@ -164,23 +166,20 @@ class ULID:
         a value when they're unsure what format/primitive type it will be given in.
         """
         if isinstance(value, ULID):
-            return value
+            return cast(U, value)
         if isinstance(value, uuid.UUID):
             return cls.from_uuid(value)
         if isinstance(value, str):
             len_value = len(value)
-            if len_value in [36, 32]:
+            if len_value in {constants.UUID_REPR_LEN, constants.UUID_LEN}:
                 return cls.from_uuid(uuid.UUID(value))
-            if len_value == 26:
+            if len_value == constants.REPR_LEN:
                 return cls.from_str(value)
-            if len_value == 16:
+            if len_value == constants.BYTES_LEN:
                 return cls.from_hex(value)
             raise ValueError(f"Cannot parse ULID from string of length {len_value}")
         if isinstance(value, int):
-            if len(str(value)) == 13:
-                return cls.from_timestamp(value)
-            else:
-                return cls.from_int(value)
+            return cls.from_int(value)
         if isinstance(value, float):
             return cls.from_timestamp(value)
         if isinstance(value, datetime):
@@ -265,22 +264,22 @@ class ULID:
     def __lt__(self, other: Any) -> bool:
         if isinstance(other, ULID):
             return self.bytes < other.bytes
-        elif isinstance(other, int):
+        if isinstance(other, int):
             return int(self) < other
-        elif isinstance(other, bytes):
+        if isinstance(other, bytes):
             return self.bytes < other
-        elif isinstance(other, str):
+        if isinstance(other, str):
             return str(self) < other
         return NotImplemented
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, ULID):
             return self.bytes == other.bytes
-        elif isinstance(other, int):
+        if isinstance(other, int):
             return int(self) == other
-        elif isinstance(other, bytes):
+        if isinstance(other, bytes):
             return self.bytes == other
-        elif isinstance(other, str):
+        if isinstance(other, str):
             return str(self) == other
         return NotImplemented
 
@@ -293,14 +292,12 @@ class ULID:
 
         return core_schema.no_info_wrap_validator_function(
             cls._pydantic_validate,
-            core_schema.union_schema(
-                [
-                    core_schema.is_instance_schema(ULID),
-                    core_schema.no_info_plain_validator_function(ULID),
-                    core_schema.str_schema(pattern=r"[A-Z0-9]{26}", min_length=26, max_length=26),
-                    core_schema.bytes_schema(min_length=16, max_length=16),
-                ]
-            ),
+            core_schema.union_schema([
+                core_schema.is_instance_schema(ULID),
+                core_schema.no_info_plain_validator_function(ULID),
+                core_schema.str_schema(pattern=r"[A-Z0-9]{26}", min_length=26, max_length=26),
+                core_schema.bytes_schema(min_length=16, max_length=16),
+            ]),
             serialization=core_schema.to_string_ser_schema(
                 when_used="json-unless-none",
             ),

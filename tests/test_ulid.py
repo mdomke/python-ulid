@@ -1,11 +1,12 @@
+from __future__ import annotations
+
 import json
 import time
 import uuid
-from collections.abc import Callable
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
-from typing import Optional
+from typing import TYPE_CHECKING
 from typing import Union
 
 import pytest
@@ -16,6 +17,10 @@ from pydantic import ValidationError
 from ulid import base32
 from ulid import constants
 from ulid import ULID
+
+
+if TYPE_CHECKING:  # pragma: no cover
+    from collections.abc import Callable
 
 
 def utcnow() -> datetime:
@@ -71,7 +76,7 @@ def assert_sorted(seq: list) -> None:
 def test_comparison() -> None:
     with freeze_time() as frozen_time:
         ulid1 = ULID()
-        assert ulid1 == ulid1
+        assert ulid1 == ulid1  # noqa: PLR0124
         assert ulid1 == int(ulid1)
         assert ulid1 == ulid1.bytes
         assert ulid1 == str(ulid1)
@@ -115,7 +120,7 @@ def test_idempotency() -> None:
 def test_to_uuid4() -> None:
     ulid = ULID()
     uuid = ulid.to_uuid4()
-    assert uuid.version == 4
+    assert uuid.version == 4  # noqa: PLR2004
 
 
 def test_hash() -> None:
@@ -215,7 +220,7 @@ def test_pydantic_protocol() -> None:
     ulid = ULID()
 
     class Model(BaseModel):
-        ulid: Optional[ULID] = None
+        ulid: ULID | None = None
 
     for value in [ulid, str(ulid), int(ulid), bytes(ulid)]:
         model = Model(ulid=value)
@@ -254,6 +259,4 @@ def test_pydantic_protocol() -> None:
     } in model_json_schema["properties"]["ulid"]["anyOf"]
     assert {
         "type": "null",
-    } in model_json_schema["properties"][
-        "ulid"
-    ]["anyOf"]
+    } in model_json_schema["properties"]["ulid"]["anyOf"]

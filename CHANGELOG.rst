@@ -5,6 +5,23 @@ Changelog
 
 Versions follow `Semantic Versioning <http://www.semver.org>`_
 
+`3.0.0`_ - 2024-10-11
+---------------------
+Changed
+~~~~~~~
+* Raise `TypeError` instead of `ValueError` if constructor is called with value of wrong type.
+* Update ``ruff`` linter rules and switch to ``hatch fmt``.
+
+Added
+~~~~~
+* Added :meth:`.ULID.parse`-method, which allows to create a :class:`.ULID`-instance from an
+  arbitrary supported input value. `@perrotuerto <https://github.com/perrotuerto>`_.
+
+Fixed
+~~~~~
+* Documentation bug in the example of :meth:`.ULID.milliseconds` `@tsugumi-sys <https://github.com/tsugumi-sys>`_.
+
+
 `2.7.0`_ - 2024-06-17
 ---------------------
 Changed
@@ -22,7 +39,6 @@ Changed
 
 `2.5.0`_ - 2024-04-26
 ---------------------
-
 Changed
 ~~~~~~~
 * Generate a more accurate JSON schema with Pydantic's ``BaseModel.model_json_schema()``. This
@@ -30,7 +46,6 @@ Changed
 
 `2.4.0`_ - 2024-04-02
 ---------------------
-
 Added
 ~~~~~
 * :class:`.ULID` objects are now properly serialized when used as Pydantic types `@Avihais12344 <https://github.com/Avihais12344>`_.
@@ -38,7 +53,6 @@ Added
 
 `2.3.0`_ - 2024-03-21
 ---------------------
-
 Added
 ~~~~~
 * :class:`.ULID` objects can now be converted to bytes with ``bytes(ulid)``.
@@ -53,7 +67,6 @@ Changed
 
 `2.2.0`_ - 2023-09-21
 ---------------------
-
 Added
 ~~~~~
 * Added a new flag ``--uuid4`` to the CLI ``show`` command, that converts the provided ``ULID``
@@ -68,7 +81,6 @@ Added
 
 `2.1.0`_ - 2023-09-21
 ---------------------
-
 Added
 ~~~~~
 * The new method :meth:`.ULID.to_uuid4` can be used to create an RFC 4122 compliant ``UUID`` from
@@ -83,7 +95,6 @@ Changed
 
 `2.0.0`_ - 2023-09-20
 ---------------------
-
 Added
 ~~~~~
 * New command line interface to easily generate and inspect ULIDs from the terminal
@@ -114,7 +125,6 @@ Changed
 
 `1.1.0`_ - 2022-03-10
 ---------------------
-
 Added
 ~~~~~
 * Added support for Python 3.10.
@@ -123,7 +133,6 @@ Added
 
 `1.0.3`_ - 2021-07-14
 ---------------------
-
 Added
 ~~~~~
 * Enable tool based type checking as described in `PEP-0561`_ by adding the ``py.typed`` marker.
@@ -135,7 +144,6 @@ Changed
 
 `1.0.0`_ - 2020-04-30
 ---------------------
-
 Added
 ~~~~~
 * Added type annotations
@@ -174,6 +182,7 @@ Changed
 * The package now has no external dependencies.
 * The test-coverage has been raised to 100%.
 
+.. _3.0.0: https://github.com/mdomke/python-ulid/compare/2.7.0...3.0.0
 .. _2.7.0: https://github.com/mdomke/python-ulid/compare/2.6.0...2.7.0
 .. _2.6.0: https://github.com/mdomke/python-ulid/compare/2.5.0...2.6.0
 .. _2.5.0: https://github.com/mdomke/python-ulid/compare/2.4.0...2.5.0

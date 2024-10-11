@@ -4,15 +4,19 @@ import argparse
 import shutil
 import sys
 import textwrap
-from collections.abc import Callable
-from collections.abc import Sequence
 from datetime import datetime
 from functools import partial
 from typing import Any
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import ulid
 from ulid import ULID
+
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from collections.abc import Sequence
 
 
 def make_parser(prog: str | None = None) -> argparse.ArgumentParser:
@@ -135,30 +139,29 @@ def show(args: argparse.Namespace) -> str:
     ulid: ULID = ULID.from_str(from_value_or_stdin(args.ulid))
     if args.uuid:
         return str(ulid.to_uuid())
-    elif args.uuid4:
+    if args.uuid4:
         return str(ulid.to_uuid4())
-    elif args.hex:
+    if args.hex:
         return ulid.hex
-    elif args.int:
+    if args.int:
         return str(int(ulid))
-    elif args.timestamp:
+    if args.timestamp:
         return str(ulid.timestamp)
-    elif args.datetime:
+    if args.datetime:
         return ulid.datetime.isoformat()
-    else:
-        return textwrap.dedent(
-            f"""
+    return textwrap.dedent(
+        f"""
             ULID:      {ulid!s}
             Hex:       {ulid.hex}
             Int:       {int(ulid)}
             Timestamp: {ulid.timestamp}
             Datetime:  {ulid.datetime.isoformat()}
             """
-        ).strip()
+    ).strip()
 
 
 def entrypoint() -> None:  # pragma: no cover
-    print(main(sys.argv[1:]))
+    pass
 
 
 if __name__ == "__main__":  # pragma: no cover

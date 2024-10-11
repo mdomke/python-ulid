@@ -50,20 +50,29 @@ packages = [
     "ulid",
 ]
 
-[tool.black]
-line-length = 100
-
 [tool.ruff]
+extend = ".ruff_defaults.toml"
 target-version = "py39"
 line-length = 100
 
+[tool.ruff.format]
+preview = true
+
 [tool.ruff.lint]
-select = ["A", "B", "C", "C4", "E", "F", "I", "N", "PT", "Q", "RUF", "S", "SIM", "T10", "UP", "W", "YTT"]
-fixable = ["RUF100", "I001"]
+extend-fixable = ["RUF100", "I001"]
 ignore = [
     "S101",   # Allow usage of asserts
     "A001",   # Allow shadowing bultins 
     "A003",   # Allow shadowing bultins on classes
+    "EM101",  # Allow raw strings in exceptions
+    "EM102",  # Allow f-strings in exceptions
+    "EM102",  # Allow f-strings in exceptions
+    "TRY003", # Allow "long" messages in exceptions
+]
+
+[tool.ruff.lint.per-file-ignores]
+"docs/**/*" = [
+  "INP001",   # Ignore possible static credentials
 ]
 
 [tool.ruff.lint.mccabe]
@@ -73,6 +82,19 @@ max-complexity = 15
 force-single-line = true
 lines-after-imports = 2
 order-by-type = false
+
+[tool.mypy]
+disallow_untyped_defs = true
+follow_imports = "normal"
+ignore_missing_imports = true
+pretty = true
+show_column_numbers = true
+show_error_codes = true
+warn_no_return = false
+warn_unused_ignores = true
+plugins = [
+  "pydantic.mypy",
+]
 
 [tool.coverage.run]
 branch = true

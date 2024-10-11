@@ -1,6 +1,7 @@
 import os
 import sys
 from datetime import datetime
+from datetime import timezone
 
 
 sys.path.insert(0, os.path.abspath("../.."))
@@ -8,7 +9,7 @@ sys.path.insert(0, os.path.abspath("../.."))
 import ulid
 
 
-copyright = f"{datetime.now().year}, Martin Domke"
+copyright = f"{datetime.now(timezone.utc).year}, Martin Domke"
 author = "Martin Domke"
 master_doc = "index"
 source_suffix = [".rst", ".md"]

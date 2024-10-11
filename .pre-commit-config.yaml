@@ -1,10 +1,10 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.3.3
+    rev: v0.6.9
     hooks:
       - id: ruff
       - id: ruff-format
   - repo: https://github.com/pycqa/doc8
-    rev: v1.1.1
+    rev: v1.1.2
     hooks:
       - id: doc8
