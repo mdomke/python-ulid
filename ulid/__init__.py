@@ -162,8 +162,9 @@ class ULID:
     def parse(cls: type[U], value: Any) -> U:
         """Create a new :class:`ULID`-object from a given value.
 
-        .. note:: This method should only be used when the caller is trying to parse a ULID from
-        a value when they're unsure what format/primitive type it will be given in.
+        .. note::
+            This method should only be used when the caller is trying to parse a ULID from
+            a value when they're unsure what format/primitive type it will be given in.
         """
         if isinstance(value, ULID):
             return cast(U, value)
