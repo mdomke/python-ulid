@@ -23,6 +23,7 @@ version = release.rsplit(".", 1)[0]
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "sphinx_copybutton",
@@ -74,3 +75,7 @@ html_sidebars = {
 pygments_style = "sphinx"
 
 autodoc_member_order = "groupwise"
+# ----------------------------------------------
+
+# Example configuration for intersphinx: refer to the Python standard library.
+intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
