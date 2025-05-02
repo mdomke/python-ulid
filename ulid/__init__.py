@@ -190,7 +190,7 @@ class ULID:
             return cls.from_bytes(value)
         raise TypeError(f"Cannot parse ULID from type {type(value)}")
 
-    @property
+    @functools.cached_property
     def milliseconds(self) -> int:
         """The timestamp part as epoch time in milliseconds.
 
@@ -201,7 +201,7 @@ class ULID:
         """
         return int.from_bytes(self.bytes[: constants.TIMESTAMP_LEN], byteorder="big")
 
-    @property
+    @functools.cached_property
     def timestamp(self) -> float:
         """The timestamp part as epoch time in seconds.
 
@@ -212,7 +212,7 @@ class ULID:
         """
         return self.milliseconds / constants.MILLISECS_IN_SECS
 
-    @property
+    @functools.cached_property
     def datetime(self) -> datetime:
         """Return the timestamp part as timezone-aware :class:`datetime` in UTC.
 
@@ -223,7 +223,7 @@ class ULID:
         """
         return datetime.fromtimestamp(self.timestamp, timezone.utc)
 
-    @property
+    @functools.cached_property
     def hex(self) -> str:
         """Encode the :class:`ULID`-object as a 32 char sequence of hex values."""
         return self.bytes.hex()
