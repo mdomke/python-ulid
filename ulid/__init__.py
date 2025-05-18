@@ -80,12 +80,25 @@ class ULID:
         ValueError: If the provided value is not a valid encoded ULID.
     """
 
-    def __init__(self, value: bytes | None = None) -> None:
-        if value is not None and len(value) != constants.BYTES_LEN:
-            raise ValueError("ULID has to be exactly 16 bytes long.")
-        self.bytes: bytes = (
-            value or ULID.from_timestamp(time.time_ns() // constants.NANOSECS_IN_MILLISECS).bytes
-        )
+    def __init__(self, value: bytes | str | None = None) -> None:
+        if value is None:
+            value = self._gen_bytes_from_ts()
+        elif isinstance(value, bytes):
+            if len(value) != constants.BYTES_LEN:
+                raise ValueError(f"ULID has to be exactly {constants.BYTES_LEN} bytes long.")
+        elif isinstance(value, str):
+            if len(value) != constants.REPR_LEN:
+                raise ValueError(f"ULID has to be exactly {constants.REPR_LEN} characters long.")
+            value = base32.decode(value)
+
+        self.bytes: bytes = value
+
+    @staticmethod
+    def _gen_bytes_from_ts(ts_ms: int | None = None) -> bytes:
+        """Generate a new ULID bytes from the timestamp(ms)."""
+
+        ts_ms = ts_ms or time.time_ns() // constants.NANOSECS_IN_MILLISECS
+        return ts_ms.to_bytes(constants.TIMESTAMP_LEN, "big") + os.urandom(constants.RANDOMNESS_LEN)
 
     @classmethod
     @validate_type(datetime)
@@ -116,9 +129,7 @@ class ULID:
         """
         if isinstance(value, float):
             value = int(value * constants.MILLISECS_IN_SECS)
-        timestamp = int.to_bytes(value, constants.TIMESTAMP_LEN, "big")
-        randomness = os.urandom(constants.RANDOMNESS_LEN)
-        return cls.from_bytes(timestamp + randomness)
+        return cls.from_bytes(cls._gen_bytes_from_ts(value))
 
     @classmethod
     @validate_type(uuid.UUID)
@@ -249,7 +260,7 @@ class ULID:
         return uuid.UUID(bytes=self.bytes, version=4)
 
     def __repr__(self) -> str:
-        return f"ULID({self!s})"
+        return f"ULID({str(self)!r})"
 
     def __str__(self) -> str:
         """Encode this object as a 26 character string sequence."""
