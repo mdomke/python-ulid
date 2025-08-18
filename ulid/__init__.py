@@ -6,6 +6,7 @@ import time
 import uuid
 from datetime import datetime
 from datetime import timezone
+from threading import Lock
 from typing import Any
 from typing import cast
 from typing import Generic
@@ -53,8 +54,42 @@ class validate_type(Generic[T]):  # noqa: N801
         return wrapped
 
 
+class ValueProvider:
+    def __init__(self) -> None:
+        self.lock = Lock()
+        self.prev_timestamp = constants.MIN_TIMESTAMP
+        self.prev_randomness = constants.MIN_RANDOMNESS
+
+    def timestamp(self, value: float | None = None) -> int:
+        if value is None:
+            value = time.time_ns() // constants.NANOSECS_IN_MILLISECS
+        elif isinstance(value, float):
+            value = int(value * constants.MILLISECS_IN_SECS)
+        if value > constants.MAX_TIMESTAMP:
+            raise ValueError("Value exceeds maximum possible timestamp")
+        return value
+
+    def randomness(self) -> bytes:
+        with self.lock:
+            current_timestamp = self.timestamp()
+            if current_timestamp == self.prev_timestamp:
+                if self.prev_randomness == constants.MAX_RANDOMNESS:
+                    raise ValueError("Randomness within same millisecond exhausted")
+                randomness = (int.from_bytes(self.prev_randomness) + 1).to_bytes(
+                    constants.RANDOMNESS_LEN, byteorder="big"
+                )
+            else:
+                randomness = os.urandom(constants.RANDOMNESS_LEN)
+
+            self.prev_randomness = randomness
+            self.prev_timestamp = current_timestamp
+        return randomness
+
+
 @functools.total_ordering
 class ULID:
+    provider = ValueProvider()
+
     """The :class:`ULID` object consists of a timestamp part of 48 bits and of 80 random bits.
 
     .. code-block:: text
@@ -82,9 +117,7 @@ class ULID:
     def __init__(self, value: bytes | None = None) -> None:
         if value is not None and len(value) != constants.BYTES_LEN:
             raise ValueError("ULID has to be exactly 16 bytes long.")
-        self.bytes: bytes = (
-            value or ULID.from_timestamp(time.time_ns() // constants.NANOSECS_IN_MILLISECS).bytes
-        )
+        self.bytes: bytes = value or ULID.from_timestamp(self.provider.timestamp()).bytes
 
     @classmethod
     @validate_type(datetime)
@@ -113,10 +146,8 @@ class ULID:
             >>> ULID.from_timestamp(time.time())
             ULID(01E75QWN5HKQ0JAVX9FG1K4YP4)
         """
-        if isinstance(value, float):
-            value = int(value * constants.MILLISECS_IN_SECS)
-        timestamp = int.to_bytes(value, constants.TIMESTAMP_LEN, "big")
-        randomness = os.urandom(constants.RANDOMNESS_LEN)
+        timestamp = int.to_bytes(cls.provider.timestamp(value), constants.TIMESTAMP_LEN, "big")
+        randomness = cls.provider.randomness()
         return cls.from_bytes(timestamp + randomness)
 
     @classmethod

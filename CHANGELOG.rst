@@ -10,7 +10,10 @@ Versions follow `Semantic Versioning <http://www.semver.org>`_
 Changed
 ~~~~~~~
 * Added Python 3.13 to the trove classifiers.
-* Optimze ``@property`` to ``@cached_property`` `<@WH-2099 <https://github.com/WH-2099>`_.
+* Optimze ``@property`` to ``@cached_property`` `@WH-2099 <https://github.com/WH-2099>`_.
+* When generating ULIDs within the same millisecond, the library will ensure monotonic sort order by
+  incrementing the randomness component by 1 bit. This process is descrbied in the
+  `spec <https://github.com/ulid/spec/blob/master/README.md#monotonicity>`_.
 
 Fixed
 ~~~~~

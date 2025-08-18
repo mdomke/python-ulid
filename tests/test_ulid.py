@@ -61,6 +61,19 @@ def test_ulid_monotonic_sorting(tick: int) -> None:
     assert_sorted([v.bytes for v in ulids])
 
 
+@freeze_time()
+def test_same_millisecond_monotonic_sorting() -> None:
+    ulids = [ULID() for _ in range(1000)]
+    assert_sorted(ulids)
+
+
+@freeze_time()
+def test_same_millisecond_overflow() -> None:
+    ULID.provider.prev_randomness = constants.MAX_RANDOMNESS
+    with pytest.raises(ValueError, match="Randomness within same millisecond exhausted"):
+        ULID()
+
+
 def assert_sorted(seq: list) -> None:
     last = seq[0]
     for item in seq[1:]:
@@ -152,6 +165,11 @@ def test_ulid_from_timestamp() -> None:
     ulid1 = ULID.from_timestamp(t)
     ulid2 = ULID.from_timestamp(int(t * constants.MILLISECS_IN_SECS))
     assert ulid1.timestamp == ulid2.timestamp
+
+
+def test_ulid_from_timestamp_overflow() -> None:
+    with pytest.raises(ValueError, match="Value exceeds maximum possible timestamp"):
+        ULID.from_timestamp(constants.MAX_TIMESTAMP + 1)
 
 
 Params = Union[bytes, str, int, float]
