@@ -109,6 +109,7 @@ max-line-length = 100
 dev-dependencies = [
     "hatch>=1.14.1",
     "freezegun>=1.5",
+    "sphinx>=7.4.7",
 ]
 
 [tool.hatch.metadata.hooks.fancy-pypi-readme]
