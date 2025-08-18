@@ -296,7 +296,11 @@ class ULID:
             core_schema.union_schema([
                 core_schema.is_instance_schema(ULID),
                 core_schema.no_info_plain_validator_function(ULID),
-                core_schema.str_schema(pattern=r"[01234567][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}", min_length=26, max_length=26),
+                core_schema.str_schema(
+                    pattern=rf"[0-7][{base32.ENCODE}]{{25}}",
+                    min_length=26,
+                    max_length=26,
+                ),
                 core_schema.bytes_schema(min_length=16, max_length=16),
             ]),
             serialization=core_schema.to_string_ser_schema(
