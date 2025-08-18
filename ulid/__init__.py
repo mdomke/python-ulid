@@ -11,6 +11,8 @@ from typing import Generic
 from typing import TYPE_CHECKING
 from typing import TypeVar
 
+from typing_extensions import Self
+
 from ulid import base32
 from ulid import constants
 
@@ -50,9 +52,6 @@ class validate_type(Generic[T]):  # noqa: N801
         return wrapped
 
 
-U = TypeVar("U", bound="ULID")
-
-
 @functools.total_ordering
 class ULID:
     """The :class:`ULID` object consists of a timestamp part of 48 bits and of 80 random bits.
@@ -88,8 +87,8 @@ class ULID:
 
     @classmethod
     @validate_type(datetime.datetime)
-    def from_datetime(cls: type[U], value: datetime.datetime) -> U:
-        """Create a new :class:`ULID`-object from a :class:`datetime.datetime`. The timestamp part of the
+    def from_datetime(cls, value: datetime.datetime) -> Self:
+        """Create a new :class:`ULID`-object from a :class:`datetime`. The timestamp part of the
         `ULID` will be set to the corresponding timestamp of the datetime.
 
         Examples:
@@ -102,7 +101,7 @@ class ULID:
 
     @classmethod
     @validate_type(int, float)
-    def from_timestamp(cls: type[U], value: float) -> U:
+    def from_timestamp(cls, value: float) -> Self:
         """Create a new :class:`ULID`-object from a timestamp. The timestamp can be either a
         `float` representing the time in seconds (as it would be returned by :func:`time.time()`)
         or an `int` in milliseconds.
@@ -121,7 +120,7 @@ class ULID:
 
     @classmethod
     @validate_type(uuid.UUID)
-    def from_uuid(cls: type[U], value: uuid.UUID) -> U:
+    def from_uuid(cls, value: uuid.UUID) -> Self:
         """Create a new :class:`ULID`-object from a :class:`uuid.UUID`. The timestamp part will be
         random in that case.
 
@@ -135,30 +134,30 @@ class ULID:
 
     @classmethod
     @validate_type(bytes)
-    def from_bytes(cls: type[U], bytes_: bytes) -> U:
+    def from_bytes(cls, bytes_: bytes) -> Self:
         """Create a new :class:`ULID`-object from sequence of 16 bytes."""
         return cls(bytes_)
 
     @classmethod
     @validate_type(str)
-    def from_hex(cls: type[U], value: str) -> U:
+    def from_hex(cls, value: str) -> Self:
         """Create a new :class:`ULID`-object from 32 character string of hex values."""
         return cls.from_bytes(bytes.fromhex(value))
 
     @classmethod
     @validate_type(str)
-    def from_str(cls: type[U], string: str) -> U:
+    def from_str(cls, string: str) -> Self:
         """Create a new :class:`ULID`-object from a 26 char long string representation."""
         return cls(base32.decode(string))
 
     @classmethod
     @validate_type(int)
-    def from_int(cls: type[U], value: int) -> U:
+    def from_int(cls, value: int) -> Self:
         """Create a new :class:`ULID`-object from an `int`."""
         return cls(int.to_bytes(value, constants.BYTES_LEN, "big"))
 
     @classmethod
-    def parse(cls: type[U], value: Any) -> U:
+    def parse(cls, value: Any) -> Self:
         """Create a new :class:`ULID`-object from a given value.
 
         .. note::
@@ -166,7 +165,7 @@ class ULID:
             a value when they're unsure what format/primitive type it will be given in.
         """
         if isinstance(value, ULID):
-            return cast(U, value)
+            return cast(Self, value)
         if isinstance(value, uuid.UUID):
             return cls.from_uuid(value)
         if isinstance(value, str):
@@ -190,7 +189,7 @@ class ULID:
             return cls.from_bytes(value)
         raise TypeError(f"Cannot parse ULID from type {type(value)}")
 
-    @property
+    @functools.cached_property
     def milliseconds(self) -> int:
         """The timestamp part as epoch time in milliseconds.
 
@@ -201,7 +200,7 @@ class ULID:
         """
         return int.from_bytes(self.bytes[: constants.TIMESTAMP_LEN], byteorder="big")
 
-    @property
+    @functools.cached_property
     def timestamp(self) -> float:
         """The timestamp part as epoch time in seconds.
 
@@ -212,9 +211,10 @@ class ULID:
         """
         return self.milliseconds / constants.MILLISECS_IN_SECS
 
-    @property
+
+    @functools.cached_property
     def datetime(self) -> datetime.datetime:
-        """Return the timestamp part as timezone-aware :class:`datetime.datetime` in UTC.
+        """Return the timestamp part as timezone-aware :class:`datetime` in UTC.
 
         Examples:
 
@@ -223,7 +223,7 @@ class ULID:
         """
         return datetime.datetime.fromtimestamp(self.timestamp, datetime.timezone.utc)
 
-    @property
+    @functools.cached_property
     def hex(self) -> str:
         """Encode the :class:`ULID`-object as a 32 char sequence of hex values."""
         return self.bytes.hex()
@@ -297,7 +297,11 @@ class ULID:
             core_schema.union_schema([
                 core_schema.is_instance_schema(ULID),
                 core_schema.no_info_plain_validator_function(ULID),
-                core_schema.str_schema(pattern=r"[A-Z0-9]{26}", min_length=26, max_length=26),
+                core_schema.str_schema(
+                    pattern=rf"[0-7][{base32.ENCODE}]{{25}}",
+                    min_length=26,
+                    max_length=26,
+                ),
                 core_schema.bytes_schema(min_length=16, max_length=16),
             ]),
             serialization=core_schema.to_string_ser_schema(
@@ -309,6 +313,7 @@ class ULID:
     def _pydantic_validate(cls, value: Any, handler: ValidatorFunctionWrapHandler) -> Any:
         from pydantic_core import PydanticCustomError
 
+        ulid: ULID
         try:
             if isinstance(value, int):
                 ulid = cls.from_int(value)
