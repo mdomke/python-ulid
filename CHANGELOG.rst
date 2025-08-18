@@ -9,7 +9,7 @@ Versions follow `Semantic Versioning <http://www.semver.org>`_
 ---------------------
 Changed
 ~~~~~~~
-* Raise `TypeError` instead of `ValueError` if constructor is called with value of wrong type.
+* Raise ``TypeError`` instead of ``ValueError`` if constructor is called with value of wrong type.
 * Update ``ruff`` linter rules and switch to ``hatch fmt``.
 
 Added
@@ -71,7 +71,7 @@ Added
 ~~~~~
 * Added a new flag ``--uuid4`` to the CLI ``show`` command, that converts the provided ``ULID``
   into an RFC 4122 compliant ``UUID``.
-* The `ulid build` command allows the use of the special value ``-`` for all options to read its
+* The ``ulid build`` command allows the use of the special value ``-`` for all options to read its
   inputs from ``stdin``. E.g.
 
   .. code-block:: bash
@@ -128,7 +128,7 @@ Changed
 Added
 ~~~~~
 * Added support for Python 3.10.
-* Added :attr:`__version__` variable to package.
+* Added ``__version__`` variable to package.
 
 
 `1.0.3`_ - 2021-07-14
@@ -153,7 +153,7 @@ Added
 Changed
 ~~~~~~~
 * Dropped support for Python 2. Only Python 3.6+ is supported.
-* The named constructor :meth:`.ULID.new` has been removed. Use one of the specifc named
+* The named constructor ``ULID.new`` has been removed. Use one of the specifc named
   constructors instead. For a new :class:`.ULID` created from the current timestamp use the
   standard constructor.
 
@@ -169,8 +169,8 @@ Changed
     ulid = ULID.from_timestamp(time.time())
     ulid = ULID.from_datetime(datetime.now())
 
-* The :meth:`.ULID.str` and :meth:`.ULID.int` methods have been removed in favour of the more
-  Pythonic special dunder-methods. Use `str(ulid)` and `int(ulid)` instead.
+* The ``ULID.str`` and ``ULID.int`` methods have been removed in favour of the more
+  Pythonic special dunder-methods. Use ``str(ulid)`` and ``int(ulid)`` instead.
 * Added the property :meth:`.ULID.hex` that returns a hex representation of the :class:`.ULID`.
 
   .. code-block:: python

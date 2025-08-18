@@ -1,11 +1,10 @@
 from __future__ import annotations
 
+import datetime
 import functools
 import os
 import time
 import uuid
-from datetime import datetime
-from datetime import timezone
 from typing import Any
 from typing import cast
 from typing import Generic
@@ -87,8 +86,8 @@ class ULID:
         )
 
     @classmethod
-    @validate_type(datetime)
-    def from_datetime(cls, value: datetime) -> Self:
+    @validate_type(datetime.datetime)
+    def from_datetime(cls, value: datetime.datetime) -> Self:
         """Create a new :class:`ULID`-object from a :class:`datetime`. The timestamp part of the
         `ULID` will be set to the corresponding timestamp of the datetime.
 
@@ -161,8 +160,9 @@ class ULID:
     def parse(cls, value: Any) -> Self:
         """Create a new :class:`ULID`-object from a given value.
 
-        .. note:: This method should only be used when the caller is trying to parse a ULID from
-        a value when they're unsure what format/primitive type it will be given in.
+        .. note::
+            This method should only be used when the caller is trying to parse a ULID from
+            a value when they're unsure what format/primitive type it will be given in.
         """
         if isinstance(value, ULID):
             return cast(Self, value)
@@ -183,7 +183,7 @@ class ULID:
             return cls.from_timestamp(value)
         if isinstance(value, float):
             return cls.from_timestamp(value)
-        if isinstance(value, datetime):
+        if isinstance(value, datetime.datetime):
             return cls.from_datetime(value)
         if isinstance(value, bytes):
             return cls.from_bytes(value)
@@ -211,8 +211,9 @@ class ULID:
         """
         return self.milliseconds / constants.MILLISECS_IN_SECS
 
+
     @functools.cached_property
-    def datetime(self) -> datetime:
+    def datetime(self) -> datetime.datetime:
         """Return the timestamp part as timezone-aware :class:`datetime` in UTC.
 
         Examples:
@@ -220,7 +221,7 @@ class ULID:
             >>> ulid.datetime
             datetime.datetime(2020, 4, 30, 14, 33, 27, 560000, tzinfo=datetime.timezone.utc)
         """
-        return datetime.fromtimestamp(self.timestamp, timezone.utc)
+        return datetime.datetime.fromtimestamp(self.timestamp, datetime.timezone.utc)
 
     @functools.cached_property
     def hex(self) -> str:
