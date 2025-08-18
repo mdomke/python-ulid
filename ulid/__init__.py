@@ -75,15 +75,17 @@ class ValueProvider:
             if current_timestamp == self.prev_timestamp:
                 if self.prev_randomness == constants.MAX_RANDOMNESS:
                     raise ValueError("Randomness within same millisecond exhausted")
-                randomness = (int.from_bytes(self.prev_randomness) + 1).to_bytes(
-                    constants.RANDOMNESS_LEN, byteorder="big"
-                )
+                randomness = self.increment_bytes(self.prev_randomness)
             else:
                 randomness = os.urandom(constants.RANDOMNESS_LEN)
 
             self.prev_randomness = randomness
             self.prev_timestamp = current_timestamp
         return randomness
+
+    def increment_bytes(self, value: bytes) -> bytes:
+        length = len(value)
+        return (int.from_bytes(value, byteorder="big") + 1).to_bytes(length, byteorder="big")
 
 
 @functools.total_ordering
