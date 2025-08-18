@@ -217,6 +217,7 @@ def test_pydantic_protocol() -> None:
     class Model(BaseModel):
         ulid: Optional[ULID] = None  # noqa: FA100
 
+    model: Model | None = None
     for value in [ulid, str(ulid), int(ulid), bytes(ulid)]:
         model = Model(ulid=value)
         assert isinstance(model.ulid, ULID)
@@ -226,6 +227,7 @@ def test_pydantic_protocol() -> None:
         with pytest.raises(ValidationError):
             Model(ulid=value)
 
+    assert model is not None
     model_dict = model.model_dump()
     ulid_from_dict = model_dict["ulid"]
     assert ulid_from_dict == ulid
@@ -243,7 +245,7 @@ def test_pydantic_protocol() -> None:
     assert {
         "maxLength": 26,
         "minLength": 26,
-        "pattern": "[01234567][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}",
+        "pattern": "[0-7][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}",
         "type": "string",
     } in model_json_schema["properties"]["ulid"]["anyOf"]
     assert {

@@ -125,6 +125,54 @@
           "store_path": "/nix/store/2mab9iiwhcqwk75qwvp3zv0bvbiaq6cs-python3-3.13.3"
         }
       }
+    },
+    "uv@latest": {
+      "last_modified": "2025-07-28T17:09:23Z",
+      "resolved": "github:NixOS/nixpkgs/648f70160c03151bc2121d179291337ad6bc564b#uv",
+      "source": "devbox-search",
+      "version": "0.8.2",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/db9y1b002zlnyjgpsnbl9hvlwsiqajl4-uv-0.8.2",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/db9y1b002zlnyjgpsnbl9hvlwsiqajl4-uv-0.8.2"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/bdps6h2gn2rysavc3cq2slqnjlsyyk03-uv-0.8.2",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/bdps6h2gn2rysavc3cq2slqnjlsyyk03-uv-0.8.2"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/91g6383zq1wbiik2an7g6yfrj294c19v-uv-0.8.2",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/91g6383zq1wbiik2an7g6yfrj294c19v-uv-0.8.2"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/swq8qrr7n5gkc1b4940q62a3ll52prgl-uv-0.8.2",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/swq8qrr7n5gkc1b4940q62a3ll52prgl-uv-0.8.2"
+        }
+      }
     }
   }
 }

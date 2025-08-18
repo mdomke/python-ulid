@@ -108,6 +108,7 @@ max-line-length = 100
 [tool.uv]
 dev-dependencies = [
     "hatch>=1.14.1",
+    "freezegun>=1.5",
 ]
 
 [tool.hatch.metadata.hooks.fancy-pypi-readme]
