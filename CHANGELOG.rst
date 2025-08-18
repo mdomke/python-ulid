@@ -5,6 +5,18 @@ Changelog
 
 Versions follow `Semantic Versioning <http://www.semver.org>`_
 
+`3.1.0`_ - 2025-08-18
+---------------------
+Changed
+~~~~~~~
+* Added Python 3.13 to the trove classifiers.
+* Optimze ``@property`` to ``@cached_property`` `<@WH-2099 <https://github.com/WH-2099>`_.
+
+Fixed
+~~~~~
+* Sharpen regular expression for Pydantic `@aplhk <https://github.com/aplhk>`_.
+* Fix Sphinx warnings when referencing ULID from an external project. `@BoboTiG <https://github.com/BoboTiG>`_.
+
 `3.0.0`_ - 2024-10-11
 ---------------------
 Changed
@@ -182,6 +194,7 @@ Changed
 * The package now has no external dependencies.
 * The test-coverage has been raised to 100%.
 
+.. _3.1.0: https://github.com/mdomke/python-ulid/compare/3.0.0...3.1.0
 .. _3.0.0: https://github.com/mdomke/python-ulid/compare/2.7.0...3.0.0
 .. _2.7.0: https://github.com/mdomke/python-ulid/compare/2.6.0...2.7.0
 .. _2.6.0: https://github.com/mdomke/python-ulid/compare/2.5.0...2.6.0
