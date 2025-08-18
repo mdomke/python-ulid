@@ -105,6 +105,11 @@ source = ["ulid"]
 [tool.doc8]
 max-line-length = 100
 
+[tool.uv]
+dev-dependencies = [
+    "hatch>=1.14.1",
+]
+
 [tool.hatch.metadata.hooks.fancy-pypi-readme]
 content-type = "text/x-rst"
 
