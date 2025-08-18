@@ -21,6 +21,10 @@ Release v\ |release| (:ref:`What's new <changelog>`)
    :end-before: pydantic-end
 
 .. include:: ../../README.rst
+   :start-after: monotonic-begin
+   :end-before: monotonic-end
+
+.. include:: ../../README.rst
    :start-after: cli-begin
    :end-before: cli-end
 

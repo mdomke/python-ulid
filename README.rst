@@ -42,6 +42,7 @@ A ``ULID`` is a *universally unique lexicographically sortable identifier*. It i
 * Uses Crockford's base32 for better efficiency and readability (5 bits per character)
 * Case insensitive
 * No special characters (URL safe)
+* Monotonic sort order (correctly detects and handles the same millisecond)
 
 In general the structure of a ULID is as follows:
 
@@ -150,6 +151,20 @@ The ``ULID`` class can be directly used for the popular data validation library
 
 .. pydantic-end
 
+.. monotonic-begin
+
+Monotonic Support
+-----------------
+
+This library by default supports the implementation for monotonic sort order suggested by the
+official ULID specification.
+
+This means that ULID values generated in the same millisecond will have linear increasing randomness
+values. If :math:`r_1` and :math:`r_2` are the randomness values of two ULIDs with the same
+timestamp, then :math:`r_2 = r_1 + 1`.
+
+.. monotonic-end
+
 .. cli-begin
 
 Command line interface
@@ -207,3 +222,9 @@ Other implementations
 * `ulid/javascript <https://github.com/ulid/javascript>`_
 * `RobThree/NUlid <https://github.com/RobThree/NUlid>`_
 * `imdario/go-ulid <https://github.com/imdario/go-ulid>`_
+
+Contributions
+-------------
+
+Contributions are welcome! Feel free to create pull-requests for issues or feature requests.
+It might be worth creating an issue upfront to discuss the matter.
