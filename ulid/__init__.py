@@ -12,6 +12,8 @@ from typing import Generic
 from typing import TYPE_CHECKING
 from typing import TypeVar
 
+from typing_extensions import Self
+
 from ulid import base32
 from ulid import constants
 
@@ -51,9 +53,6 @@ class validate_type(Generic[T]):  # noqa: N801
         return wrapped
 
 
-U = TypeVar("U", bound="ULID")
-
-
 @functools.total_ordering
 class ULID:
     """The :class:`ULID` object consists of a timestamp part of 48 bits and of 80 random bits.
@@ -89,7 +88,7 @@ class ULID:
 
     @classmethod
     @validate_type(datetime)
-    def from_datetime(cls: type[U], value: datetime) -> U:
+    def from_datetime(cls, value: datetime) -> Self:
         """Create a new :class:`ULID`-object from a :class:`datetime`. The timestamp part of the
         `ULID` will be set to the corresponding timestamp of the datetime.
 
@@ -103,7 +102,7 @@ class ULID:
 
     @classmethod
     @validate_type(int, float)
-    def from_timestamp(cls: type[U], value: float) -> U:
+    def from_timestamp(cls, value: float) -> Self:
         """Create a new :class:`ULID`-object from a timestamp. The timestamp can be either a
         `float` representing the time in seconds (as it would be returned by :func:`time.time()`)
         or an `int` in milliseconds.
@@ -122,7 +121,7 @@ class ULID:
 
     @classmethod
     @validate_type(uuid.UUID)
-    def from_uuid(cls: type[U], value: uuid.UUID) -> U:
+    def from_uuid(cls, value: uuid.UUID) -> Self:
         """Create a new :class:`ULID`-object from a :class:`uuid.UUID`. The timestamp part will be
         random in that case.
 
@@ -136,37 +135,37 @@ class ULID:
 
     @classmethod
     @validate_type(bytes)
-    def from_bytes(cls: type[U], bytes_: bytes) -> U:
+    def from_bytes(cls, bytes_: bytes) -> Self:
         """Create a new :class:`ULID`-object from sequence of 16 bytes."""
         return cls(bytes_)
 
     @classmethod
     @validate_type(str)
-    def from_hex(cls: type[U], value: str) -> U:
+    def from_hex(cls, value: str) -> Self:
         """Create a new :class:`ULID`-object from 32 character string of hex values."""
         return cls.from_bytes(bytes.fromhex(value))
 
     @classmethod
     @validate_type(str)
-    def from_str(cls: type[U], string: str) -> U:
+    def from_str(cls, string: str) -> Self:
         """Create a new :class:`ULID`-object from a 26 char long string representation."""
         return cls(base32.decode(string))
 
     @classmethod
     @validate_type(int)
-    def from_int(cls: type[U], value: int) -> U:
+    def from_int(cls, value: int) -> Self:
         """Create a new :class:`ULID`-object from an `int`."""
         return cls(int.to_bytes(value, constants.BYTES_LEN, "big"))
 
     @classmethod
-    def parse(cls: type[U], value: Any) -> U:
+    def parse(cls, value: Any) -> Self:
         """Create a new :class:`ULID`-object from a given value.
 
         .. note:: This method should only be used when the caller is trying to parse a ULID from
         a value when they're unsure what format/primitive type it will be given in.
         """
         if isinstance(value, ULID):
-            return cast(U, value)
+            return cast(Self, value)
         if isinstance(value, uuid.UUID):
             return cls.from_uuid(value)
         if isinstance(value, str):
@@ -309,6 +308,7 @@ class ULID:
     def _pydantic_validate(cls, value: Any, handler: ValidatorFunctionWrapHandler) -> Any:
         from pydantic_core import PydanticCustomError
 
+        ulid: ULID
         try:
             if isinstance(value, int):
                 ulid = cls.from_int(value)

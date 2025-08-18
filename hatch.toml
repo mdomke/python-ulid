@@ -5,7 +5,7 @@ features = [
 ]
 
 [envs.hatch-static-analysis]
-dependencies = ["ruff==0.6.*"]
+dependencies = ["ruff==0.12.*"]
 config-path = ".ruff_defaults.toml"
 
 [envs.hatch-test]
@@ -29,12 +29,12 @@ xml = "coverage xml"
 
 [envs.types]
 extra-dependencies = [
-  "mypy==1.11.*",
+  "mypy==1.17.*",
 ]
 scripts = { check = "mypy --install-types --non-interactive {args:ulid}" }
 
 [envs.docs]
 extra-dependencies = [
-  "doc8==1.1.*",
+  "doc8==2.0.*",
 ]
 scripts = { check = "doc8 docs" }
