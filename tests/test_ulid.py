@@ -243,7 +243,7 @@ def test_pydantic_protocol() -> None:
     assert {
         "maxLength": 26,
         "minLength": 26,
-        "pattern": "[A-Z0-9]{26}",
+        "pattern": "[01234567][0123456789ABCDEFGHJKMNPQRSTVWXYZ]{25}",
         "type": "string",
     } in model_json_schema["properties"]["ulid"]["anyOf"]
     assert {
