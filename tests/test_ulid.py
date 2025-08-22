@@ -74,6 +74,14 @@ def test_same_millisecond_overflow() -> None:
         ULID()
 
 
+def test_same_millisecond_monotonic_sorting_without_frozen_time() -> None:
+    previous_ulid = "" 
+    for i in range(10000):
+        new_ulid = ULID()
+        assert new_ulid > previous_ulid
+        previous_ulid = new_ulid
+
+
 def assert_sorted(seq: list) -> None:
     last = seq[0]
     for item in seq[1:]:
