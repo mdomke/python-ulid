@@ -284,9 +284,8 @@ class ULID:
     def to_uuidv7(self, compliant: bool = False) -> uuid.UUID:
         """Convert the :class:`ULID` to a UUIDv7 (:class:`uuid.UUID` version 7).
 
-        UUIDv7 encodes a Unix timestamp with sub-second precision in the first 48 bits,
-        similar to ULID's timestamp format. This allows transparent preservation of the
-        timestamp during conversion.
+        UUIDv7 encodes a Unix timestamp in milliseconds in the first 48 bits (just like ULID).
+        The timestamp is always transparently preserved regardless of compliant mode.
 
         Args:
             compliant: If True, sets RFC 4122 version (0x7) and variant (0b10) bits,
@@ -304,9 +303,8 @@ class ULID:
             >>> uuid7_compliant.version
             7
         """
-        # ULID: [48 bits timestamp_ms][80 bits randomness]
-        # UUIDv7: [36 bits unix_sec][12 bits subsec_a][4 bits ver][12 bits subsec_b]
-        #         [2 bits var][62 bits subsec_seq_node]
+        # ULID:   [48 bits timestamp_ms][80 bits randomness]
+        # UUIDv7: [48 bits timestamp_ms][4 bits ver][12 bits rand_a][2 bits var][62 bits rand_b]
 
         timestamp_ms = self.milliseconds
 
@@ -314,33 +312,17 @@ class ULID:
         randomness_bits = int.from_bytes(self.bytes[6:], byteorder="big")
 
         if compliant:
-            # RFC 4122 compliant: proper timestamp encoding + version/variant bits
-            unix_sec = timestamp_ms // 1000
-            msec_fraction = timestamp_ms % 1000
-
-            # Convert millisecond fraction to 12-bit fixed-point (subsec_a)
-            # Formula: msec / 1000 * 4096 to get 12-bit fractional representation
-            subsec_a = (msec_fraction * 4096) // 1000
-
+            # RFC 4122 compliant: set version and variant bits, losing 6 bits of randomness
             # Extract 74 bits of randomness (losing 6 bits for version/variant)
-            # subsec_b: 12 bits from randomness
-            # subsec_seq_node: 62 bits from randomness
-            subsec_b = (randomness_bits >> 68) & 0xFFF  # Top 12 bits
-            subsec_seq_node = randomness_bits & ((1 << 62) - 1)  # Bottom 62 bits
+            rand_a = (randomness_bits >> 68) & 0xFFF  # Top 12 bits
+            rand_b = randomness_bits & ((1 << 62) - 1)  # Bottom 62 bits
 
-            # Build UUIDv7 with version and variant bits
-            uuid_int = (unix_sec << 92) | (subsec_a << 80) | (0x7 << 76) | (subsec_b << 64) | (0x2 << 62) | subsec_seq_node
+            # Build UUIDv7: [48-bit timestamp_ms][4-bit version][12-bit rand_a][2-bit variant][62-bit rand_b]
+            uuid_int = (timestamp_ms << 80) | (0x7 << 76) | (rand_a << 64) | (0x2 << 62) | rand_b
         else:
-            # Non-compliant: preserve all bits for perfect round-trip
-            # For perfect round-trip, split 48-bit timestamp directly into 36+12 bits
-            # without lossy conversion to fractional representation
-            unix_sec = timestamp_ms >> 12  # Top 36 bits
-            subsec_a = timestamp_ms & 0xFFF  # Bottom 12 bits
-
-            # Bits 0-35: unix_sec (36 bits of timestamp)
-            # Bits 36-47: subsec_a (12 bits of timestamp)
-            # Bits 48-127: all 80 bits of randomness (clobbering version/variant)
-            uuid_int = (unix_sec << 92) | (subsec_a << 80) | randomness_bits
+            # Non-compliant: preserve all 80 bits of randomness for perfect round-trip
+            # Build UUIDv7: [48-bit timestamp_ms][80-bit randomness] (clobbers version/variant)
+            uuid_int = (timestamp_ms << 80) | randomness_bits
 
         uuid_bytes = uuid_int.to_bytes(16, byteorder="big")
         return uuid.UUID(bytes=uuid_bytes)
@@ -350,13 +332,9 @@ class ULID:
     def from_uuidv7(cls, value: uuid.UUID) -> Self:
         """Create a new :class:`ULID` from a UUIDv7 (:class:`uuid.UUID` version 7).
 
-        Extracts the timestamp from the UUIDv7's first 48 bits (unix seconds + sub-second
-        precision) and treats the remaining 80 bits as randomness. This provides transparent
-        round-trip conversion with :meth:`to_uuidv7`.
-
-        For UUIDv7s created with ``compliant=False``, this provides perfect bit-for-bit
-        round-trip. For compliant UUIDv7s from external sources, the timestamp is extracted
-        using the RFC 4122 interpretation.
+        Extracts the timestamp from the UUIDv7's first 48 bits (milliseconds since epoch)
+        and the remaining 80 bits as randomness. The timestamp is always transparently
+        preserved, providing perfect round-trip conversion with :meth:`to_uuidv7`.
 
         Examples:
 
@@ -367,26 +345,9 @@ class ULID:
         """
         uuid_int = int.from_bytes(value.bytes, byteorder="big")
 
-        # Extract timestamp components from UUIDv7 layout
-        # Bits 0-35: unix_sec (36 bits)
-        # Bits 36-47: subsec_a (12 bits)
-        unix_sec = (uuid_int >> 92) & ((1 << 36) - 1)
-        subsec_a = (uuid_int >> 80) & 0xFFF
-
-        # Check if this looks like a compliant UUIDv7 by checking version bits
-        # Bits 48-51 should be 0x7 for compliant UUIDv7
-        version_bits = (uuid_int >> 76) & 0xF
-        is_compliant = version_bits == 0x7
-
-        if is_compliant:
-            # Compliant UUIDv7: interpret subsec_a as fractional time
-            # Convert 12-bit subsec_a back to milliseconds
-            msec_fraction = (subsec_a * 1000) // 4096
-            timestamp_ms = unix_sec * 1000 + msec_fraction
-        else:
-            # Non-compliant (our format): direct bit mapping for perfect round-trip
-            # Reconstruct 48-bit timestamp from 36+12 bit split
-            timestamp_ms = (unix_sec << 12) | subsec_a
+        # Extract timestamp from UUIDv7 layout (always in first 48 bits)
+        # Bits 0-47: timestamp_ms (48 bits)
+        timestamp_ms = uuid_int >> 80
 
         # Extract all 80 bits after the timestamp (bits 48-127) as randomness
         # This includes version/variant bits if present, enabling perfect round-trip

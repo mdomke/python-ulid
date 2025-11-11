@@ -169,9 +169,9 @@ def test_uuidv7_compliant_roundtrip() -> None:
     ulid = ULID()
     uuid7 = ulid.to_uuidv7(compliant=True)
     ulid_restored = ULID.from_uuidv7(uuid7)
-    # Timestamp should be preserved (may have small rounding error due to subsec encoding)
-    assert abs(ulid_restored.milliseconds - ulid.milliseconds) <= 1
-    # Full ULID won't match due to lost randomness in version/variant bits
+    # Timestamp should be perfectly preserved
+    assert ulid_restored.milliseconds == ulid.milliseconds
+    # Full ULID won't match due to lost randomness in version/variant bits (6 bits lost)
     assert ulid_restored.bytes != ulid.bytes
 
 
@@ -181,12 +181,14 @@ def test_uuidv7_timestamp_preservation() -> None:
     test_timestamp = 1699564800.123  # 2023-11-10 00:00:00.123 UTC
     ulid = ULID.from_timestamp(test_timestamp)
 
-    uuid7_non_compliant = ulid.to_uuidv7(compliant=False)
-    ulid_from_uuid7 = ULID.from_uuidv7(uuid7_non_compliant)
+    # Test both compliant and non-compliant modes
+    for compliant in [False, True]:
+        uuid7 = ulid.to_uuidv7(compliant=compliant)
+        ulid_from_uuid7 = ULID.from_uuidv7(uuid7)
 
-    # Check timestamp is preserved (within 1ms tolerance due to encoding)
-    assert abs(ulid_from_uuid7.timestamp - test_timestamp) < 0.001
-    assert ulid_from_uuid7.milliseconds == ulid.milliseconds
+        # Check timestamp is perfectly preserved (exact millisecond match)
+        assert ulid_from_uuid7.milliseconds == ulid.milliseconds
+        assert abs(ulid_from_uuid7.timestamp - test_timestamp) < 0.001
 
 
 def test_uuidv7_monotonic_ordering() -> None:
@@ -222,21 +224,23 @@ def test_uuidv7_same_millisecond() -> None:
 
 def test_from_uuidv7_with_external_uuid() -> None:
     """Test creating ULID from an external UUIDv7."""
-    # Create a UUIDv7-like UUID with known timestamp
+    # Create a UUIDv7 with known timestamp (compliant format)
     # This simulates a UUIDv7 created by another system
-    unix_sec = 1699564800  # 2023-11-10 00:00:00 UTC
-    msec_fraction = 500
-    subsec_a = (msec_fraction * 4096) // 1000  # Convert to 12-bit fixed-point
+    timestamp_ms = 1699564800500  # 2023-11-10 00:00:00.500 UTC
 
-    # Build a compliant UUIDv7
-    uuid_int = (unix_sec << 92) | (subsec_a << 80) | (0x7 << 76) | (0x2 << 62)
+    # Build a compliant UUIDv7: [48-bit timestamp_ms][4-bit version][12-bit rand_a][2-bit variant][62-bit rand_b]
+    # For this test, we'll use some random values for rand_a and rand_b
+    rand_a = 0xABC  # 12 bits
+    rand_b = 0x1234567890ABCDEF  # 62 bits (only bottom 62 bits will be used)
+    rand_b = rand_b & ((1 << 62) - 1)  # Mask to 62 bits
+
+    uuid_int = (timestamp_ms << 80) | (0x7 << 76) | (rand_a << 64) | (0x2 << 62) | rand_b
     uuid7 = uuid.UUID(bytes=uuid_int.to_bytes(16, byteorder="big"))
 
     ulid = ULID.from_uuidv7(uuid7)
 
-    # Check timestamp is correctly extracted
-    expected_ms = unix_sec * 1000 + msec_fraction
-    assert abs(ulid.milliseconds - expected_ms) <= 1  # Allow 1ms tolerance
+    # Check timestamp is correctly extracted (should be exact since it's in milliseconds)
+    assert ulid.milliseconds == timestamp_ms
 
 
 def test_hash() -> None:
