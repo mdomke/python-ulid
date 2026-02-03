@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import functools
 import os
-import sys
 import time
 import uuid
 from datetime import datetime
@@ -14,22 +13,22 @@ from typing import Generic
 from typing import TYPE_CHECKING
 from typing import TypeVar
 
-
-if sys.version_info >= (3, 11):
-    from typing import Self
-else:
-    from typing_extensions import Self
-
 from ulid import base32
 from ulid import constants
 
 
 if TYPE_CHECKING:  # pragma: no cover
+    import sys
     from collections.abc import Callable
 
     from pydantic import GetCoreSchemaHandler
     from pydantic import ValidatorFunctionWrapHandler
     from pydantic_core import CoreSchema
+
+    if sys.version_info >= (3, 11):
+        from typing import Self
+    else:
+        from typing_extensions import Self
 
 try:
     from importlib.metadata import version
@@ -204,7 +203,7 @@ class ULID:
             a value when they're unsure what format/primitive type it will be given in.
         """
         if isinstance(value, ULID):
-            return cast(Self, value)
+            return cast("Self", value)
         if isinstance(value, uuid.UUID):
             return cls.from_uuid(value)
         if isinstance(value, str):
