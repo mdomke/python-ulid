@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import functools
 import os
+import sys
 import time
 import uuid
 from datetime import datetime
@@ -13,7 +14,11 @@ from typing import Generic
 from typing import TYPE_CHECKING
 from typing import TypeVar
 
-from typing_extensions import Self
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
 
 from ulid import base32
 from ulid import constants
