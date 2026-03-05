@@ -39,20 +39,11 @@ T = TypeVar("T", bound=type)
 R = TypeVar("R")
 
 
-class validate_type(Generic[T]):  # noqa: N801
-    def __init__(self, *types: T) -> None:
-        self.types = types
-
-    def __call__(self, func: Callable[..., R]) -> Callable[..., R]:
-        @functools.wraps(func)
-        def wrapped(cls: Any, value: T) -> R:
-            if not isinstance(value, self.types):
-                message = "Value has to be of type "
-                message += " or ".join([t.__name__ for t in self.types])
-                raise TypeError(message)
-            return func(cls, value)
-
-        return wrapped
+def validate_value_type(type_to_validate: type, *types_to_validate_against: type,) -> None:
+    if not isinstance(type_to_validate, types_to_validate_against):
+        message = "Value has to be of type "
+        message += " or ".join([t.__name__ for t in types_to_validate_against])
+        raise TypeError(message)
 
 @functools.total_ordering
 class ULID:
@@ -88,7 +79,6 @@ class ULID:
         self.bytes: bytes = value or ULID.from_timestamp(self.provider.timestamp()).bytes
 
     @classmethod
-    @validate_type(datetime)
     def from_datetime(cls, value: datetime) -> Self:
         """Create a new :class:`ULID`-object from a :class:`datetime`. The timestamp part of the
         `ULID` will be set to the corresponding timestamp of the datetime.
@@ -99,10 +89,10 @@ class ULID:
             >>> ULID.from_datetime(datetime.now())
             ULID(01E75QRYCAMM1MKQ9NYMYT6SAV)
         """
+        validate_value_type(value, datetime)
         return cls.from_timestamp(value.timestamp())
 
     @classmethod
-    @validate_type(int, float)
     def from_timestamp(cls, value: float) -> Self:
         """Create a new :class:`ULID`-object from a timestamp. The timestamp can be either a
         `float` representing the time in seconds (as it would be returned by :func:`time.time()`)
@@ -114,6 +104,7 @@ class ULID:
             >>> ULID.from_timestamp(time.time())
             ULID(01E75QWN5HKQ0JAVX9FG1K4YP4)
         """
+        validate_value_type(value, int, float)
         timestamp = int.to_bytes(cls.provider.timestamp(value), constants.TIMESTAMP_LEN, "big")
         randomness = cls.provider.randomness()
         return cls.from_bytes(timestamp + randomness)
@@ -130,30 +121,31 @@ class ULID:
             >>> ULID.from_uuid(uuid4())
             ULID(27Q506DP7E9YNRXA0XVD8Z5YSG)
         """
+        validate_value_type(value, uuid.UUID)
         return cls(value.bytes)
 
     @classmethod
-    @validate_type(bytes)
     def from_bytes(cls, bytes_: bytes) -> Self:
         """Create a new :class:`ULID`-object from sequence of 16 bytes."""
+        validate_value_type(bytes_, bytes)
         return cls(bytes_)
 
     @classmethod
-    @validate_type(str)
     def from_hex(cls, value: str) -> Self:
         """Create a new :class:`ULID`-object from 32 character string of hex values."""
+        validate_value_type(value, str)
         return cls.from_bytes(bytes.fromhex(value))
 
     @classmethod
-    @validate_type(str)
     def from_str(cls, string: str) -> Self:
         """Create a new :class:`ULID`-object from a 26 char long string representation."""
+        validate_value_type(string, str)
         return cls(base32.decode(string))
 
     @classmethod
-    @validate_type(int)
     def from_int(cls, value: int) -> Self:
         """Create a new :class:`ULID`-object from an `int`."""
+        validate_value_type(value, int)
         return cls(int.to_bytes(value, constants.BYTES_LEN, "big"))
 
     @classmethod
