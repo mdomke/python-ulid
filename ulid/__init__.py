@@ -70,7 +70,7 @@ class ULID:
         self.bytes: bytes = value or ULID.from_timestamp(value_provider_to_use.timestamp(), value_provider=value_provider_to_use).bytes
 
     @classmethod
-    def from_datetime(cls, value: datetime) -> Self:
+    def from_datetime(cls, value: datetime, value_provider: ValueProvider | None = None) -> Self:
         """Create a new :class:`ULID`-object from a :class:`datetime`. The timestamp part of the
         `ULID` will be set to the corresponding timestamp of the datetime.
 
@@ -80,8 +80,9 @@ class ULID:
             >>> ULID.from_datetime(datetime.now())
             ULID(01E75QRYCAMM1MKQ9NYMYT6SAV)
         """
+        value_provider_to_use = value_provider or cls.provider
         validate_value_type(value, datetime)
-        return cls.from_timestamp(value.timestamp())
+        return cls.from_timestamp(value.timestamp(), value_provider=value_provider_to_use)
 
     @classmethod
     def from_timestamp(cls, value: float, value_provider: ValueProvider | None = None) -> Self:
