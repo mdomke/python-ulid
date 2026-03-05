@@ -63,10 +63,11 @@ class ULID:
         ValueError: If the provided value is not a valid encoded ULID.
     """
 
-    def __init__(self, value: bytes | None = None) -> None:
+    def __init__(self, value: bytes | None = None, value_provider: ValueProvider | None = None) -> None:
         if value is not None and len(value) != constants.BYTES_LEN:
             raise ValueError("ULID has to be exactly 16 bytes long.")
-        self.bytes: bytes = value or ULID.from_timestamp(self.provider.timestamp()).bytes
+        value_provider_to_use = value_provider or self.provider
+        self.bytes: bytes = value or ULID.from_timestamp(value_provider_to_use.timestamp(), value_provider=value_provider_to_use).bytes
 
     @classmethod
     def from_datetime(cls, value: datetime) -> Self:
@@ -83,7 +84,7 @@ class ULID:
         return cls.from_timestamp(value.timestamp())
 
     @classmethod
-    def from_timestamp(cls, value: float) -> Self:
+    def from_timestamp(cls, value: float, value_provider: ValueProvider | None = None) -> Self:
         """Create a new :class:`ULID`-object from a timestamp. The timestamp can be either a
         `float` representing the time in seconds (as it would be returned by :func:`time.time()`)
         or an `int` in milliseconds.
@@ -95,8 +96,9 @@ class ULID:
             ULID(01E75QWN5HKQ0JAVX9FG1K4YP4)
         """
         validate_value_type(value, int, float)
-        timestamp = int.to_bytes(cls.provider.timestamp(value), constants.TIMESTAMP_LEN, "big")
-        randomness = cls.provider.randomness()
+        value_provider_to_use = value_provider or cls.provider
+        timestamp = int.to_bytes(value_provider_to_use.timestamp(value), constants.TIMESTAMP_LEN, "big")
+        randomness = value_provider_to_use.randomness()
         return cls.from_bytes(timestamp + randomness)
 
     @classmethod
