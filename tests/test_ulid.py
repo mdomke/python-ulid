@@ -16,6 +16,7 @@ from pydantic import ValidationError
 from ulid import base32
 from ulid import constants
 from ulid import ULID
+from ulid.value_provider.abstract_value_provider import AbstractValueProvider
 
 
 def utcnow() -> datetime:
@@ -276,3 +277,25 @@ def test_pydantic_protocol() -> None:
     assert {
         "type": "null",
     } in model_json_schema["properties"]["ulid"]["anyOf"]
+
+def test_ulid_support_other_value_provider() -> None:
+    random_part: bytes = b"\x00" * 10
+    datetime = utcnow()
+    timestamp_in_seconds = int(datetime.timestamp())
+    timestamp_in_milliseconds = int(timestamp_in_seconds * constants.MILLISECS_IN_SECS)
+    ulid_bytes: bytes = timestamp_in_milliseconds.to_bytes(constants.TIMESTAMP_LEN, byteorder="big") + random_part
+    class DummyValueProvider(AbstractValueProvider):
+        def randomness(self) -> bytes:
+            return random_part
+
+        def timestamp(self, value: float | None = None) -> int:
+            return timestamp_in_milliseconds
+
+    ulid = ULID(value_provider=DummyValueProvider())
+
+    assert ulid.bytes == ulid_bytes
+    assert ulid.timestamp == timestamp_in_seconds
+    datetimes_almost_equal(ulid.datetime, datetime)
+    assert ulid.milliseconds == timestamp_in_milliseconds
+    assert ulid.hex == ulid_bytes.hex()
+    assert str(ulid) == base32.encode(ulid_bytes)
