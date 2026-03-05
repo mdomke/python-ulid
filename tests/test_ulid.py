@@ -18,7 +18,7 @@ from ulid import constants
 from ulid import ULID
 from ulid.value_provider.abstract_value_provider import AbstractValueProvider
 
-from tests.conftest import datetimes_almost_equal, utcnow
+from tests.conftest import assert_sorted, datetimes_almost_equal, utcnow
 
 
 @freeze_time()
@@ -68,13 +68,6 @@ def test_same_millisecond_overflow() -> None:
     ULID.provider.prev_timestamp = ULID.provider.timestamp()
     with pytest.raises(ValueError, match="Randomness within same millisecond exhausted"):
         ULID()
-
-
-def assert_sorted(seq: list) -> None:
-    last = seq[0]
-    for item in seq[1:]:
-        assert last < item
-        last = item
 
 
 def test_comparison() -> None:
