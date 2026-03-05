@@ -17,6 +17,7 @@ from typing_extensions import Self
 
 from ulid import base32
 from ulid import constants
+from ulid.value_provider import MonotonicValueProvider as ValueProvider
 
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -52,41 +53,6 @@ class validate_type(Generic[T]):  # noqa: N801
             return func(cls, value)
 
         return wrapped
-
-
-class ValueProvider:
-    def __init__(self) -> None:
-        self.lock = Lock()
-        self.prev_timestamp = constants.MIN_TIMESTAMP
-        self.prev_randomness = constants.MIN_RANDOMNESS
-
-    def timestamp(self, value: float | None = None) -> int:
-        if value is None:
-            value = time.time_ns() // constants.NANOSECS_IN_MILLISECS
-        elif isinstance(value, float):
-            value = int(value * constants.MILLISECS_IN_SECS)
-        if value > constants.MAX_TIMESTAMP:
-            raise ValueError("Value exceeds maximum possible timestamp")
-        return value
-
-    def randomness(self) -> bytes:
-        with self.lock:
-            current_timestamp = self.timestamp()
-            if current_timestamp == self.prev_timestamp:
-                if self.prev_randomness == constants.MAX_RANDOMNESS:
-                    raise ValueError("Randomness within same millisecond exhausted")
-                randomness = self.increment_bytes(self.prev_randomness)
-            else:
-                randomness = os.urandom(constants.RANDOMNESS_LEN)
-
-            self.prev_randomness = randomness
-            self.prev_timestamp = current_timestamp
-        return randomness
-
-    def increment_bytes(self, value: bytes) -> bytes:
-        length = len(value)
-        return (int.from_bytes(value, byteorder="big") + 1).to_bytes(length, byteorder="big")
-
 
 @functools.total_ordering
 class ULID:
