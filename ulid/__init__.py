@@ -16,8 +16,6 @@ from ulid.value_provider import MonotonicValueProvider as ValueProvider
 
 
 if TYPE_CHECKING:  # pragma: no cover
-    from collections.abc import Callable
-
     from pydantic import GetCoreSchemaHandler
     from pydantic import ValidatorFunctionWrapHandler
     from pydantic_core import CoreSchema
