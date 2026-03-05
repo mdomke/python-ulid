@@ -35,9 +35,6 @@ except ImportError:  # pragma: no cover
 
 __version__ = version("python-ulid")
 
-T = TypeVar("T", bound=type)
-R = TypeVar("R")
-
 
 def validate_value_type(type_to_validate: type, *types_to_validate_against: type,) -> None:
     if not isinstance(type_to_validate, types_to_validate_against):
