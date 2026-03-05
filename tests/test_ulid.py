@@ -18,13 +18,7 @@ from ulid import constants
 from ulid import ULID
 from ulid.value_provider.abstract_value_provider import AbstractValueProvider
 
-
-def utcnow() -> datetime:
-    return datetime.now(timezone.utc)
-
-
-def datetimes_almost_equal(a: datetime, b: datetime) -> None:
-    assert a.replace(microsecond=0) == b.replace(microsecond=0)
+from tests.conftest import datetimes_almost_equal, utcnow
 
 
 @freeze_time()
