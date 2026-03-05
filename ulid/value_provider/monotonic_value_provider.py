@@ -19,7 +19,7 @@ class MonotonicValueProvider(AbstractValueProvider):
                     raise ValueError("Randomness within same millisecond exhausted")
                 randomness = self.increment_bytes(self.prev_randomness)
             else:
-                randomness = self._generate_randomness()
+                randomness = os.urandom(constants.RANDOMNESS_LEN)
 
             self.prev_randomness = randomness
             self.prev_timestamp = current_timestamp

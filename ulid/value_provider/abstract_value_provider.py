@@ -18,6 +18,3 @@ class AbstractValueProvider(ABC):
     @abstractmethod
     def randomness(self) -> bytes:
         pass
-    
-    def _generate_randomness(self) -> bytes:
-        return os.urandom(constants.RANDOMNESS_LEN)
