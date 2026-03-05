@@ -1,4 +1,3 @@
-# TODO: Test the value providers.
 # TODO: Add docstrings to the value providers.
 
 from datetime import datetime, timezone
