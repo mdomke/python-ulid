@@ -110,7 +110,6 @@ class ULID:
         return cls.from_bytes(timestamp + randomness)
 
     @classmethod
-    @validate_type(uuid.UUID)
     def from_uuid(cls, value: uuid.UUID) -> Self:
         """Create a new :class:`ULID`-object from a :class:`uuid.UUID`. The timestamp part will be
         random in that case.
