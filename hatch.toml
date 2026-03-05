@@ -11,6 +11,7 @@ config-path = ".ruff_defaults.toml"
 [envs.hatch-test]
 extra-dependencies = [
   "freezegun==1.5.*",
+  "pytest==8.4.*",
 ]
 features = [
   "pydantic"
