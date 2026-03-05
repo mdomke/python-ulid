@@ -70,6 +70,7 @@ def test_same_millisecond_monotonic_sorting() -> None:
 @freeze_time()
 def test_same_millisecond_overflow() -> None:
     ULID.provider.prev_randomness = constants.MAX_RANDOMNESS
+    ULID.provider.prev_timestamp = ULID.provider.timestamp()
     with pytest.raises(ValueError, match="Randomness within same millisecond exhausted"):
         ULID()
 
