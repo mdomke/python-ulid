@@ -13,6 +13,7 @@ from typing_extensions import Self
 from ulid import base32
 from ulid import constants
 from ulid.value_provider import MonotonicValueProvider as ValueProvider
+from ulid.value_provider import AbstractValueProvider
 
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -35,6 +36,7 @@ def validate_value_type(type_to_validate: type, *types_to_validate_against: type
         message += " or ".join([t.__name__ for t in types_to_validate_against])
         raise TypeError(message)
 
+
 @functools.total_ordering
 class ULID:
     provider = ValueProvider()
@@ -56,23 +58,30 @@ class ULID:
         >>> str(ulid)
         '01E75PVKXA3GFABX1M1J9NZZNF'
 
+    The value provider will be used to generate the randomness part
+    (and the timestamp part if needed) of the `ULID`.
+
     Args:
         value (bytes, None):  A sequence of 16 bytes representing an encoded ULID.
+        value_provider (AbstractValueProvider, None): The value provider to use to generate the randomness and timestamp.
 
     Raises:
         ValueError: If the provided value is not a valid encoded ULID.
     """
 
-    def __init__(self, value: bytes | None = None, value_provider: ValueProvider | None = None) -> None:
+    def __init__(self, value: bytes | None = None, value_provider: AbstractValueProvider | None = None) -> None:
         if value is not None and len(value) != constants.BYTES_LEN:
             raise ValueError("ULID has to be exactly 16 bytes long.")
         value_provider_to_use = value_provider or self.provider
         self.bytes: bytes = value or ULID.from_timestamp(value_provider_to_use.timestamp(), value_provider=value_provider_to_use).bytes
 
     @classmethod
-    def from_datetime(cls, value: datetime, value_provider: ValueProvider | None = None) -> Self:
+    def from_datetime(cls, value: datetime, value_provider: AbstractValueProvider | None = None) -> Self:
         """Create a new :class:`ULID`-object from a :class:`datetime`. The timestamp part of the
         `ULID` will be set to the corresponding timestamp of the datetime.
+        The value provider will be used to
+        generate the randomness part of the
+        `ULID`.
 
         Examples:
 
@@ -85,10 +94,13 @@ class ULID:
         return cls.from_timestamp(value.timestamp(), value_provider=value_provider_to_use)
 
     @classmethod
-    def from_timestamp(cls, value: float, value_provider: ValueProvider | None = None) -> Self:
+    def from_timestamp(cls, value: float, value_provider: AbstractValueProvider | None = None) -> Self:
         """Create a new :class:`ULID`-object from a timestamp. The timestamp can be either a
         `float` representing the time in seconds (as it would be returned by :func:`time.time()`)
         or an `int` in milliseconds.
+        The value provider will be used to
+        generate the randomness part of the
+        `ULID`.
 
         Examples:
 
