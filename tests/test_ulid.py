@@ -1,11 +1,13 @@
+from __future__ import annotations
+
 import json
 import time
 import uuid
-from collections.abc import Callable
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
 from typing import Optional
+from typing import TYPE_CHECKING
 from typing import Union
 
 import pytest
@@ -13,17 +15,17 @@ from freezegun import freeze_time
 from pydantic import BaseModel
 from pydantic import ValidationError
 
+from tests.conftest import assert_sorted
+from tests.conftest import datetimes_almost_equal
+from tests.conftest import utcnow
 from ulid import base32
 from ulid import constants
 from ulid import ULID
+from ulid.value_provider.abstract_value_provider import AbstractValueProvider
 
 
-def utcnow() -> datetime:
-    return datetime.now(timezone.utc)
-
-
-def datetimes_almost_equal(a: datetime, b: datetime) -> None:
-    assert a.replace(microsecond=0) == b.replace(microsecond=0)
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 @freeze_time()
@@ -70,15 +72,9 @@ def test_same_millisecond_monotonic_sorting() -> None:
 @freeze_time()
 def test_same_millisecond_overflow() -> None:
     ULID.provider.prev_randomness = constants.MAX_RANDOMNESS
+    ULID.provider.prev_timestamp = ULID.provider.timestamp()
     with pytest.raises(ValueError, match="Randomness within same millisecond exhausted"):
         ULID()
-
-
-def assert_sorted(seq: list) -> None:
-    last = seq[0]
-    for item in seq[1:]:
-        assert last < item
-        last = item
 
 
 def test_comparison() -> None:
@@ -233,7 +229,7 @@ def test_pydantic_protocol() -> None:
     ulid = ULID()
 
     class Model(BaseModel):
-        ulid: Optional[ULID] = None  # noqa: FA100
+        ulid: Optional[ULID] = None
 
     model: Model | None = None
     for value in [ulid, str(ulid), int(ulid), bytes(ulid)]:
@@ -275,3 +271,93 @@ def test_pydantic_protocol() -> None:
     assert {
         "type": "null",
     } in model_json_schema["properties"]["ulid"]["anyOf"]
+
+
+def test_ulid_constructor_support_other_value_provider() -> None:
+    random_part = b"\x00" * 10
+    datetime = utcnow()
+    timestamp_in_seconds = int(datetime.timestamp())
+    timestamp_in_milliseconds = int(timestamp_in_seconds * constants.MILLISECS_IN_SECS)
+    ulid_bytes: bytes = (
+        timestamp_in_milliseconds.to_bytes(constants.TIMESTAMP_LEN, byteorder="big") + random_part
+    )
+
+    class DummyValueProvider(AbstractValueProvider):
+        def randomness(self) -> bytes:
+            return random_part
+
+        def timestamp(self, value: float | None = None) -> int:  # noqa: ARG002 because we overriding but still don't have `typing_extensions`.
+            return timestamp_in_milliseconds
+
+    ulid1 = ULID(value_provider=DummyValueProvider())
+    ulid2 = ULID(value_provider=DummyValueProvider())
+
+    assert ulid1.bytes == ulid_bytes
+    assert ulid1.timestamp == timestamp_in_seconds
+    datetimes_almost_equal(ulid1.datetime, datetime)
+    assert ulid1.milliseconds == timestamp_in_milliseconds
+    assert ulid1.hex == ulid_bytes.hex()
+    assert str(ulid1) == base32.encode(ulid_bytes)
+    # since the same dummy value provider is used,
+    # the generated ULIDs should be the same.
+    assert ulid2 == ulid1
+
+
+def test_ulid_from_datetime_support_other_value_provider() -> None:
+    random_part = b"\x00" * 10
+    datetime = utcnow()
+    timestamp_in_seconds = int(datetime.timestamp())
+    timestamp_in_milliseconds = int(timestamp_in_seconds * constants.MILLISECS_IN_SECS)
+    ulid_bytes: bytes = (
+        timestamp_in_milliseconds.to_bytes(constants.TIMESTAMP_LEN, byteorder="big") + random_part
+    )
+
+    class DummyValueProvider(AbstractValueProvider):
+        def randomness(self) -> bytes:
+            return random_part
+
+        def timestamp(self, value: float | None = None) -> int:  # noqa: ARG002 because we overriding but still don't have `typing_extensions`.
+            return timestamp_in_milliseconds
+
+    ulid1 = ULID.from_datetime(datetime, value_provider=DummyValueProvider())
+    ulid2 = ULID.from_datetime(datetime, value_provider=DummyValueProvider())
+
+    assert ulid1.bytes == ulid_bytes
+    assert ulid1.timestamp == timestamp_in_seconds
+    datetimes_almost_equal(ulid1.datetime, datetime)
+    assert ulid1.milliseconds == timestamp_in_milliseconds
+    assert ulid1.hex == ulid_bytes.hex()
+    assert str(ulid1) == base32.encode(ulid_bytes)
+    # since the same dummy value provider is used,
+    # the generated ULIDs should be the same.
+    assert ulid2 == ulid1
+
+
+def test_ulid_from_timestamp_support_other_value_provider() -> None:
+    random_part = b"\x00" * 10
+    datetime = utcnow()
+    timestamp_in_seconds = int(datetime.timestamp())
+    timestamp_in_milliseconds = int(timestamp_in_seconds * constants.MILLISECS_IN_SECS)
+    ulid_bytes: bytes = (
+        timestamp_in_milliseconds.to_bytes(constants.TIMESTAMP_LEN, byteorder="big") + random_part
+    )
+
+    class DummyValueProvider(AbstractValueProvider):
+        def randomness(self) -> bytes:
+            return random_part
+
+        def timestamp(self, value: float | None = None) -> int:  # noqa: ARG002 because we overriding but still don't have `typing_extensions`.
+            return timestamp_in_milliseconds
+
+    ulid1 = ULID.from_timestamp(datetime.timestamp(), value_provider=DummyValueProvider())
+    ulid2 = ULID.from_timestamp(datetime.timestamp(), value_provider=DummyValueProvider())
+
+    assert ulid1.bytes == ulid_bytes
+    assert ulid1.timestamp == timestamp_in_seconds
+    datetimes_almost_equal(ulid1.datetime, datetime)
+    assert ulid1.milliseconds == timestamp_in_milliseconds
+    assert ulid1.hex == ulid_bytes.hex()
+    assert str(ulid1) == base32.encode(ulid_bytes)
+    # since the same dummy value provider is used,
+    # the generated ULIDs should be the same.
+    assert ulid2 == ulid1

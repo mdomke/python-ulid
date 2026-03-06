@@ -153,8 +153,8 @@ The ``ULID`` class can be directly used for the popular data validation library
 
 .. monotonic-begin
 
-Monotonic Support
------------------
+Monotonic And Non-Monotonic Support
+-----------------------------------
 
 This library by default supports the implementation for monotonic sort order suggested by the
 official ULID specification.
@@ -162,6 +162,39 @@ official ULID specification.
 This means that ULID values generated in the same millisecond will have linear increasing randomness
 values. If :math:`r_1` and :math:`r_2` are the randomness values of two ULIDs with the same
 timestamp, then :math:`r_2 = r_1 + 1`.
+
+You can override this implementation by providing your own value provider to the ``ULID``
+constructor. The library comes with a default monotonic (``MonotonicValueProvider``)
+and non-monotonic (``NonMonotonicValueProvider``) value provider that generates
+randomness values independently. For example:
+
+.. code-block:: python
+
+  from ulid import ULID
+  from ulid.value_provider import NonMonotonicValueProvider
+
+  ulid1 = ULID(value_provider=NonMonotonicValueProvider())
+  ulid2 = ULID(value_provider=NonMonotonicValueProvider())
+
+You can also implement your own value provider by inheriting from the ``AbstractValueProvider`` and
+overriding the ``randomness`` and ``timestamp`` methods. For example:
+
+.. code-block:: python
+
+  from ulid import ULID
+  from ulid.value_provider import AbstractValueProvider
+
+  class MyValueProvider(AbstractValueProvider):
+      def randomness(self) -> bytes:
+          # Implement your randomness generation logic here
+          return b"\x00" * 10  # Example: return a fixed randomness value
+
+      def timestamp(self, value: float | None = None) -> int:
+          # Implement your timestamp generation logic here
+          return 1772790331000  # Example: return a fixed timestamp value
+
+   ulid1 = ULID(value_provider=MyValueProvider())
+   print(ulid1) # Should print "ULID(01KK18KDKR0000000000000000)"
 
 .. monotonic-end
 

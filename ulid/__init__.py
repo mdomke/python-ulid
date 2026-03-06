@@ -1,27 +1,22 @@
 from __future__ import annotations
 
 import functools
-import os
-import time
 import uuid
 from datetime import datetime
 from datetime import timezone
-from threading import Lock
 from typing import Any
 from typing import cast
-from typing import Generic
 from typing import TYPE_CHECKING
-from typing import TypeVar
 
 from typing_extensions import Self
 
 from ulid import base32
 from ulid import constants
+from ulid.value_provider import AbstractValueProvider
+from ulid.value_provider import MonotonicValueProvider as ValueProvider
 
 
 if TYPE_CHECKING:  # pragma: no cover
-    from collections.abc import Callable
-
     from pydantic import GetCoreSchemaHandler
     from pydantic import ValidatorFunctionWrapHandler
     from pydantic_core import CoreSchema
@@ -34,58 +29,15 @@ except ImportError:  # pragma: no cover
 
 __version__ = version("python-ulid")
 
-T = TypeVar("T", bound=type)
-R = TypeVar("R")
 
-
-class validate_type(Generic[T]):  # noqa: N801
-    def __init__(self, *types: T) -> None:
-        self.types = types
-
-    def __call__(self, func: Callable[..., R]) -> Callable[..., R]:
-        @functools.wraps(func)
-        def wrapped(cls: Any, value: T) -> R:
-            if not isinstance(value, self.types):
-                message = "Value has to be of type "
-                message += " or ".join([t.__name__ for t in self.types])
-                raise TypeError(message)
-            return func(cls, value)
-
-        return wrapped
-
-
-class ValueProvider:
-    def __init__(self) -> None:
-        self.lock = Lock()
-        self.prev_timestamp = constants.MIN_TIMESTAMP
-        self.prev_randomness = constants.MIN_RANDOMNESS
-
-    def timestamp(self, value: float | None = None) -> int:
-        if value is None:
-            value = time.time_ns() // constants.NANOSECS_IN_MILLISECS
-        elif isinstance(value, float):
-            value = int(value * constants.MILLISECS_IN_SECS)
-        if value > constants.MAX_TIMESTAMP:
-            raise ValueError("Value exceeds maximum possible timestamp")
-        return value
-
-    def randomness(self) -> bytes:
-        with self.lock:
-            current_timestamp = self.timestamp()
-            if current_timestamp == self.prev_timestamp:
-                if self.prev_randomness == constants.MAX_RANDOMNESS:
-                    raise ValueError("Randomness within same millisecond exhausted")
-                randomness = self.increment_bytes(self.prev_randomness)
-            else:
-                randomness = os.urandom(constants.RANDOMNESS_LEN)
-
-            self.prev_randomness = randomness
-            self.prev_timestamp = current_timestamp
-        return randomness
-
-    def increment_bytes(self, value: bytes) -> bytes:
-        length = len(value)
-        return (int.from_bytes(value, byteorder="big") + 1).to_bytes(length, byteorder="big")
+def validate_value_type(
+    value_to_validate: object,
+    *types_to_validate_against: type,
+) -> None:
+    if not isinstance(value_to_validate, types_to_validate_against):
+        message = "Value has to be of type "
+        message += " or ".join([t.__name__ for t in types_to_validate_against])
+        raise TypeError(message)
 
 
 @functools.total_ordering
@@ -109,23 +61,43 @@ class ULID:
         >>> str(ulid)
         '01E75PVKXA3GFABX1M1J9NZZNF'
 
+    The value provider will be used to generate the randomness part
+    (and the timestamp part if needed) of the `ULID`.
+
     Args:
         value (bytes, None):  A sequence of 16 bytes representing an encoded ULID.
+        value_provider (AbstractValueProvider, None): The value provider to use to generate the randomness and timestamp.
 
     Raises:
         ValueError: If the provided value is not a valid encoded ULID.
     """
 
-    def __init__(self, value: bytes | None = None) -> None:
+    def __init__(
+        self,
+        value: bytes | None = None,
+        value_provider: AbstractValueProvider | None = None,
+    ) -> None:
         if value is not None and len(value) != constants.BYTES_LEN:
             raise ValueError("ULID has to be exactly 16 bytes long.")
-        self.bytes: bytes = value or ULID.from_timestamp(self.provider.timestamp()).bytes
+        value_provider_to_use = value_provider or self.provider
+        self.bytes: bytes = (
+            value
+            or ULID.from_timestamp(
+                value_provider_to_use.timestamp(), value_provider=value_provider_to_use
+            ).bytes
+        )
 
     @classmethod
-    @validate_type(datetime)
-    def from_datetime(cls, value: datetime) -> Self:
+    def from_datetime(
+        cls,
+        value: datetime,
+        value_provider: AbstractValueProvider | None = None,
+    ) -> Self:
         """Create a new :class:`ULID`-object from a :class:`datetime`. The timestamp part of the
         `ULID` will be set to the corresponding timestamp of the datetime.
+        The value provider will be used to
+        generate the randomness part of the
+        `ULID`.
 
         Examples:
 
@@ -133,14 +105,22 @@ class ULID:
             >>> ULID.from_datetime(datetime.now())
             ULID(01E75QRYCAMM1MKQ9NYMYT6SAV)
         """
-        return cls.from_timestamp(value.timestamp())
+        value_provider_to_use = value_provider or cls.provider
+        validate_value_type(value, datetime)
+        return cls.from_timestamp(value.timestamp(), value_provider=value_provider_to_use)
 
     @classmethod
-    @validate_type(int, float)
-    def from_timestamp(cls, value: float) -> Self:
+    def from_timestamp(
+        cls,
+        value: float,
+        value_provider: AbstractValueProvider | None = None,
+    ) -> Self:
         """Create a new :class:`ULID`-object from a timestamp. The timestamp can be either a
         `float` representing the time in seconds (as it would be returned by :func:`time.time()`)
         or an `int` in milliseconds.
+        The value provider will be used to
+        generate the randomness part of the
+        `ULID`.
 
         Examples:
 
@@ -148,12 +128,15 @@ class ULID:
             >>> ULID.from_timestamp(time.time())
             ULID(01E75QWN5HKQ0JAVX9FG1K4YP4)
         """
-        timestamp = int.to_bytes(cls.provider.timestamp(value), constants.TIMESTAMP_LEN, "big")
-        randomness = cls.provider.randomness()
+        validate_value_type(value, int, float)
+        value_provider_to_use = value_provider or cls.provider
+        timestamp = int.to_bytes(
+            value_provider_to_use.timestamp(value), constants.TIMESTAMP_LEN, "big"
+        )
+        randomness = value_provider_to_use.randomness()
         return cls.from_bytes(timestamp + randomness)
 
     @classmethod
-    @validate_type(uuid.UUID)
     def from_uuid(cls, value: uuid.UUID) -> Self:
         """Create a new :class:`ULID`-object from a :class:`uuid.UUID`. The timestamp part will be
         random in that case.
@@ -164,30 +147,31 @@ class ULID:
             >>> ULID.from_uuid(uuid4())
             ULID(27Q506DP7E9YNRXA0XVD8Z5YSG)
         """
+        validate_value_type(value, uuid.UUID)
         return cls(value.bytes)
 
     @classmethod
-    @validate_type(bytes)
     def from_bytes(cls, bytes_: bytes) -> Self:
         """Create a new :class:`ULID`-object from sequence of 16 bytes."""
+        validate_value_type(bytes_, bytes)
         return cls(bytes_)
 
     @classmethod
-    @validate_type(str)
     def from_hex(cls, value: str) -> Self:
         """Create a new :class:`ULID`-object from 32 character string of hex values."""
+        validate_value_type(value, str)
         return cls.from_bytes(bytes.fromhex(value))
 
     @classmethod
-    @validate_type(str)
     def from_str(cls, string: str) -> Self:
         """Create a new :class:`ULID`-object from a 26 char long string representation."""
+        validate_value_type(string, str)
         return cls(base32.decode(string))
 
     @classmethod
-    @validate_type(int)
     def from_int(cls, value: int) -> Self:
         """Create a new :class:`ULID`-object from an `int`."""
+        validate_value_type(value, int)
         return cls(int.to_bytes(value, constants.BYTES_LEN, "big"))
 
     @classmethod
