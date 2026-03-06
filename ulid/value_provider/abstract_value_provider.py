@@ -27,4 +27,3 @@ class AbstractValueProvider(ABC):
         """
         Generate the randomness value.
         """
-        pass
