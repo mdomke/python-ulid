@@ -286,7 +286,7 @@ def test_ulid_constructor_support_other_value_provider() -> None:
         def randomness(self) -> bytes:
             return random_part
 
-        def timestamp(self, value: float | None = None) -> int:
+        def timestamp(self, value: float | None = None) -> int:  # noqa: ARG002 because we overriding but still don't have `typing_extensions`.
             return timestamp_in_milliseconds
 
     ulid1 = ULID(value_provider=DummyValueProvider())
@@ -316,7 +316,7 @@ def test_ulid_from_datetime_support_other_value_provider() -> None:
         def randomness(self) -> bytes:
             return random_part
 
-        def timestamp(self, value: float | None = None) -> int:
+        def timestamp(self, value: float | None = None) -> int:  # noqa: ARG002 because we overriding but still don't have `typing_extensions`.
             return timestamp_in_milliseconds
 
     ulid1 = ULID.from_datetime(datetime, value_provider=DummyValueProvider())
@@ -346,7 +346,7 @@ def test_ulid_from_timestamp_support_other_value_provider() -> None:
         def randomness(self) -> bytes:
             return random_part
 
-        def timestamp(self, value: float | None = None) -> int:
+        def timestamp(self, value: float | None = None) -> int:  # noqa: ARG002 because we overriding but still don't have `typing_extensions`.
             return timestamp_in_milliseconds
 
     ulid1 = ULID.from_timestamp(datetime.timestamp(), value_provider=DummyValueProvider())

@@ -19,7 +19,7 @@ def test_generate_randomness_monotinic() -> None:
     # Assert that they are monotonic and not equal.
     assert randomness2_as_number - randomness1_as_number == 1
     assert randomness3_as_number - randomness2_as_number == 1
-    assert randomness3_as_number - randomness1_as_number == 2
+    assert randomness3_as_number - randomness1_as_number == 2  # noqa: PLR2004 Allow use of magic numbers.
 
 
 def test_randomness_exhaustion() -> None:

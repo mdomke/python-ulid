@@ -1,4 +1,3 @@
-import time
 import os
 from threading import Lock
 
