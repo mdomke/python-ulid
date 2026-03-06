@@ -31,10 +31,10 @@ __version__ = version("python-ulid")
 
 
 def validate_value_type(
-    type_to_validate: type,
+    value_to_validate: object,
     *types_to_validate_against: type,
 ) -> None:
-    if not isinstance(type_to_validate, types_to_validate_against):
+    if not isinstance(value_to_validate, types_to_validate_against):
         message = "Value has to be of type "
         message += " or ".join([t.__name__ for t in types_to_validate_against])
         raise TypeError(message)
