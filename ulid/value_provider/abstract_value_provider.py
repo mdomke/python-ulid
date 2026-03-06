@@ -1,6 +1,8 @@
-from abc import ABC, abstractmethod
-import os
+from __future__ import annotations
+
 import time
+from abc import ABC
+from abc import abstractmethod
 
 from ulid import constants
 

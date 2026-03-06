@@ -1,8 +1,7 @@
 import os
 
 from ulid import constants
-
-from .abstract_value_provider import AbstractValueProvider
+from ulid.value_provider.abstract_value_provider import AbstractValueProvider
 
 
 class NonMonotonicValueProvider(AbstractValueProvider):

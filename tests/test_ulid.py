@@ -1,11 +1,13 @@
+from __future__ import annotations
+
 import json
 import time
 import uuid
-from collections.abc import Callable
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
 from typing import Optional
+from typing import TYPE_CHECKING
 from typing import Union
 
 import pytest
@@ -13,12 +15,17 @@ from freezegun import freeze_time
 from pydantic import BaseModel
 from pydantic import ValidationError
 
+from tests.conftest import assert_sorted
+from tests.conftest import datetimes_almost_equal
+from tests.conftest import utcnow
 from ulid import base32
 from ulid import constants
 from ulid import ULID
 from ulid.value_provider.abstract_value_provider import AbstractValueProvider
 
-from tests.conftest import assert_sorted, datetimes_almost_equal, utcnow
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 @freeze_time()
@@ -222,7 +229,7 @@ def test_pydantic_protocol() -> None:
     ulid = ULID()
 
     class Model(BaseModel):
-        ulid: Optional[ULID] = None  # noqa: FA100
+        ulid: Optional[ULID] = None
 
     model: Model | None = None
     for value in [ulid, str(ulid), int(ulid), bytes(ulid)]:

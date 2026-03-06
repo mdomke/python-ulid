@@ -1,5 +1,4 @@
 import pytest
-
 from freezegun import freeze_time
 
 from ulid import constants

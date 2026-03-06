@@ -12,8 +12,8 @@ from typing_extensions import Self
 
 from ulid import base32
 from ulid import constants
-from ulid.value_provider import MonotonicValueProvider as ValueProvider
 from ulid.value_provider import AbstractValueProvider
+from ulid.value_provider import MonotonicValueProvider as ValueProvider
 
 
 if TYPE_CHECKING:  # pragma: no cover
