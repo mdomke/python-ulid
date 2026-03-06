@@ -154,7 +154,7 @@ The ``ULID`` class can be directly used for the popular data validation library
 .. monotonic-begin
 
 Monotonic And Non-Monotonic Support
------------------
+-----------------------------------
 
 This library by default supports the implementation for monotonic sort order suggested by the
 official ULID specification.
