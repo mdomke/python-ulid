@@ -265,12 +265,16 @@ def test_pydantic_protocol() -> None:
         "type": "null",
     } in model_json_schema["properties"]["ulid"]["anyOf"]
 
+
 def test_ulid_constructor_support_other_value_provider() -> None:
     random_part = b"\x00" * 10
     datetime = utcnow()
     timestamp_in_seconds = int(datetime.timestamp())
     timestamp_in_milliseconds = int(timestamp_in_seconds * constants.MILLISECS_IN_SECS)
-    ulid_bytes: bytes = timestamp_in_milliseconds.to_bytes(constants.TIMESTAMP_LEN, byteorder="big") + random_part
+    ulid_bytes: bytes = (
+        timestamp_in_milliseconds.to_bytes(constants.TIMESTAMP_LEN, byteorder="big") + random_part
+    )
+
     class DummyValueProvider(AbstractValueProvider):
         def randomness(self) -> bytes:
             return random_part
@@ -291,12 +295,16 @@ def test_ulid_constructor_support_other_value_provider() -> None:
     # the generated ULIDs should be the same.
     assert ulid2 == ulid1
 
+
 def test_ulid_from_datetime_support_other_value_provider() -> None:
     random_part = b"\x00" * 10
     datetime = utcnow()
     timestamp_in_seconds = int(datetime.timestamp())
     timestamp_in_milliseconds = int(timestamp_in_seconds * constants.MILLISECS_IN_SECS)
-    ulid_bytes: bytes = timestamp_in_milliseconds.to_bytes(constants.TIMESTAMP_LEN, byteorder="big") + random_part
+    ulid_bytes: bytes = (
+        timestamp_in_milliseconds.to_bytes(constants.TIMESTAMP_LEN, byteorder="big") + random_part
+    )
+
     class DummyValueProvider(AbstractValueProvider):
         def randomness(self) -> bytes:
             return random_part
@@ -317,12 +325,16 @@ def test_ulid_from_datetime_support_other_value_provider() -> None:
     # the generated ULIDs should be the same.
     assert ulid2 == ulid1
 
+
 def test_ulid_from_timestamp_support_other_value_provider() -> None:
     random_part = b"\x00" * 10
     datetime = utcnow()
     timestamp_in_seconds = int(datetime.timestamp())
     timestamp_in_milliseconds = int(timestamp_in_seconds * constants.MILLISECS_IN_SECS)
-    ulid_bytes: bytes = timestamp_in_milliseconds.to_bytes(constants.TIMESTAMP_LEN, byteorder="big") + random_part
+    ulid_bytes: bytes = (
+        timestamp_in_milliseconds.to_bytes(constants.TIMESTAMP_LEN, byteorder="big") + random_part
+    )
+
     class DummyValueProvider(AbstractValueProvider):
         def randomness(self) -> bytes:
             return random_part

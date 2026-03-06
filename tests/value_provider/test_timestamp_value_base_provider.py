@@ -15,26 +15,29 @@ from ulid.value_provider.non_monotonic_value_provider import NonMonotonicValuePr
 
 class TestValueProvider(AbstractValueProvider):
     def randomness(self) -> bytes:
-        return b'\x00' * 10
+        return b"\x00" * 10
 
 
 @pytest.mark.parametrize(
-        "datetime_timestamp",
-        [
-            datetime(2026, 6, 6, 6, 6, 6, 6, tzinfo=timezone.utc),
-            datetime(2024, 1, 1, tzinfo=timezone.utc),
-            datetime(2025, 12, 31, 9, 6, 3, tzinfo=timezone.utc),
-        ],
+    "datetime_timestamp",
+    [
+        datetime(2026, 6, 6, 6, 6, 6, 6, tzinfo=timezone.utc),
+        datetime(2024, 1, 1, tzinfo=timezone.utc),
+        datetime(2025, 12, 31, 9, 6, 3, tzinfo=timezone.utc),
+    ],
 )
 @pytest.mark.parametrize(
     "value_provider",
     [
         pytest.param(TestValueProvider(), id="CustomedValueProvider"),
         pytest.param(MonotonicValueProvider(), id="MonotonicValueProvider"),
-        pytest.param(NonMonotonicValueProvider(), id="NonMonotonicValueProvider")
-    ]
+        pytest.param(NonMonotonicValueProvider(), id="NonMonotonicValueProvider"),
+    ],
 )
-def test_timestamp(datetime_timestamp: datetime, value_provider: AbstractValueProvider,) -> None:
+def test_timestamp(
+    datetime_timestamp: datetime,
+    value_provider: AbstractValueProvider,
+) -> None:
     expected_timestamp = int(datetime_timestamp.timestamp() * constants.MILLISECS_IN_SECS)
 
     first_timestamp = value_provider.timestamp(datetime_timestamp.timestamp())
@@ -53,10 +56,12 @@ def test_timestamp(datetime_timestamp: datetime, value_provider: AbstractValuePr
     [
         pytest.param(TestValueProvider(), id="CustomedValueProvider"),
         pytest.param(MonotonicValueProvider(), id="MonotonicValueProvider"),
-        pytest.param(NonMonotonicValueProvider(), id="NonMonotonicValueProvider")
-    ]
+        pytest.param(NonMonotonicValueProvider(), id="NonMonotonicValueProvider"),
+    ],
 )
-def test_timestamp_now(value_provider: AbstractValueProvider,) -> None:
+def test_timestamp_now(
+    value_provider: AbstractValueProvider,
+) -> None:
     with freeze_time() as frozen:
         expected_first_timestamp = int(utcnow().timestamp() * constants.MILLISECS_IN_SECS)
         first_timestamp = value_provider.timestamp()
@@ -76,9 +81,11 @@ def test_timestamp_now(value_provider: AbstractValueProvider,) -> None:
     [
         pytest.param(TestValueProvider(), id="CustomedValueProvider"),
         pytest.param(MonotonicValueProvider(), id="MonotonicValueProvider"),
-        pytest.param(NonMonotonicValueProvider(), id="NonMonotonicValueProvider")
-    ]
+        pytest.param(NonMonotonicValueProvider(), id="NonMonotonicValueProvider"),
+    ],
 )
-def test_max_timestamp(value_provider: AbstractValueProvider,) -> None:
+def test_max_timestamp(
+    value_provider: AbstractValueProvider,
+) -> None:
     with pytest.raises(ValueError, match="Value exceeds maximum possible timestamp"):
         value_provider.timestamp(constants.MAX_TIMESTAMP + 1)

@@ -30,7 +30,10 @@ except ImportError:  # pragma: no cover
 __version__ = version("python-ulid")
 
 
-def validate_value_type(type_to_validate: type, *types_to_validate_against: type,) -> None:
+def validate_value_type(
+    type_to_validate: type,
+    *types_to_validate_against: type,
+) -> None:
     if not isinstance(type_to_validate, types_to_validate_against):
         message = "Value has to be of type "
         message += " or ".join([t.__name__ for t in types_to_validate_against])
@@ -69,14 +72,27 @@ class ULID:
         ValueError: If the provided value is not a valid encoded ULID.
     """
 
-    def __init__(self, value: bytes | None = None, value_provider: AbstractValueProvider | None = None) -> None:
+    def __init__(
+        self,
+        value: bytes | None = None,
+        value_provider: AbstractValueProvider | None = None,
+    ) -> None:
         if value is not None and len(value) != constants.BYTES_LEN:
             raise ValueError("ULID has to be exactly 16 bytes long.")
         value_provider_to_use = value_provider or self.provider
-        self.bytes: bytes = value or ULID.from_timestamp(value_provider_to_use.timestamp(), value_provider=value_provider_to_use).bytes
+        self.bytes: bytes = (
+            value
+            or ULID.from_timestamp(
+                value_provider_to_use.timestamp(), value_provider=value_provider_to_use
+            ).bytes
+        )
 
     @classmethod
-    def from_datetime(cls, value: datetime, value_provider: AbstractValueProvider | None = None) -> Self:
+    def from_datetime(
+        cls,
+        value: datetime,
+        value_provider: AbstractValueProvider | None = None,
+    ) -> Self:
         """Create a new :class:`ULID`-object from a :class:`datetime`. The timestamp part of the
         `ULID` will be set to the corresponding timestamp of the datetime.
         The value provider will be used to
@@ -94,7 +110,11 @@ class ULID:
         return cls.from_timestamp(value.timestamp(), value_provider=value_provider_to_use)
 
     @classmethod
-    def from_timestamp(cls, value: float, value_provider: AbstractValueProvider | None = None) -> Self:
+    def from_timestamp(
+        cls,
+        value: float,
+        value_provider: AbstractValueProvider | None = None,
+    ) -> Self:
         """Create a new :class:`ULID`-object from a timestamp. The timestamp can be either a
         `float` representing the time in seconds (as it would be returned by :func:`time.time()`)
         or an `int` in milliseconds.
@@ -110,7 +130,9 @@ class ULID:
         """
         validate_value_type(value, int, float)
         value_provider_to_use = value_provider or cls.provider
-        timestamp = int.to_bytes(value_provider_to_use.timestamp(value), constants.TIMESTAMP_LEN, "big")
+        timestamp = int.to_bytes(
+            value_provider_to_use.timestamp(value), constants.TIMESTAMP_LEN, "big"
+        )
         randomness = value_provider_to_use.randomness()
         return cls.from_bytes(timestamp + randomness)
 

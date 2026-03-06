@@ -5,6 +5,7 @@ from threading import Lock
 from ulid import constants
 from ulid.value_provider.abstract_value_provider import AbstractValueProvider
 
+
 class MonotonicValueProvider(AbstractValueProvider):
     def __init__(self) -> None:
         self.lock = Lock()
