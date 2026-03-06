@@ -9,6 +9,11 @@ from ulid import constants
 
 class AbstractValueProvider(ABC):
     def timestamp(self, value: float | None = None) -> int:
+        """
+        Generate a timestamp value.
+        Uses current time in milliseconds if no value is provided,
+        otherwise converts the provided timestamp in seconds to milliseconds.
+        """
         if value is None:
             value = time.time_ns() // constants.NANOSECS_IN_MILLISECS
         elif isinstance(value, float):
@@ -19,4 +24,7 @@ class AbstractValueProvider(ABC):
 
     @abstractmethod
     def randomness(self) -> bytes:
+        """
+        Generate the randomness value.
+        """
         pass
