@@ -5,8 +5,6 @@ from collections.abc import Callable
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
-from typing import Optional
-from typing import Union
 
 import pytest
 from freezegun import freeze_time
@@ -172,7 +170,7 @@ def test_ulid_from_timestamp_overflow() -> None:
         ULID.from_timestamp(constants.MAX_TIMESTAMP + 1)
 
 
-Params = Union[bytes, str, int, float]
+Params = bytes | str | int | float
 
 
 @pytest.mark.parametrize(
@@ -233,7 +231,7 @@ def test_pydantic_protocol() -> None:
     ulid = ULID()
 
     class Model(BaseModel):
-        ulid: Optional[ULID] = None  # noqa: FA100
+        ulid: ULID | None = None
 
     model: Model | None = None
     for value in [ulid, str(ulid), int(ulid), bytes(ulid)]:
