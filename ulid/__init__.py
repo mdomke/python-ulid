@@ -69,9 +69,10 @@ class ValueProvider:
             raise ValueError("Value exceeds maximum possible timestamp")
         return value
 
-    def randomness(self) -> bytes:
+    def randomness(self, current_timestamp: int | None = None) -> bytes:
         with self.lock:
-            current_timestamp = self.timestamp()
+            if current_timestamp is None:
+                current_timestamp = self.timestamp()
             if current_timestamp == self.prev_timestamp:
                 if self.prev_randomness == constants.MAX_RANDOMNESS:
                     raise ValueError("Randomness within same millisecond exhausted")
@@ -148,8 +149,9 @@ class ULID:
             >>> ULID.from_timestamp(time.time())
             ULID(01E75QWN5HKQ0JAVX9FG1K4YP4)
         """
-        timestamp = int.to_bytes(cls.provider.timestamp(value), constants.TIMESTAMP_LEN, "big")
-        randomness = cls.provider.randomness()
+        timestamp_value = cls.provider.timestamp(value)
+        timestamp = int.to_bytes(timestamp_value, constants.TIMESTAMP_LEN, "big")
+        randomness = cls.provider.randomness(timestamp_value)
         return cls.from_bytes(timestamp + randomness)
 
     @classmethod
