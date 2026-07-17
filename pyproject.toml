@@ -53,6 +53,10 @@ source = "vcs"
 packages = [
     "ulid",
 ]
+[tool.hatch.build.targets.sdist]
+exclude = [
+    ".flox",
+]
 
 [tool.ruff]
 extend = ".ruff_defaults.toml"
