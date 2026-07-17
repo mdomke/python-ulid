@@ -5,6 +5,28 @@ Changelog
 
 Versions follow `Semantic Versioning <http://www.semver.org>`_
 
+`3.2.0`_ - 2026-07-17
+---------------------
+Added
+~~~~~
+* Added transparent bidirectional UUIDv7 conversion methods (``ULID.to_uuid7`` and
+  ``ULID.from_uuidv7``) `@pirate <https://github.com/pirate>`_.
+* Added a ``--uuid7`` option to the CLI's ``show`` command to convert and output a ULID as an
+  RFC 4122 compliant UUIDv7.
+
+Changed
+~~~~~~~
+* Dropped support for Python 3.9 and added support for Python 3.14
+  `@Avihais12344 <https://github.com/Avihais12344>`_.
+* Migrated package and development workflow from Hatch to ``uv`` and ``poethepoet``.
+* Configured Flox for bootstrapping the development environment.
+
+Fixed
+~~~~~
+* Fixed a clock-skew bug where non-monotonic ULIDs could be generated when crossing a millisecond boundary between timestamp and randomness sampling `@gaoflow <https://github.com/gaoflow>`_.
+* Fixed warning from ``uv`` during synchronization `@jaseemabid <https://github.com/jaseemabid>`_.
+* Resolved various Ruff linter warnings and Pyrefly type checker issues.
+
 `3.1.0`_ - 2025-08-18
 ---------------------
 Changed
@@ -197,6 +219,7 @@ Changed
 * The package now has no external dependencies.
 * The test-coverage has been raised to 100%.
 
+.. _3.2.0: https://github.com/mdomke/python-ulid/compare/3.1.0...3.2.0
 .. _3.1.0: https://github.com/mdomke/python-ulid/compare/3.0.0...3.1.0
 .. _3.0.0: https://github.com/mdomke/python-ulid/compare/2.7.0...3.0.0
 .. _2.7.0: https://github.com/mdomke/python-ulid/compare/2.6.0...2.7.0
