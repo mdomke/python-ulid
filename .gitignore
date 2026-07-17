@@ -4,6 +4,7 @@ __pycache__
 
 /.tox
 /.coverage
+/.coverage.*
 /.cache
 /.eggs
 /.mypy_cache
