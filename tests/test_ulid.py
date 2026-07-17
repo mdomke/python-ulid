@@ -65,8 +65,21 @@ def test_same_millisecond_monotonic_sorting() -> None:
     assert_sorted(ulids)
 
 
+def test_z_real_time_monotonic_sorting() -> None:
+    """ULIDs generated in rapid succession must be monotonically increasing.
+
+    This catches the bug where ``from_timestamp()`` samples the clock twice,
+    potentially crossing a millisecond boundary between the timestamp capture
+    and the randomness generation, which could produce a fresh (smaller) random
+    value instead of incrementing the previous one.
+    """
+    ulids = [ULID() for _ in range(5000)]
+    assert_sorted(ulids)
+
+
 @freeze_time()
 def test_same_millisecond_overflow() -> None:
+    ULID.provider.prev_timestamp = ULID.provider.timestamp()
     ULID.provider.prev_randomness = constants.MAX_RANDOMNESS
     with pytest.raises(ValueError, match="Randomness within same millisecond exhausted"):
         ULID()
