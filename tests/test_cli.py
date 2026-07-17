@@ -43,7 +43,7 @@ def test_parse_show(option: str):
 )
 def test_build(option: str):
     ulid = ULID()
-    value: str
+    value: str = ""
     includes_randomness = True
     includes_timestamp = True
     if option.endswith("uuid"):

@@ -26,6 +26,6 @@ from ulid import constants
         (base32.decode_randomness, "A" * (constants.RANDOMNESS_REPR_LEN + 1)),
     ],
 )
-def test_invalid_input(func: Callable, value: Any) -> None:
+def test_invalid_input(func: Callable[[bytes], str], value: Any) -> None:
     with pytest.raises(ValueError):  # noqa: PT011
         func(value)

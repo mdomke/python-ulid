@@ -34,12 +34,12 @@ except ImportError:  # pragma: no cover
 
 __version__ = version("python-ulid")
 
-T = TypeVar("T", bound=type)
+T = TypeVar("T")
 R = TypeVar("R")
 
 
 class validate_type(Generic[T]):  # noqa: N801
-    def __init__(self, *types: T) -> None:
+    def __init__(self, *types: type[T]) -> None:
         self.types = types
 
     def __call__(self, func: Callable[..., R]) -> Callable[..., R]:
@@ -283,7 +283,7 @@ class ULID:
         """
         return uuid.UUID(bytes=self.bytes, version=4)
 
-    def to_uuidv7(self, compliant: bool = False) -> uuid.UUID:
+    def to_uuid7(self, *, compliant: bool = False) -> uuid.UUID:
         """Convert the :class:`ULID` to a UUIDv7 (:class:`uuid.UUID` version 7).
 
         UUIDv7 encodes a Unix timestamp in milliseconds in the first 48 bits (just like ULID).
@@ -340,7 +340,7 @@ class ULID:
 
         Examples:
 
-            >>> uuid7 = uuid.UUID('01936c5e-f4c0-7000-8000-000000000000')
+            >>> uuid7 = uuid.UUID("01936c5e-f4c0-7000-8000-000000000000")
             >>> ulid = ULID.from_uuidv7(uuid7)
             >>> ulid.datetime
             datetime.datetime(2025, 11, 10, ...)

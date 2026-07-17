@@ -5,6 +5,7 @@ from collections.abc import Callable
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
+from typing import Any
 
 import pytest
 from freezegun import freeze_time
@@ -85,7 +86,7 @@ def test_same_millisecond_overflow() -> None:
         ULID()
 
 
-def assert_sorted(seq: list) -> None:
+def assert_sorted(seq: list[Any]) -> None:
     last = seq[0]
     for item in seq[1:]:
         assert last < item
@@ -121,7 +122,7 @@ def test_idempotency() -> None:
     assert ULID.from_bytes(ulid.bytes) == ulid
     assert ULID.from_str(str(ulid)) == ulid
     assert ULID.from_uuid(ulid.to_uuid()) == ulid
-    assert ULID.from_uuidv7(ulid.to_uuidv7(compliant=False)) == ulid
+    assert ULID.from_uuidv7(ulid.to_uuid7(compliant=False)) == ulid
     assert ULID.from_int(int(ulid)) == ulid
     assert ULID.from_hex(ulid.hex) == ulid
     assert ULID.parse(ulid) == ulid
@@ -143,31 +144,32 @@ def test_to_uuid4() -> None:
     assert uuid.version == 4  # noqa: PLR2004
 
 
-def test_to_uuidv7_non_compliant() -> None:
+def test_to_uuid7_non_compliant() -> None:
     """Test non-compliant UUIDv7 conversion preserves all randomness."""
     ulid = ULID()
-    uuid7 = ulid.to_uuidv7(compliant=False)
+    uuid7 = ulid.to_uuid7(compliant=False)
     assert isinstance(uuid7, uuid.UUID)
     # Non-compliant may not have version/variant bits set correctly
     # but should preserve all data for perfect round-trip
 
 
-def test_to_uuidv7_compliant() -> None:
+def test_to_uuid7_compliant() -> None:
     """Test compliant UUIDv7 has correct version and variant bits."""
     ulid = ULID()
-    uuid7 = ulid.to_uuidv7(compliant=True)
+    uuid7 = ulid.to_uuid7(compliant=True)
     assert isinstance(uuid7, uuid.UUID)
     assert uuid7.version == 7  # noqa: PLR2004
     # Check variant bits are RFC 4122 compliant (10xx xxxx)
     # The variant field is in byte 8 (bits 64-65)
     variant_byte = uuid7.bytes[8]
-    assert (variant_byte & 0xC0) == 0x80  # Variant bits should be 0b10xxxxxx
+    rfc4122_variant = 0x80
+    assert (variant_byte & 0xC0) == rfc4122_variant  # Variant bits should be 0b10xxxxxx
 
 
-def test_uuidv7_perfect_roundtrip() -> None:
+def test_uuid7_perfect_roundtrip() -> None:
     """Test perfect round-trip conversion with compliant=False."""
     ulid = ULID()
-    uuid7 = ulid.to_uuidv7(compliant=False)
+    uuid7 = ulid.to_uuid7(compliant=False)
     ulid_restored = ULID.from_uuidv7(uuid7)
     # Perfect round-trip: all 128 bits should be identical
     assert ulid_restored == ulid
@@ -175,10 +177,10 @@ def test_uuidv7_perfect_roundtrip() -> None:
     assert ulid_restored.milliseconds == ulid.milliseconds
 
 
-def test_uuidv7_compliant_roundtrip() -> None:
+def test_uuid7_compliant_roundtrip() -> None:
     """Test round-trip with compliant=True preserves timestamp but loses some randomness."""
     ulid = ULID()
-    uuid7 = ulid.to_uuidv7(compliant=True)
+    uuid7 = ulid.to_uuid7(compliant=True)
     ulid_restored = ULID.from_uuidv7(uuid7)
     # Timestamp should be perfectly preserved
     assert ulid_restored.milliseconds == ulid.milliseconds
@@ -186,7 +188,7 @@ def test_uuidv7_compliant_roundtrip() -> None:
     assert ulid_restored.bytes != ulid.bytes
 
 
-def test_uuidv7_timestamp_preservation() -> None:
+def test_uuid7_timestamp_preservation() -> None:
     """Test that UUIDv7 conversion preserves timestamp accurately."""
     # Test with a specific known timestamp
     test_timestamp = 1699564800.123  # 2023-11-10 00:00:00.123 UTC
@@ -194,46 +196,46 @@ def test_uuidv7_timestamp_preservation() -> None:
 
     # Test both compliant and non-compliant modes
     for compliant in [False, True]:
-        uuid7 = ulid.to_uuidv7(compliant=compliant)
+        uuid7 = ulid.to_uuid7(compliant=compliant)
         ulid_from_uuid7 = ULID.from_uuidv7(uuid7)
 
         # Check timestamp is perfectly preserved (exact millisecond match)
         assert ulid_from_uuid7.milliseconds == ulid.milliseconds
-        assert abs(ulid_from_uuid7.timestamp - test_timestamp) < 0.001
+        assert ulid_from_uuid7.timestamp == pytest.approx(test_timestamp, abs=1e-3)
 
 
-def test_uuidv7_monotonic_ordering() -> None:
+def test_uuid7_monotonic_ordering() -> None:
     """Test that UUIDv7s maintain monotonic ordering like ULIDs."""
     with freeze_time() as frozen_time:
         ulids = []
-        uuid7s = []
-        for i in range(10):
+        uuids = []
+        for _ in range(10):
             ulid = ULID()
             ulids.append(ulid)
-            uuid7s.append(ulid.to_uuidv7(compliant=False))
+            uuids.append(ulid.to_uuid7(compliant=False))
             frozen_time.tick()
 
         # Both ULIDs and UUID7s should be sorted
         assert_sorted(ulids)
-        assert_sorted([u.bytes for u in uuid7s])
+        assert_sorted([u.bytes for u in uuids])
 
 
 @freeze_time()
-def test_uuidv7_same_millisecond() -> None:
+def test_uuid7_same_millisecond() -> None:
     """Test UUIDv7 conversion with multiple ULIDs in same millisecond."""
     ulids = [ULID() for _ in range(100)]
-    uuid7s = [u.to_uuidv7(compliant=False) for u in ulids]
+    uuids = [u.to_uuid7(compliant=False) for u in ulids]
 
     # All should maintain monotonic ordering
     assert_sorted(ulids)
-    assert_sorted([u.bytes for u in uuid7s])
+    assert_sorted([u.bytes for u in uuids])
 
     # Perfect round-trip for all
-    for ulid, uuid7 in zip(ulids, uuid7s):
+    for ulid, uuid7 in zip(ulids, uuids, strict=True):
         assert ULID.from_uuidv7(uuid7) == ulid
 
 
-def test_from_uuidv7_with_external_uuid() -> None:
+def test_from_uuid7_with_external_uuid() -> None:
     """Test creating ULID from an external UUIDv7."""
     # Create a UUIDv7 with known timestamp (compliant format)
     # This simulates a UUIDv7 created by another system
