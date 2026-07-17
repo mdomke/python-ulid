@@ -18,6 +18,7 @@ Changed
 ~~~~~~~
 * Dropped support for Python 3.9 and added support for Python 3.14
   `@Avihais12344 <https://github.com/Avihais12344>`_.
+* Depend on ``typing-extensions`` only when running on Python < 3.11 `@musicinmybrain <https://github.com/musicinmybrain>`_.
 * Migrated package and development workflow from Hatch to ``uv`` and ``poethepoet``.
 * Configured Flox for bootstrapping the development environment.
 
