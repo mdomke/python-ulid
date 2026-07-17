@@ -1,0 +1,119 @@
+schema-version = "1.12.0"
+
+
+## Install Packages --------------------------------------------------
+##  $ flox install gum  <- puts a package in [install] section below
+##  $ flox search gum   <- search for a package
+##  $ flox show gum     <- show all versions of a package
+## -------------------------------------------------------------------
+[install]
+uv.pkg-path = "uv"
+# gum.pkg-path = "gum"
+# gum.version = "^0.14.5"
+
+
+## Environment Variables ---------------------------------------------
+##  ... available for use in the activated environment
+##      as well as [hook], [profile] scripts and [services] below.
+## -------------------------------------------------------------------
+[vars]
+# INTRO_MESSAGE = "It's gettin' Flox in here"
+
+
+## Activation Hook ---------------------------------------------------
+##  ... run by _bash_ shell when you run 'flox activate'.
+## -------------------------------------------------------------------
+[hook]
+on-activate = """
+  uv python install 3.14
+
+  export PATH="$FLOX_ENV_PROJECT/.flox/bin:$PATH"
+  export PYTHON_DIR="$FLOX_ENV_PROJECT/.venv"
+  if [ ! -d "${PYTHON_DIR}" ]; then
+    echo "Creating python virtual environment in ${PYTHON_DIR}"
+    uv venv "${PYTHON_DIR}"
+  fi
+
+  # Quietly activate venv and install packages in a subshell so
+  # that the venv can be freshly activated in the profile section.
+  (
+    source "${PYTHON_DIR}/bin/activate"
+    uv sync --active
+
+    if [ ! -e "${FLOX_ENV_PROJECT}/.git/hooks/pre-commit" ]; then
+      prek install
+    fi
+  )
+"""
+
+
+## Profile script ----------------------------------------------------
+## ... sourced by _your shell_ when you run 'flox activate'.
+## -------------------------------------------------------------------
+[profile]
+bash = """
+  export PATH="$FLOX_ENV_PROJECT/.flox/bin:$PATH"
+  source "${PYTHON_DIR}/bin/activate"
+  echo "✅ Activated Python virtual environment" >&2
+"""
+fish = """
+  set -gx PATH "$FLOX_ENV_PROJECT/.flox/bin" $PATH
+  source "${PYTHON_DIR}/bin/activate.fish"
+  echo "✅ Activated Python virtual environment" >&2
+"""
+tcsh = """
+  setenv PATH "$FLOX_ENV_PROJECT/.flox/bin:$PATH"
+  source "${PYTHON_DIR}/bin/activate.csh"
+  echo "✅ Activated Python virtual environment" >&2
+"""
+zsh = """
+  export PATH="$FLOX_ENV_PROJECT/.flox/bin:$PATH"
+  source "${PYTHON_DIR}/bin/activate"
+  echo "✅ Activated Python virtual environment" >&2
+"""
+
+
+## Services ---------------------------------------------------------
+##  $ flox services start             <- Starts all services
+##  $ flox services status            <- Status of running services
+##  $ flox activate --start-services  <- Activates & starts all
+## ------------------------------------------------------------------
+[services]
+# myservice.command = "python3 -m http.server"
+
+
+## Include ----------------------------------------------------------
+## ... environments to create a composed environment
+## ------------------------------------------------------------------
+[include]
+# environments = [
+#     { dir = "../common" }
+# ]
+
+
+## Build and publish your own packages ------------------------------
+##  $ flox build
+##  $ flox publish
+## ------------------------------------------------------------------
+[build]
+# [build.myproject]
+# description = "The coolest project ever"
+# version = "0.0.1"
+# command = """
+#   mkdir -p $out/bin
+#   cargo build --release
+#   cp target/release/myproject $out/bin/myproject
+# """
+
+
+## Other Environment Options -----------------------------------------
+[options]
+# Systems that environment is compatible with
+# systems = [
+#   "aarch64-darwin",
+#   "aarch64-linux",
+#   "x86_64-darwin",
+#   "x86_64-linux",
+# ]
+# Uncomment to disable CUDA detection.
+# cuda-detection = false
