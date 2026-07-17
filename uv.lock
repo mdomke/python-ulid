@@ -667,6 +667,9 @@ wheels = [
 [[package]]
 name = "python-ulid"
 source = { editable = "." }
+dependencies = [
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+]
 
 [package.optional-dependencies]
 pydantic = [
@@ -689,7 +692,10 @@ doc = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pydantic", marker = "extra == 'pydantic'", specifier = ">=2.0" }]
+requires-dist = [
+    { name = "pydantic", marker = "extra == 'pydantic'", specifier = ">=2.0" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+]
 provides-extras = ["pydantic"]
 
 [package.metadata.requires-dev]
