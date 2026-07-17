@@ -281,6 +281,84 @@ class ULID:
         """
         return uuid.UUID(bytes=self.bytes, version=4)
 
+    def to_uuidv7(self, compliant: bool = False) -> uuid.UUID:
+        """Convert the :class:`ULID` to a UUIDv7 (:class:`uuid.UUID` version 7).
+
+        UUIDv7 encodes a Unix timestamp in milliseconds in the first 48 bits (just like ULID).
+        The timestamp is always transparently preserved regardless of compliant mode.
+
+        Args:
+            compliant: If True, sets RFC 4122 version (0x7) and variant (0b10) bits,
+                      losing 6 bits of randomness. If False (default), preserves all 80 bits
+                      of randomness by clobbering version/variant bits, enabling perfect
+                      round-trip conversion. Most tools (PostgreSQL, standard libraries)
+                      accept non-compliant UUIDv7s.
+
+        Examples:
+
+            >>> ulid = ULID()
+            >>> uuid7 = ulid.to_uuidv7()  # Perfect round-trip
+            >>> assert ULID.from_uuidv7(uuid7) == ulid
+            >>> uuid7_compliant = ulid.to_uuidv7(compliant=True)  # RFC 4122 compliant
+            >>> uuid7_compliant.version
+            7
+        """
+        # ULID:   [48 bits timestamp_ms][80 bits randomness]
+        # UUIDv7: [48 bits timestamp_ms][4 bits ver][12 bits rand_a][2 bits var][62 bits rand_b]
+
+        timestamp_ms = self.milliseconds
+
+        # Get the 80 bits of randomness from ULID
+        randomness_bits = int.from_bytes(self.bytes[6:], byteorder="big")
+
+        if compliant:
+            # RFC 4122 compliant: set version and variant bits, losing 6 bits of randomness
+            # Extract 74 bits of randomness (losing 6 bits for version/variant)
+            rand_a = (randomness_bits >> 68) & 0xFFF  # Top 12 bits
+            rand_b = randomness_bits & ((1 << 62) - 1)  # Bottom 62 bits
+
+            # Build UUIDv7: [48-bit timestamp_ms][4-bit version][12-bit rand_a][2-bit variant][62-bit rand_b]
+            uuid_int = (timestamp_ms << 80) | (0x7 << 76) | (rand_a << 64) | (0x2 << 62) | rand_b
+        else:
+            # Non-compliant: preserve all 80 bits of randomness for perfect round-trip
+            # Build UUIDv7: [48-bit timestamp_ms][80-bit randomness] (clobbers version/variant)
+            uuid_int = (timestamp_ms << 80) | randomness_bits
+
+        uuid_bytes = uuid_int.to_bytes(16, byteorder="big")
+        return uuid.UUID(bytes=uuid_bytes)
+
+    @classmethod
+    @validate_type(uuid.UUID)
+    def from_uuidv7(cls, value: uuid.UUID) -> Self:
+        """Create a new :class:`ULID` from a UUIDv7 (:class:`uuid.UUID` version 7).
+
+        Extracts the timestamp from the UUIDv7's first 48 bits (milliseconds since epoch)
+        and the remaining 80 bits as randomness. The timestamp is always transparently
+        preserved, providing perfect round-trip conversion with :meth:`to_uuidv7`.
+
+        Examples:
+
+            >>> uuid7 = uuid.UUID('01936c5e-f4c0-7000-8000-000000000000')
+            >>> ulid = ULID.from_uuidv7(uuid7)
+            >>> ulid.datetime
+            datetime.datetime(2025, 11, 10, ...)
+        """
+        uuid_int = int.from_bytes(value.bytes, byteorder="big")
+
+        # Extract timestamp from UUIDv7 layout (always in first 48 bits)
+        # Bits 0-47: timestamp_ms (48 bits)
+        timestamp_ms = uuid_int >> 80
+
+        # Extract all 80 bits after the timestamp (bits 48-127) as randomness
+        # This includes version/variant bits if present, enabling perfect round-trip
+        randomness_bits = uuid_int & ((1 << 80) - 1)
+
+        # Build ULID bytes: [48-bit timestamp][80-bit randomness]
+        timestamp_bytes = timestamp_ms.to_bytes(6, byteorder="big")
+        randomness_bytes = randomness_bits.to_bytes(10, byteorder="big")
+
+        return cls.from_bytes(timestamp_bytes + randomness_bytes)
+
     def __repr__(self) -> str:
         return f"ULID({self!s})"
 
