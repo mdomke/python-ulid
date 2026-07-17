@@ -97,6 +97,38 @@ plugins = [
   "pydantic.mypy",
 ]
 
+[tool.uv]
+default-groups = ["dev", "doc"]
+
+[tool.pyrefly]
+preset = "strict"
+project-excludes = ["docs"]
+
+[tool.poe.tasks]
+test = "uv run --extra pydantic coverage run -m pytest"
+check-code = "ruff check"
+check-fmt = "ruff format --check"
+check-types = "uv run --extra pydantic pyrefly check"
+check-docs = "doc8 docs/source"
+fmt = "ruff format"
+build = "uv build"
+cov-combine = "coverage combine"
+cov-xml = "coverage xml"
+
+[tool.poe.tasks.docs]
+help = "Build the HTML documentation"
+cmd = "uv run --with-requirements requirements.txt make html"
+cwd = "docs"
+
+[tool.poe.tasks.check]
+help = "Run all checks (code, format, types, docs)"
+sequence = [
+    { ref = "check-code" },
+    { ref = "check-fmt" },
+    { ref = "check-types" },
+    { ref = "check-docs" },
+]
+
 [tool.coverage.run]
 branch = true
 parallel = true
@@ -107,9 +139,17 @@ max-line-length = 100
 
 [dependency-groups]
 dev = [
-    "freezegun>=1.5",
-    "hatch>=1.14.1",
-    "sphinx>=7.4.7",
+    "coverage==7.15.*",
+    "freezegun==1.5.*",
+    "poethepoet==0.48.*",
+    "prek==0.4.*",
+    "pyrefly==1.1.*",
+    "pytest==9.1.*",
+    "ruff==0.15.*",
+]
+doc = [
+    "doc8>=2.0.0",
+    "sphinx==8.1.*",
 ]
 
 [tool.hatch.metadata.hooks.fancy-pypi-readme]

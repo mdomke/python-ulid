@@ -10,43 +10,37 @@ jobs:
   lint-docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python 3.13
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.3.0
         with:
-          python-version: "3.13"
-      - name: Install hatch
-        uses: pypa/hatch@install
+          python-version: "3.14"
       - name: Lint documentation
-        run: hatch run docs:check
+        run: uv run doc8 docs/source
 
   lint-code:
     runs-on: ubuntu-latest
     name: Lint code
     steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python 3.13
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.3.0
         with:
-          python-version: "3.13"
-      - name: Install hatch
-        uses: pypa/hatch@install
-      - name: Lint code
-        run: hatch fmt --check
+          python-version: "3.14"
+      - name: Lint style
+        run: uv run ruff check
 
   lint-typing:
     runs-on: ubuntu-latest
     name: Lint type annotations
     steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python 3.13
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.3.0
         with:
-          python-version: "3.13"
-      - name: Install hatch
-        uses: pypa/hatch@install
+          python-version: "3.14"
       - name: Lint typing
-        run: hatch run types:check
+        run: uv run poe check-types
 
   test:
     runs-on: ubuntu-latest
@@ -55,26 +49,20 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
     steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.3.0
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install hatch
-        uses: pypa/hatch@install
-
       - name: Test
-        run: hatch test --cover --python ${{ matrix.python-version }}
-
-      - name: Disambiguate coverage filename
-        run: mv .coverage ".coverage.${{ matrix.os }}.${{ matrix.python-version }}"
+        run: uv run poe test
 
       - name: Upload coverage data
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           include-hidden-files: true
-          name: coverage-${{ matrix.os }}-${{ matrix.python-version }}
+          name: coverage-${{ matrix.python-version }}
           path: .coverage*
 
 
@@ -84,23 +72,23 @@ jobs:
     needs:
       - test
     steps:
-      - uses: actions/checkout@v5
-      - name: Install Hatch
-        uses: pypa/hatch@install
+      - uses: actions/checkout@v7
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.3.0
 
       - name: Download coverage data
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: coverage-*
           merge-multiple: true
 
       - name: Combine coverage data
-        run: hatch run coverage:combine
+        run: uv run poe cov-combine
 
       - name: Export coverage reports
-        run: hatch run coverage:xml
+        run: uv run poe cov-xml
 
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -109,5 +97,5 @@ jobs:
     name: Build & verify package
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: hynek/build-and-inspect-python-package@v2

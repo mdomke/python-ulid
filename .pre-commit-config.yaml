@@ -1,10 +1,18 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.9
+    rev: v0.15.4
     hooks:
-      - id: ruff
+      - id: ruff-check
       - id: ruff-format
   - repo: https://github.com/pycqa/doc8
     rev: v2.0.0
     hooks:
       - id: doc8
+  - repo: local
+    hooks:
+      - id: pyrefly-check
+        name: pyrefly
+        entry: uv run pyrefly check
+        language: system
+        types: [python]
+        pass_filenames: false
