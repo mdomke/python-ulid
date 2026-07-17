@@ -89,6 +89,7 @@ def make_parser(prog: str | None = None) -> argparse.ArgumentParser:
     s.add_argument("ulid", help="the ULID to inspect. The special value - reads from stdin")
     s.add_argument("--uuid", action="store_true", help="convert to fully random UUID")
     s.add_argument("--uuid4", action="store_true", help="convert to RFC 4122 compliant UUIDv4")
+    s.add_argument("--uuid7", action="store_true", help="convert to RFC 4122 compliant UUIDv7")
     s.add_argument("--hex", action="store_true", help="convert to hex")
     s.add_argument("--int", action="store_true", help="convert to int")
     s.add_argument("--timestamp", "--ts", action="store_true", help="show timestamp")
@@ -141,6 +142,8 @@ def show(args: argparse.Namespace) -> str:
         return str(ulid.to_uuid())
     if args.uuid4:
         return str(ulid.to_uuid4())
+    if args.uuid7:
+        return str(ulid.to_uuid7(compliant=True))
     if args.hex:
         return ulid.hex
     if args.int:
