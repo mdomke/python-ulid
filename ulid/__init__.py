@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import abc
 import functools
 import os
 import time
@@ -66,7 +67,7 @@ class MonotonicityPolicy(Protocol):
         ...
 
 
-class BaseMonotonicPolicy:
+class BaseMonotonicPolicy(abc.ABC):
     """Base class for stateful monotonic policies."""
 
     def __init__(self) -> None:
@@ -91,6 +92,7 @@ class BaseMonotonicPolicy:
         self.prev_timestamp = timestamp
         return randomness
 
+    @abc.abstractmethod
     def _on_overflow(
         self,
         timestamp: int,
