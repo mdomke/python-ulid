@@ -456,9 +456,9 @@ class ULID:
         Examples:
 
             >>> ulid = ULID()
-            >>> uuid7 = ulid.to_uuidv7()  # Perfect round-trip
-            >>> assert ULID.from_uuidv7(uuid7) == ulid
-            >>> uuid7_compliant = ulid.to_uuidv7(compliant=True)  # RFC 4122 compliant
+            >>> uuid7 = ulid.to_uuid7()  # Perfect round-trip
+            >>> assert ULID.from_uuid7(uuid7) == ulid
+            >>> uuid7_compliant = ulid.to_uuid7(compliant=True)  # RFC 4122 compliant
             >>> uuid7_compliant.version
             7
         """
@@ -487,17 +487,17 @@ class ULID:
         return uuid.UUID(bytes=uuid_bytes)
 
     @classmethod
-    def from_uuidv7(cls, value: uuid.UUID) -> Self:
+    def from_uuid7(cls, value: uuid.UUID) -> Self:
         """Create a new :class:`ULID` from a UUIDv7 (:class:`uuid.UUID` version 7).
 
         Extracts the timestamp from the UUIDv7's first 48 bits (milliseconds since epoch)
         and the remaining 80 bits as randomness. The timestamp is always transparently
-        preserved, providing perfect round-trip conversion with :meth:`to_uuidv7`.
+        preserved, providing perfect round-trip conversion with :meth:`to_uuid7`.
 
         Examples:
 
             >>> uuid7 = uuid.UUID("01936c5e-f4c0-7000-8000-000000000000")
-            >>> ulid = ULID.from_uuidv7(uuid7)
+            >>> ulid = ULID.from_uuid7(uuid7)
             >>> ulid.datetime
             datetime.datetime(2025, 11, 10, ...)
         """

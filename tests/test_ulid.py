@@ -161,7 +161,7 @@ def test_idempotency() -> None:
     assert ULID.from_bytes(ulid.bytes) == ulid
     assert ULID.from_str(str(ulid)) == ulid
     assert ULID.from_uuid(ulid.to_uuid()) == ulid
-    assert ULID.from_uuidv7(ulid.to_uuid7(compliant=False)) == ulid
+    assert ULID.from_uuid7(ulid.to_uuid7(compliant=False)) == ulid
     assert ULID.from_int(int(ulid)) == ulid
     assert ULID.from_hex(ulid.hex) == ulid
     assert ULID.parse(ulid) == ulid
@@ -209,7 +209,7 @@ def test_uuid7_perfect_roundtrip() -> None:
     """Test perfect round-trip conversion with compliant=False."""
     ulid = ULID()
     uuid7 = ulid.to_uuid7(compliant=False)
-    ulid_restored = ULID.from_uuidv7(uuid7)
+    ulid_restored = ULID.from_uuid7(uuid7)
     # Perfect round-trip: all 128 bits should be identical
     assert ulid_restored == ulid
     assert ulid_restored.bytes == ulid.bytes
@@ -220,7 +220,7 @@ def test_uuid7_compliant_roundtrip() -> None:
     """Test round-trip with compliant=True preserves timestamp but loses some randomness."""
     ulid = ULID()
     uuid7 = ulid.to_uuid7(compliant=True)
-    ulid_restored = ULID.from_uuidv7(uuid7)
+    ulid_restored = ULID.from_uuid7(uuid7)
     # Timestamp should be perfectly preserved
     assert ulid_restored.milliseconds == ulid.milliseconds
     # Full ULID won't match due to lost randomness in version/variant bits (6 bits lost)
@@ -236,7 +236,7 @@ def test_uuid7_timestamp_preservation() -> None:
     # Test both compliant and non-compliant modes
     for compliant in [False, True]:
         uuid7 = ulid.to_uuid7(compliant=compliant)
-        ulid_from_uuid7 = ULID.from_uuidv7(uuid7)
+        ulid_from_uuid7 = ULID.from_uuid7(uuid7)
 
         # Check timestamp is perfectly preserved (exact millisecond match)
         assert ulid_from_uuid7.milliseconds == ulid.milliseconds
@@ -271,7 +271,7 @@ def test_uuid7_same_millisecond() -> None:
 
     # Perfect round-trip for all
     for ulid, uuid7 in zip(ulids, uuids, strict=True):
-        assert ULID.from_uuidv7(uuid7) == ulid
+        assert ULID.from_uuid7(uuid7) == ulid
 
 
 def test_from_uuid7_with_external_uuid() -> None:
@@ -289,7 +289,7 @@ def test_from_uuid7_with_external_uuid() -> None:
     uuid_int = (timestamp_ms << 80) | (0x7 << 76) | (rand_a << 64) | (0x2 << 62) | rand_b
     uuid7 = uuid.UUID(bytes=uuid_int.to_bytes(16, byteorder="big"))
 
-    ulid = ULID.from_uuidv7(uuid7)
+    ulid = ULID.from_uuid7(uuid7)
 
     # Check timestamp is correctly extracted (should be exact since it's in milliseconds)
     assert ulid.milliseconds == timestamp_ms

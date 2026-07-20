@@ -5,6 +5,13 @@ Changelog
 
 Versions follow `Semantic Versioning <http://www.semver.org>`_
 
+`4.0.1`_ - 2026-07-20
+---------------------
+Changed
+~~~~~~~
+* Renamed ``ULID.from_uuidv7`` to :meth:`.ULID.from_uuid7` for naming symmetry with
+  :meth:`.ULID.to_uuid7`, correcting an inconsistency introduced in 3.2.0.
+
 `4.0.0`_ - 2026-07-20
 ---------------------
 
@@ -258,6 +265,7 @@ Changed
 * The package now has no external dependencies.
 * The test-coverage has been raised to 100%.
 
+.. _4.0.1: https://github.com/mdomke/python-ulid/compare/4.0.0...4.0.1
 .. _4.0.0: https://github.com/mdomke/python-ulid/compare/3.2.1...4.0.0
 .. _3.2.1: https://github.com/mdomke/python-ulid/compare/3.2.0...3.2.1
 .. _3.2.0: https://github.com/mdomke/python-ulid/compare/3.1.0...3.2.0
