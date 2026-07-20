@@ -5,6 +5,7 @@ import functools
 import os
 import time
 import uuid
+from collections.abc import Callable
 from datetime import datetime
 from datetime import timezone
 from threading import Lock
@@ -25,7 +26,6 @@ from ulid import constants
 
 if TYPE_CHECKING:  # pragma: no cover
     import sys
-    from collections.abc import Callable
 
     from pydantic import GetCoreSchemaHandler
     from pydantic import ValidatorFunctionWrapHandler
@@ -45,21 +45,25 @@ except ImportError:  # pragma: no cover
 __version__ = version("python-ulid")
 
 
+RandomnessSource = Callable[[int], bytes]
+RandomnessIncrementer = Callable[[bytes], bytes]
+
+
 class MonotonicityPolicy(Protocol):
     """Protocol defining the interface for monotonicity and randomness resolution policies."""
 
     def resolve_randomness(
         self,
         timestamp: int,
-        randomness_source: Callable[[int], bytes],
-        increment_bytes: Callable[[bytes], bytes],
+        randomness_source: RandomnessSource,
+        increment_bytes: RandomnessIncrementer,
     ) -> bytes:
         """Resolve randomness for a given timestamp.
 
         Args:
             timestamp (int): The current timestamp in milliseconds.
-            randomness_source (Callable[[int], bytes]): A callable to get fresh random bytes.
-            increment_bytes (Callable[[bytes], bytes]): A callable to increment random bytes.
+            randomness_source (RandomnessSource): A callable to get fresh random bytes.
+            increment_bytes (RandomnessIncrementer): A callable to increment random bytes.
 
         Returns:
             bytes: The resolved randomness bytes (80 bits).
@@ -77,8 +81,8 @@ class BaseMonotonicPolicy(abc.ABC):
     def resolve_randomness(
         self,
         timestamp: int,
-        randomness_source: Callable[[int], bytes],
-        increment_bytes: Callable[[bytes], bytes],
+        randomness_source: RandomnessSource,
+        increment_bytes: RandomnessIncrementer,
     ) -> bytes:
         if timestamp == self.prev_timestamp:
             if self.prev_randomness == constants.MAX_RANDOMNESS:
@@ -96,13 +100,13 @@ class BaseMonotonicPolicy(abc.ABC):
     def _on_overflow(
         self,
         timestamp: int,
-        randomness_source: Callable[[int], bytes],
+        randomness_source: RandomnessSource,
     ) -> bytes:
         """Handle same-millisecond randomness exhaustion.
 
         Args:
             timestamp (int): The current timestamp in milliseconds.
-            randomness_source (Callable[[int], bytes]): A callable to get fresh random bytes.
+            randomness_source (RandomnessSource): A callable to get fresh random bytes.
 
         Returns:
             bytes: The resolved randomness bytes.
@@ -121,7 +125,7 @@ class StrictMonotonicPolicy(BaseMonotonicPolicy):
     def _on_overflow(
         self,
         timestamp: int,
-        randomness_source: Callable[[int], bytes],
+        randomness_source: RandomnessSource,
     ) -> bytes:
         raise ValueError("Randomness within same millisecond exhausted")
 
@@ -135,8 +139,8 @@ class PureRandomPolicy:
     def resolve_randomness(
         self,
         timestamp: int,
-        randomness_source: Callable[[int], bytes],
-        increment_bytes: Callable[[bytes], bytes],  # noqa: ARG002
+        randomness_source: RandomnessSource,
+        increment_bytes: RandomnessIncrementer,  # noqa: ARG002
     ) -> bytes:
         return randomness_source(timestamp)
 
@@ -153,7 +157,7 @@ class LaxMonotonicPolicy(BaseMonotonicPolicy):
     def _on_overflow(
         self,
         timestamp: int,
-        randomness_source: Callable[[int], bytes],
+        randomness_source: RandomnessSource,
     ) -> bytes:
         return randomness_source(timestamp)
 
@@ -168,7 +172,7 @@ class ULIDGenerator:
     def __init__(
         self,
         clock: Callable[[], int] | None = None,
-        randomness: Callable[[int], bytes] | None = None,
+        randomness: RandomnessSource | None = None,
         policy: MonotonicityPolicy | None = None,
     ) -> None:
         self.lock = Lock()
