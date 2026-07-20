@@ -15,6 +15,7 @@ from pydantic import ValidationError
 from ulid import base32
 from ulid import constants
 from ulid import ULID
+from ulid import ULIDGenerator
 
 
 def utcnow() -> datetime:
@@ -80,10 +81,41 @@ def test_z_real_time_monotonic_sorting() -> None:
 
 @freeze_time()
 def test_same_millisecond_overflow() -> None:
-    ULID.provider.prev_timestamp = ULID.provider.timestamp()
-    ULID.provider.prev_randomness = constants.MAX_RANDOMNESS
+    generator = ULIDGenerator(randomness=lambda _: constants.MAX_RANDOMNESS)
+    generator.generate()
     with pytest.raises(ValueError, match="Randomness within same millisecond exhausted"):
-        ULID()
+        generator.generate()
+
+
+def test_generator_custom_clock_and_randomness() -> None:
+    custom_ts = 123456789
+    custom_rand = b"1234567890"
+    generator = ULIDGenerator(
+        clock=lambda: custom_ts,
+        randomness=lambda _: custom_rand,
+    )
+    ulid = generator.generate()
+    assert ulid.milliseconds == custom_ts
+    assert ulid.bytes[constants.TIMESTAMP_LEN :] == custom_rand
+
+
+def test_generator_state_isolation() -> None:
+    # Ensure two generators do not share state
+    g1 = ULIDGenerator()
+    g2 = ULIDGenerator()
+
+    # Initially, both states should be untouched
+    assert g1.prev_timestamp == constants.MIN_TIMESTAMP
+    assert g2.prev_timestamp == constants.MIN_TIMESTAMP
+
+    # Generating with g1 should update g1's state, but g2 should remain untouched
+    g1.generate()
+    assert g1.prev_timestamp != constants.MIN_TIMESTAMP
+    assert g2.prev_timestamp == constants.MIN_TIMESTAMP
+
+    # Generating with g2 should update g2's state independently
+    g2.generate()
+    assert g2.prev_timestamp != constants.MIN_TIMESTAMP
 
 
 def assert_sorted(seq: list[Any]) -> None:

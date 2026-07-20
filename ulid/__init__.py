@@ -58,45 +58,82 @@ class validate_type(Generic[T]):  # noqa: N801
         return wrapped
 
 
-class ValueProvider:
-    def __init__(self) -> None:
+class ULIDGenerator:
+    """Generator for creating universally unique lexicographically sortable identifiers (ULIDs).
+
+    This class handles stateful monotonic generation of ULIDs, ensuring that identifiers
+    generated within the same millisecond are monotonically increasing.
+    """
+
+    def __init__(
+        self,
+        clock: Callable[[], int] | None = None,
+        randomness: Callable[[int], bytes] | None = None,
+    ) -> None:
         self.lock = Lock()
+        self.clock = clock or self._default_clock
+        self.randomness_source = randomness or self._default_randomness
         self.prev_timestamp = constants.MIN_TIMESTAMP
         self.prev_randomness = constants.MIN_RANDOMNESS
 
+    @staticmethod
+    def _default_clock() -> int:
+        return time.time_ns() // constants.NANOSECS_IN_MILLISECS
+
+    @staticmethod
+    def _default_randomness(_timestamp: int) -> bytes:
+        return os.urandom(constants.RANDOMNESS_LEN)
+
     def timestamp(self, value: float | None = None) -> int:
         if value is None:
-            value = time.time_ns() // constants.NANOSECS_IN_MILLISECS
+            value = self.clock()
         elif isinstance(value, float):
             value = int(value * constants.MILLISECS_IN_SECS)
         if value > constants.MAX_TIMESTAMP:
             raise ValueError("Value exceeds maximum possible timestamp")
         return value
 
-    def randomness(self, current_timestamp: int | None = None) -> bytes:
+    def generate(self, timestamp: float | datetime | None = None) -> ULID:
+        """Generate a new :class:`ULID` monotonically.
+
+        Args:
+            timestamp (int, float, datetime, None): Optional timestamp to set on the ULID.
+
+        Returns:
+            ULID: A generated ULID.
+        """
+        ts_val: int
+        if isinstance(timestamp, datetime):
+            ts_val = self.timestamp(timestamp.timestamp())
+        elif isinstance(timestamp, (int, float)):
+            ts_val = self.timestamp(timestamp)
+        else:
+            ts_val = self.timestamp()
+
         with self.lock:
-            if current_timestamp is None:
-                current_timestamp = self.timestamp()
-            if current_timestamp == self.prev_timestamp:
+            if ts_val == self.prev_timestamp:
                 if self.prev_randomness == constants.MAX_RANDOMNESS:
                     raise ValueError("Randomness within same millisecond exhausted")
                 randomness = self.increment_bytes(self.prev_randomness)
             else:
-                randomness = os.urandom(constants.RANDOMNESS_LEN)
+                randomness = self.randomness_source(ts_val)
 
             self.prev_randomness = randomness
-            self.prev_timestamp = current_timestamp
-        return randomness
+            self.prev_timestamp = ts_val
+
+        timestamp_bytes = int.to_bytes(ts_val, constants.TIMESTAMP_LEN, "big")
+        return ULID.from_bytes(timestamp_bytes + randomness)
 
     def increment_bytes(self, value: bytes) -> bytes:
         length = len(value)
         return (int.from_bytes(value, byteorder="big") + 1).to_bytes(length, byteorder="big")
 
 
+_default_generator = ULIDGenerator()
+
+
 @functools.total_ordering
 class ULID:
-    provider = ValueProvider()
-
     """The :class:`ULID` object consists of a timestamp part of 48 bits and of 80 random bits.
 
     .. code-block:: text
@@ -124,7 +161,7 @@ class ULID:
     def __init__(self, value: bytes | None = None) -> None:
         if value is not None and len(value) != constants.BYTES_LEN:
             raise ValueError("ULID has to be exactly 16 bytes long.")
-        self.bytes: bytes = value or ULID.from_timestamp(self.provider.timestamp()).bytes
+        self.bytes: bytes = value or _default_generator.generate().bytes
 
     @classmethod
     @validate_type(datetime)
@@ -153,10 +190,7 @@ class ULID:
             >>> ULID.from_timestamp(time.time())
             ULID(01E75QWN5HKQ0JAVX9FG1K4YP4)
         """
-        timestamp_value = cls.provider.timestamp(value)
-        timestamp = int.to_bytes(timestamp_value, constants.TIMESTAMP_LEN, "big")
-        randomness = cls.provider.randomness(timestamp_value)
-        return cls.from_bytes(timestamp + randomness)
+        return cls.from_bytes(_default_generator.generate(value).bytes)
 
     @classmethod
     @validate_type(uuid.UUID)
