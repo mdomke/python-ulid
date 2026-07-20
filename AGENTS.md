@@ -46,6 +46,18 @@ We require full, strict type annotations across the entire codebase.
 
 ---
 
+## 📝 Changelog
+
+We maintain a human-readable changelog in [CHANGELOG.rst](file:///Users/martin.domke/Source/private/ulid/CHANGELOG.rst) following the **[Keep a Changelog](https://keepachangelog.com/en/1.1.0/)** conventions.
+
+- **Section headings**: Group entries under the standard headings, in this order: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`. Omit any section that has no entries.
+- **Removals belong under `Removed`**: Do *not* fold removed or renamed public APIs into `Changed`.
+- **Versioning**: Follow [Semantic Versioning](https://semver.org). A breaking change (e.g. a removed public API) requires a **major** version bump and a `.. warning::` admonition describing the migration path.
+- **Entry format**: Each release has a ``` `X.Y.Z`_ - YYYY-MM-DD ``` heading plus a matching compare link at the bottom of the file (``.. _X.Y.Z: https://github.com/mdomke/python-ulid/compare/PREV...X.Y.Z``).
+- **reStructuredText**: Keep lines within **100 characters** (enforced by `doc8`) and reference public symbols with Sphinx roles such as `:class:` and `:meth:` — the changelog is included into the rendered documentation.
+
+---
+
 ## 🛠️ Verification Workflow
 
 Before completing any task, you **MUST** run the verification commands to ensure no regressions or style issues are introduced.

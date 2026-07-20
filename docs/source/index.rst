@@ -25,6 +25,10 @@ Release v\ |release| (:ref:`What's new <changelog>`)
    :end-before: monotonic-end
 
 .. include:: ../../README.rst
+   :start-after: generators-begin
+   :end-before: generators-end
+
+.. include:: ../../README.rst
    :start-after: cli-begin
    :end-before: cli-end
 

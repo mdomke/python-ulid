@@ -5,6 +5,44 @@ Changelog
 
 Versions follow `Semantic Versioning <http://www.semver.org>`_
 
+`4.0.0`_ - 2026-07-20
+---------------------
+
+.. warning::
+
+   **Breaking change:** the ``ValueProvider`` class and the ``ULID.provider`` class attribute
+   have been removed. ULID generation is now handled by the new :class:`.ULIDGenerator` together
+   with pluggable monotonicity policies. To customize generation, construct a
+   :class:`.ULIDGenerator` (optionally with a custom clock, randomness source, or policy) and
+   either call its ``generate()`` method or assign it to ``ulid.default_generator``.
+
+Added
+~~~~~
+* Added a public :class:`.ULIDGenerator` class that encapsulates ULID generation and can be
+  configured with a custom clock, randomness source, and monotonicity policy.
+* Added pluggable monotonicity policies: :class:`.StrictMonotonicPolicy` (the default),
+  :class:`.LaxMonotonicPolicy` and :class:`.PureRandomPolicy`, together with the
+  :class:`.MonotonicityPolicy` protocol and the :class:`.BaseMonotonicPolicy` base class for
+  implementing custom policies.
+* Added a module-level ``ulid.default_generator`` that can be reassigned to route ``ULID()`` and
+  the ``ULID.from_*`` constructors through a custom :class:`.ULIDGenerator`.
+
+Removed
+~~~~~~~
+* Removed the ``ValueProvider`` class and the ``ULID.provider`` attribute in favour of
+  :class:`.ULIDGenerator` and the monotonicity policies. Code that replaced ``ULID.provider`` or
+  subclassed ``ValueProvider`` must migrate to a custom :class:`.ULIDGenerator` assigned to
+  ``ulid.default_generator``.
+* Removed the internal ``validate_type`` decorator. The ``ULID.from_*`` constructors still raise
+  ``TypeError`` for arguments of the wrong type, so runtime behaviour is unchanged.
+
+`3.2.1`_ - 2026-07-17
+---------------------
+Fixed
+~~~~~
+* Corrected the build and publish pipeline and the generated source distribution. This release
+  contains no changes to the library code.
+
 `3.2.0`_ - 2026-07-17
 ---------------------
 Added
@@ -220,6 +258,8 @@ Changed
 * The package now has no external dependencies.
 * The test-coverage has been raised to 100%.
 
+.. _4.0.0: https://github.com/mdomke/python-ulid/compare/3.2.1...4.0.0
+.. _3.2.1: https://github.com/mdomke/python-ulid/compare/3.2.0...3.2.1
 .. _3.2.0: https://github.com/mdomke/python-ulid/compare/3.1.0...3.2.0
 .. _3.1.0: https://github.com/mdomke/python-ulid/compare/3.0.0...3.1.0
 .. _3.0.0: https://github.com/mdomke/python-ulid/compare/2.7.0...3.0.0

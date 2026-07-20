@@ -46,7 +46,6 @@ __version__ = version("python-ulid")
 
 
 RandomnessSource = Callable[[int], bytes]
-RandomnessIncrementer = Callable[[bytes], bytes]
 
 
 class MonotonicityPolicy(Protocol):
@@ -56,14 +55,12 @@ class MonotonicityPolicy(Protocol):
         self,
         timestamp: int,
         randomness_source: RandomnessSource,
-        increment_bytes: RandomnessIncrementer,
     ) -> bytes:
         """Resolve randomness for a given timestamp.
 
         Args:
             timestamp (int): The current timestamp in milliseconds.
             randomness_source (RandomnessSource): A callable to get fresh random bytes.
-            increment_bytes (RandomnessIncrementer): A callable to increment random bytes.
 
         Returns:
             bytes: The resolved randomness bytes (80 bits).
@@ -82,19 +79,22 @@ class BaseMonotonicPolicy(abc.ABC):
         self,
         timestamp: int,
         randomness_source: RandomnessSource,
-        increment_bytes: RandomnessIncrementer,
     ) -> bytes:
         if timestamp == self.prev_timestamp:
             if self.prev_randomness == constants.MAX_RANDOMNESS:
                 randomness = self._on_overflow(timestamp, randomness_source)
             else:
-                randomness = increment_bytes(self.prev_randomness)
+                randomness = self._increment(self.prev_randomness)
         else:
             randomness = randomness_source(timestamp)
 
         self.prev_randomness = randomness
         self.prev_timestamp = timestamp
         return randomness
+
+    @staticmethod
+    def _increment(value: bytes) -> bytes:
+        return (int.from_bytes(value, byteorder="big") + 1).to_bytes(len(value), byteorder="big")
 
     @abc.abstractmethod
     def _on_overflow(
@@ -140,7 +140,6 @@ class PureRandomPolicy:
         self,
         timestamp: int,
         randomness_source: RandomnessSource,
-        increment_bytes: RandomnessIncrementer,  # noqa: ARG002
     ) -> bytes:
         return randomness_source(timestamp)
 
@@ -165,8 +164,18 @@ class LaxMonotonicPolicy(BaseMonotonicPolicy):
 class ULIDGenerator:
     """Generator for creating universally unique lexicographically sortable identifiers (ULIDs).
 
-    This class handles stateful monotonic generation of ULIDs, ensuring that identifiers
-    generated within the same millisecond are monotonically increasing.
+    Samples a clock for the timestamp, sources entropy for the randomness, and enforces a
+    :class:`MonotonicityPolicy` so that identifiers generated within the same millisecond are
+    monotonically increasing. Generation is guarded by a lock and is safe to share across
+    threads.
+
+    Args:
+        clock: A callable returning the current time in milliseconds. Defaults to the system
+            clock.
+        randomness: A callable that, given a timestamp, returns fresh random bytes for the
+            randomness component. Defaults to :func:`os.urandom`.
+        policy: The :class:`MonotonicityPolicy` used to resolve randomness on same-millisecond
+            collisions. Defaults to :class:`StrictMonotonicPolicy`.
     """
 
     def __init__(
@@ -188,9 +197,11 @@ class ULIDGenerator:
     def _default_randomness(_timestamp: int) -> bytes:
         return os.urandom(constants.RANDOMNESS_LEN)
 
-    def timestamp(self, value: float | None = None) -> int:
+    def _normalize_timestamp(self, value: float | datetime | None = None) -> int:
         if value is None:
             value = self.clock()
+        elif isinstance(value, datetime):
+            value = int(value.timestamp() * constants.MILLISECS_IN_SECS)
         elif isinstance(value, float):
             value = int(value * constants.MILLISECS_IN_SECS)
         if value > constants.MAX_TIMESTAMP:
@@ -206,36 +217,25 @@ class ULIDGenerator:
         Returns:
             ULID: A generated ULID.
         """
-        ts_val: int
-        if isinstance(timestamp, datetime):
-            ts_val = self.timestamp(timestamp.timestamp())
-        elif isinstance(timestamp, (int, float)):
-            ts_val = self.timestamp(timestamp)
-        else:
-            ts_val = self.timestamp()
+        ts = self._normalize_timestamp(timestamp)
 
         with self.lock:
             randomness = self.policy.resolve_randomness(
-                ts_val,
+                ts,
                 self.randomness_source,
-                self.increment_bytes,
             )
 
-        timestamp_bytes = int.to_bytes(ts_val, constants.TIMESTAMP_LEN, "big")
-        return ULID.from_bytes(timestamp_bytes + randomness)
-
-    def increment_bytes(self, value: bytes) -> bytes:
-        length = len(value)
-        return (int.from_bytes(value, byteorder="big") + 1).to_bytes(length, byteorder="big")
+        ts_bytes = int.to_bytes(ts, constants.TIMESTAMP_LEN, "big")
+        return ULID.from_bytes(ts_bytes + randomness)
 
 
-_default_generator = ULIDGenerator()
-
-
-def _resolve_generator(policy: MonotonicityPolicy | None = None) -> ULIDGenerator:
-    if policy is not None:
-        return ULIDGenerator(policy=policy)
-    return _default_generator
+#: The module-level generator used by ``ULID()`` and the ``ULID.from_*`` constructors.
+#: Reassign it to route the default constructors through a custom
+#: :class:`ULIDGenerator` (e.g. a different clock, randomness source, or
+#: :class:`MonotonicityPolicy`)::
+#:
+#:     ulid.default_generator = ULIDGenerator(policy=LaxMonotonicPolicy())
+default_generator = ULIDGenerator()
 
 
 @functools.total_ordering
@@ -267,24 +267,16 @@ class ULID:
     def __init__(
         self,
         value: bytes | None = None,
-        *,
-        policy: MonotonicityPolicy | None = None,
     ) -> None:
         if value is not None and len(value) != constants.BYTES_LEN:
             raise ValueError("ULID has to be exactly 16 bytes long.")
         if value is None:
-            gen = _resolve_generator(policy)
-            self.bytes: bytes = gen.generate().bytes
+            self.bytes: bytes = default_generator.generate().bytes
         else:
             self.bytes = value
 
     @classmethod
-    def from_datetime(
-        cls,
-        value: datetime,
-        *,
-        policy: MonotonicityPolicy | None = None,
-    ) -> Self:
+    def from_datetime(cls, value: datetime) -> Self:
         """Create a new :class:`ULID`-object from a :class:`datetime`. The timestamp part of the
         `ULID` will be set to the corresponding timestamp of the datetime.
 
@@ -296,15 +288,10 @@ class ULID:
         """
         if not isinstance(value, datetime):
             raise TypeError("Value has to be of type datetime")
-        return cls.from_timestamp(value.timestamp(), policy=policy)
+        return cls.from_bytes(default_generator.generate(value).bytes)
 
     @classmethod
-    def from_timestamp(
-        cls,
-        value: float,
-        *,
-        policy: MonotonicityPolicy | None = None,
-    ) -> Self:
+    def from_timestamp(cls, value: float) -> Self:
         """Create a new :class:`ULID`-object from a timestamp. The timestamp can be either a
         `float` representing the time in seconds (as it would be returned by :func:`time.time()`)
         or an `int` in milliseconds.
@@ -317,8 +304,7 @@ class ULID:
         """
         if not isinstance(value, (int, float)):
             raise TypeError("Value has to be of type int or float")
-        gen = _resolve_generator(policy)
-        return cls.from_bytes(gen.generate(value).bytes)
+        return cls.from_bytes(default_generator.generate(value).bytes)
 
     @classmethod
     def from_uuid(cls, value: uuid.UUID) -> Self:
@@ -364,12 +350,7 @@ class ULID:
         return cls(int.to_bytes(value, constants.BYTES_LEN, "big"))
 
     @classmethod
-    def parse(
-        cls,
-        value: Any,
-        *,
-        policy: MonotonicityPolicy | None = None,
-    ) -> Self:
+    def parse(cls, value: Any) -> Self:
         """Create a new :class:`ULID`-object from a given value.
 
         .. note::
@@ -392,11 +373,11 @@ class ULID:
         if isinstance(value, int):
             if len(str(value)) == constants.INT_REPR_LEN:
                 return cls.from_int(value)
-            return cls.from_timestamp(value, policy=policy)
+            return cls.from_timestamp(value)
         if isinstance(value, float):
-            return cls.from_timestamp(value, policy=policy)
+            return cls.from_timestamp(value)
         if isinstance(value, datetime):
-            return cls.from_datetime(value, policy=policy)
+            return cls.from_datetime(value)
         if isinstance(value, bytes):
             return cls.from_bytes(value)
         raise TypeError(f"Cannot parse ULID from type {type(value)}")

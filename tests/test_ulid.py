@@ -12,6 +12,7 @@ from freezegun import freeze_time
 from pydantic import BaseModel
 from pydantic import ValidationError
 
+import ulid as ulid_pkg
 from ulid import base32
 from ulid import constants
 from ulid import LaxMonotonicPolicy
@@ -483,22 +484,27 @@ def test_lax_monotonic_policy() -> None:
     assert isinstance(ulid3, ULID)
 
 
-def test_ulid_policy_injection() -> None:
-    # Ensure users can configure the policy via ULID constructors / creators directly
-    policy = PureRandomPolicy()
+def test_default_generator_is_strict() -> None:
+    # The default generator is public and enforces strict monotonicity out of the box
+    assert isinstance(ulid_pkg.default_generator, ULIDGenerator)
+    assert isinstance(ulid_pkg.default_generator.policy, StrictMonotonicPolicy)
 
-    # 1. Default constructor
-    ulid1 = ULID(policy=policy)
-    assert isinstance(ulid1, ULID)
 
-    # 2. from_datetime
-    ulid2 = ULID.from_datetime(datetime.now(timezone.utc), policy=policy)
-    assert isinstance(ulid2, ULID)
+def test_default_generator_swappable(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reassigning default_generator routes ULID() and the from_* constructors through it.
+    # monkeypatch restores the original default at teardown, keeping tests isolated.
+    custom_ts = 123456789
+    custom_rand = b"1234567890"
+    custom = ULIDGenerator(clock=lambda: custom_ts, randomness=lambda _: custom_rand)
+    monkeypatch.setattr(ulid_pkg, "default_generator", custom)
 
-    # 3. from_timestamp
-    ulid3 = ULID.from_timestamp(time.time(), policy=policy)
-    assert isinstance(ulid3, ULID)
+    # ULID() draws both timestamp (via the clock) and randomness from the swapped generator
+    now_ulid = ULID()
+    assert now_ulid.milliseconds == custom_ts
+    assert now_ulid.bytes[constants.TIMESTAMP_LEN :] == custom_rand
 
-    # 4. parse
-    ulid4 = ULID.parse(time.time(), policy=policy)
-    assert isinstance(ulid4, ULID)
+    # Explicit-timestamp constructors keep their own timestamp but still draw randomness
+    # from the swapped generator (each distinct timestamp yields fresh randomness).
+    assert ULID.from_timestamp(1000).bytes[constants.TIMESTAMP_LEN :] == custom_rand
+    assert ULID.from_datetime(utcnow()).bytes[constants.TIMESTAMP_LEN :] == custom_rand
+    assert ULID.parse(2000).bytes[constants.TIMESTAMP_LEN :] == custom_rand
