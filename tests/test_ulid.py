@@ -480,4 +480,25 @@ def test_lax_monotonic_policy() -> None:
 
     # Generating again should regenerate fresh randomness instead of raising ValueError or sleeping
     ulid3 = generator.generate()
-    assert ulid3 is not None
+    assert isinstance(ulid3, ULID)
+
+
+def test_ulid_policy_injection() -> None:
+    # Ensure users can configure the policy via ULID constructors / creators directly
+    policy = PureRandomPolicy()
+
+    # 1. Default constructor
+    ulid1 = ULID(policy=policy)
+    assert isinstance(ulid1, ULID)
+
+    # 2. from_datetime
+    ulid2 = ULID.from_datetime(datetime.now(timezone.utc), policy=policy)
+    assert isinstance(ulid2, ULID)
+
+    # 3. from_timestamp
+    ulid3 = ULID.from_timestamp(time.time(), policy=policy)
+    assert isinstance(ulid3, ULID)
+
+    # 4. parse
+    ulid4 = ULID.parse(time.time(), policy=policy)
+    assert isinstance(ulid4, ULID)

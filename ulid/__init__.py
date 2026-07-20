@@ -205,6 +205,12 @@ class ULIDGenerator:
 _default_generator = ULIDGenerator()
 
 
+def _resolve_generator(policy: MonotonicityPolicy | None = None) -> ULIDGenerator:
+    if policy is not None:
+        return ULIDGenerator(policy=policy)
+    return _default_generator
+
+
 @functools.total_ordering
 class ULID:
     """The :class:`ULID` object consists of a timestamp part of 48 bits and of 80 random bits.
@@ -231,13 +237,27 @@ class ULID:
         ValueError: If the provided value is not a valid encoded ULID.
     """
 
-    def __init__(self, value: bytes | None = None) -> None:
+    def __init__(
+        self,
+        value: bytes | None = None,
+        *,
+        policy: MonotonicityPolicy | None = None,
+    ) -> None:
         if value is not None and len(value) != constants.BYTES_LEN:
             raise ValueError("ULID has to be exactly 16 bytes long.")
-        self.bytes: bytes = value or _default_generator.generate().bytes
+        if value is None:
+            gen = _resolve_generator(policy)
+            self.bytes: bytes = gen.generate().bytes
+        else:
+            self.bytes = value
 
     @classmethod
-    def from_datetime(cls, value: datetime) -> Self:
+    def from_datetime(
+        cls,
+        value: datetime,
+        *,
+        policy: MonotonicityPolicy | None = None,
+    ) -> Self:
         """Create a new :class:`ULID`-object from a :class:`datetime`. The timestamp part of the
         `ULID` will be set to the corresponding timestamp of the datetime.
 
@@ -249,10 +269,15 @@ class ULID:
         """
         if not isinstance(value, datetime):
             raise TypeError("Value has to be of type datetime")
-        return cls.from_timestamp(value.timestamp())
+        return cls.from_timestamp(value.timestamp(), policy=policy)
 
     @classmethod
-    def from_timestamp(cls, value: float) -> Self:
+    def from_timestamp(
+        cls,
+        value: float,
+        *,
+        policy: MonotonicityPolicy | None = None,
+    ) -> Self:
         """Create a new :class:`ULID`-object from a timestamp. The timestamp can be either a
         `float` representing the time in seconds (as it would be returned by :func:`time.time()`)
         or an `int` in milliseconds.
@@ -265,7 +290,8 @@ class ULID:
         """
         if not isinstance(value, (int, float)):
             raise TypeError("Value has to be of type int or float")
-        return cls.from_bytes(_default_generator.generate(value).bytes)
+        gen = _resolve_generator(policy)
+        return cls.from_bytes(gen.generate(value).bytes)
 
     @classmethod
     def from_uuid(cls, value: uuid.UUID) -> Self:
@@ -311,7 +337,12 @@ class ULID:
         return cls(int.to_bytes(value, constants.BYTES_LEN, "big"))
 
     @classmethod
-    def parse(cls, value: Any) -> Self:
+    def parse(
+        cls,
+        value: Any,
+        *,
+        policy: MonotonicityPolicy | None = None,
+    ) -> Self:
         """Create a new :class:`ULID`-object from a given value.
 
         .. note::
@@ -334,11 +365,11 @@ class ULID:
         if isinstance(value, int):
             if len(str(value)) == constants.INT_REPR_LEN:
                 return cls.from_int(value)
-            return cls.from_timestamp(value)
+            return cls.from_timestamp(value, policy=policy)
         if isinstance(value, float):
-            return cls.from_timestamp(value)
+            return cls.from_timestamp(value, policy=policy)
         if isinstance(value, datetime):
-            return cls.from_datetime(value)
+            return cls.from_datetime(value, policy=policy)
         if isinstance(value, bytes):
             return cls.from_bytes(value)
         raise TypeError(f"Cannot parse ULID from type {type(value)}")
