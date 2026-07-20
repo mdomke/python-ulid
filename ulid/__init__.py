@@ -9,9 +9,7 @@ from datetime import timezone
 from threading import Lock
 from typing import Any
 from typing import cast
-from typing import Generic
 from typing import TYPE_CHECKING
-from typing import TypeVar
 
 from ulid import base32
 from ulid import constants
@@ -37,25 +35,6 @@ except ImportError:  # pragma: no cover
 
 
 __version__ = version("python-ulid")
-
-T = TypeVar("T")
-R = TypeVar("R")
-
-
-class validate_type(Generic[T]):  # noqa: N801
-    def __init__(self, *types: type[T]) -> None:
-        self.types = types
-
-    def __call__(self, func: Callable[..., R]) -> Callable[..., R]:
-        @functools.wraps(func)
-        def wrapped(cls: Any, value: T) -> R:
-            if not isinstance(value, self.types):
-                message = "Value has to be of type "
-                message += " or ".join([t.__name__ for t in self.types])
-                raise TypeError(message)
-            return func(cls, value)
-
-        return wrapped
 
 
 class ULIDGenerator:
@@ -164,7 +143,6 @@ class ULID:
         self.bytes: bytes = value or _default_generator.generate().bytes
 
     @classmethod
-    @validate_type(datetime)
     def from_datetime(cls, value: datetime) -> Self:
         """Create a new :class:`ULID`-object from a :class:`datetime`. The timestamp part of the
         `ULID` will be set to the corresponding timestamp of the datetime.
@@ -175,10 +153,11 @@ class ULID:
             >>> ULID.from_datetime(datetime.now())
             ULID(01E75QRYCAMM1MKQ9NYMYT6SAV)
         """
+        if not isinstance(value, datetime):
+            raise TypeError("Value has to be of type datetime")
         return cls.from_timestamp(value.timestamp())
 
     @classmethod
-    @validate_type(int, float)
     def from_timestamp(cls, value: float) -> Self:
         """Create a new :class:`ULID`-object from a timestamp. The timestamp can be either a
         `float` representing the time in seconds (as it would be returned by :func:`time.time()`)
@@ -190,10 +169,11 @@ class ULID:
             >>> ULID.from_timestamp(time.time())
             ULID(01E75QWN5HKQ0JAVX9FG1K4YP4)
         """
+        if not isinstance(value, (int, float)):
+            raise TypeError("Value has to be of type int or float")
         return cls.from_bytes(_default_generator.generate(value).bytes)
 
     @classmethod
-    @validate_type(uuid.UUID)
     def from_uuid(cls, value: uuid.UUID) -> Self:
         """Create a new :class:`ULID`-object from a :class:`uuid.UUID`. The timestamp part will be
         random in that case.
@@ -204,30 +184,36 @@ class ULID:
             >>> ULID.from_uuid(uuid4())
             ULID(27Q506DP7E9YNRXA0XVD8Z5YSG)
         """
+        if not isinstance(value, uuid.UUID):
+            raise TypeError("Value has to be of type UUID")
         return cls(value.bytes)
 
     @classmethod
-    @validate_type(bytes)
     def from_bytes(cls, bytes_: bytes) -> Self:
         """Create a new :class:`ULID`-object from sequence of 16 bytes."""
+        if not isinstance(bytes_, bytes):
+            raise TypeError("Value has to be of type bytes")
         return cls(bytes_)
 
     @classmethod
-    @validate_type(str)
     def from_hex(cls, value: str) -> Self:
         """Create a new :class:`ULID`-object from 32 character string of hex values."""
+        if not isinstance(value, str):
+            raise TypeError("Value has to be of type str")
         return cls.from_bytes(bytes.fromhex(value))
 
     @classmethod
-    @validate_type(str)
     def from_str(cls, string: str) -> Self:
         """Create a new :class:`ULID`-object from a 26 char long string representation."""
+        if not isinstance(string, str):
+            raise TypeError("Value has to be of type str")
         return cls(base32.decode(string))
 
     @classmethod
-    @validate_type(int)
     def from_int(cls, value: int) -> Self:
         """Create a new :class:`ULID`-object from an `int`."""
+        if not isinstance(value, int):
+            raise TypeError("Value has to be of type int")
         return cls(int.to_bytes(value, constants.BYTES_LEN, "big"))
 
     @classmethod
@@ -368,7 +354,6 @@ class ULID:
         return uuid.UUID(bytes=uuid_bytes)
 
     @classmethod
-    @validate_type(uuid.UUID)
     def from_uuidv7(cls, value: uuid.UUID) -> Self:
         """Create a new :class:`ULID` from a UUIDv7 (:class:`uuid.UUID` version 7).
 
@@ -383,6 +368,8 @@ class ULID:
             >>> ulid.datetime
             datetime.datetime(2025, 11, 10, ...)
         """
+        if not isinstance(value, uuid.UUID):
+            raise TypeError("Value has to be of type UUID")
         uuid_int = int.from_bytes(value.bytes, byteorder="big")
 
         # Extract timestamp from UUIDv7 layout (always in first 48 bits)
