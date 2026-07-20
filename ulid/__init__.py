@@ -12,6 +12,12 @@ from typing import cast
 from typing import Protocol
 from typing import TYPE_CHECKING
 
+
+try:
+    from typing import override
+except ImportError:
+    from typing_extensions import override  # type: ignore
+
 from ulid import base32
 from ulid import constants
 
@@ -60,12 +66,8 @@ class MonotonicityPolicy(Protocol):
         ...
 
 
-class StrictMonotonicPolicy:
-    """Strict monotonicity policy.
-
-    Always increments the randomness by 1 if generated within the same millisecond.
-    Raises ValueError on millisecond randomness exhaustion.
-    """
+class BaseMonotonicPolicy:
+    """Base class for stateful monotonic policies."""
 
     def __init__(self) -> None:
         self.prev_timestamp = constants.MIN_TIMESTAMP
@@ -79,14 +81,47 @@ class StrictMonotonicPolicy:
     ) -> bytes:
         if timestamp == self.prev_timestamp:
             if self.prev_randomness == constants.MAX_RANDOMNESS:
-                raise ValueError("Randomness within same millisecond exhausted")
-            randomness = increment_bytes(self.prev_randomness)
+                randomness = self._on_overflow(timestamp, randomness_source)
+            else:
+                randomness = increment_bytes(self.prev_randomness)
         else:
             randomness = randomness_source(timestamp)
 
         self.prev_randomness = randomness
         self.prev_timestamp = timestamp
         return randomness
+
+    def _on_overflow(
+        self,
+        timestamp: int,
+        randomness_source: Callable[[int], bytes],
+    ) -> bytes:
+        """Handle same-millisecond randomness exhaustion.
+
+        Args:
+            timestamp (int): The current timestamp in milliseconds.
+            randomness_source (Callable[[int], bytes]): A callable to get fresh random bytes.
+
+        Returns:
+            bytes: The resolved randomness bytes.
+        """
+        raise NotImplementedError
+
+
+class StrictMonotonicPolicy(BaseMonotonicPolicy):
+    """Strict monotonicity policy.
+
+    Always increments the randomness by 1 if generated within the same millisecond.
+    Raises ValueError on millisecond randomness exhaustion.
+    """
+
+    @override
+    def _on_overflow(
+        self,
+        timestamp: int,
+        randomness_source: Callable[[int], bytes],
+    ) -> bytes:
+        raise ValueError("Randomness within same millisecond exhausted")
 
 
 class PureRandomPolicy:
@@ -104,7 +139,7 @@ class PureRandomPolicy:
         return randomness_source(timestamp)
 
 
-class LaxMonotonicPolicy:
+class LaxMonotonicPolicy(BaseMonotonicPolicy):
     """Lax monotonicity policy.
 
     Increments the randomness by 1 if generated within the same millisecond.
@@ -112,27 +147,13 @@ class LaxMonotonicPolicy:
     an error or sleeping.
     """
 
-    def __init__(self) -> None:
-        self.prev_timestamp = constants.MIN_TIMESTAMP
-        self.prev_randomness = constants.MIN_RANDOMNESS
-
-    def resolve_randomness(
+    @override
+    def _on_overflow(
         self,
         timestamp: int,
         randomness_source: Callable[[int], bytes],
-        increment_bytes: Callable[[bytes], bytes],
     ) -> bytes:
-        if timestamp == self.prev_timestamp:
-            if self.prev_randomness == constants.MAX_RANDOMNESS:
-                randomness = randomness_source(timestamp)
-            else:
-                randomness = increment_bytes(self.prev_randomness)
-        else:
-            randomness = randomness_source(timestamp)
-
-        self.prev_randomness = randomness
-        self.prev_timestamp = timestamp
-        return randomness
+        return randomness_source(timestamp)
 
 
 class ULIDGenerator:
