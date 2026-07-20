@@ -9,6 +9,7 @@ from datetime import timezone
 from threading import Lock
 from typing import Any
 from typing import cast
+from typing import Protocol
 from typing import TYPE_CHECKING
 
 from ulid import base32
@@ -37,6 +38,103 @@ except ImportError:  # pragma: no cover
 __version__ = version("python-ulid")
 
 
+class MonotonicityPolicy(Protocol):
+    """Protocol defining the interface for monotonicity and randomness resolution policies."""
+
+    def resolve_randomness(
+        self,
+        timestamp: int,
+        randomness_source: Callable[[int], bytes],
+        increment_bytes: Callable[[bytes], bytes],
+    ) -> bytes:
+        """Resolve randomness for a given timestamp.
+
+        Args:
+            timestamp (int): The current timestamp in milliseconds.
+            randomness_source (Callable[[int], bytes]): A callable to get fresh random bytes.
+            increment_bytes (Callable[[bytes], bytes]): A callable to increment random bytes.
+
+        Returns:
+            bytes: The resolved randomness bytes (80 bits).
+        """
+        ...
+
+
+class StrictMonotonicPolicy:
+    """Strict monotonicity policy.
+
+    Always increments the randomness by 1 if generated within the same millisecond.
+    Raises ValueError on millisecond randomness exhaustion.
+    """
+
+    def __init__(self) -> None:
+        self.prev_timestamp = constants.MIN_TIMESTAMP
+        self.prev_randomness = constants.MIN_RANDOMNESS
+
+    def resolve_randomness(
+        self,
+        timestamp: int,
+        randomness_source: Callable[[int], bytes],
+        increment_bytes: Callable[[bytes], bytes],
+    ) -> bytes:
+        if timestamp == self.prev_timestamp:
+            if self.prev_randomness == constants.MAX_RANDOMNESS:
+                raise ValueError("Randomness within same millisecond exhausted")
+            randomness = increment_bytes(self.prev_randomness)
+        else:
+            randomness = randomness_source(timestamp)
+
+        self.prev_randomness = randomness
+        self.prev_timestamp = timestamp
+        return randomness
+
+
+class PureRandomPolicy:
+    """Pure random policy.
+
+    Always generates fresh randomness without enforcing any monotonicity constraints.
+    """
+
+    def resolve_randomness(
+        self,
+        timestamp: int,
+        randomness_source: Callable[[int], bytes],
+        increment_bytes: Callable[[bytes], bytes],  # noqa: ARG002
+    ) -> bytes:
+        return randomness_source(timestamp)
+
+
+class LaxMonotonicPolicy:
+    """Lax monotonicity policy.
+
+    Increments the randomness by 1 if generated within the same millisecond.
+    If the randomness overflows, it regenerates fresh randomness instead of raising
+    an error or sleeping.
+    """
+
+    def __init__(self) -> None:
+        self.prev_timestamp = constants.MIN_TIMESTAMP
+        self.prev_randomness = constants.MIN_RANDOMNESS
+
+    def resolve_randomness(
+        self,
+        timestamp: int,
+        randomness_source: Callable[[int], bytes],
+        increment_bytes: Callable[[bytes], bytes],
+    ) -> bytes:
+        if timestamp == self.prev_timestamp:
+            if self.prev_randomness == constants.MAX_RANDOMNESS:
+                randomness = randomness_source(timestamp)
+            else:
+                randomness = increment_bytes(self.prev_randomness)
+        else:
+            randomness = randomness_source(timestamp)
+
+        self.prev_randomness = randomness
+        self.prev_timestamp = timestamp
+        return randomness
+
+
 class ULIDGenerator:
     """Generator for creating universally unique lexicographically sortable identifiers (ULIDs).
 
@@ -48,12 +146,12 @@ class ULIDGenerator:
         self,
         clock: Callable[[], int] | None = None,
         randomness: Callable[[int], bytes] | None = None,
+        policy: MonotonicityPolicy | None = None,
     ) -> None:
         self.lock = Lock()
         self.clock = clock or self._default_clock
         self.randomness_source = randomness or self._default_randomness
-        self.prev_timestamp = constants.MIN_TIMESTAMP
-        self.prev_randomness = constants.MIN_RANDOMNESS
+        self.policy = policy or StrictMonotonicPolicy()
 
     @staticmethod
     def _default_clock() -> int:
@@ -90,15 +188,11 @@ class ULIDGenerator:
             ts_val = self.timestamp()
 
         with self.lock:
-            if ts_val == self.prev_timestamp:
-                if self.prev_randomness == constants.MAX_RANDOMNESS:
-                    raise ValueError("Randomness within same millisecond exhausted")
-                randomness = self.increment_bytes(self.prev_randomness)
-            else:
-                randomness = self.randomness_source(ts_val)
-
-            self.prev_randomness = randomness
-            self.prev_timestamp = ts_val
+            randomness = self.policy.resolve_randomness(
+                ts_val,
+                self.randomness_source,
+                self.increment_bytes,
+            )
 
         timestamp_bytes = int.to_bytes(ts_val, constants.TIMESTAMP_LEN, "big")
         return ULID.from_bytes(timestamp_bytes + randomness)

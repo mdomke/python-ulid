@@ -22,9 +22,12 @@ Welcome to the architectural domain reference for the `python-ulid` project. Thi
     *   Tracking state and enforcing **Monotonicity** rules.
     *   Guaranteeing thread-safe generation across execution contexts.
 
-### Monotonicity
-*   **Definition**: The deterministic ordering property where multiple ULID instances generated within the exact same millisecond increment their randomness component by $1$ to prevent sorting collisions.
-*   **Friction**: Under heavy concurrent execution, generating more identifiers than the 80-bit randomness field allows in a single millisecond will raise an overflow error.
+### Monotonicity & Policies
+*   **Definition**: The deterministic ordering property where multiple ULID instances generated within the exact same millisecond resolve their randomness component to prevent sorting collisions.
+*   **MonotonicityPolicy**: An extensible interface (seam) for configuring generator behavior:
+    *   **StrictMonotonicPolicy**: Always increments the randomness by 1 under same-millisecond collisions, raising an overflow error if randomness is exhausted.
+    *   **PureRandomPolicy**: Ignores previous states and always generates fresh random bytes, maximizing security and entropy.
+    *   **LaxMonotonicPolicy**: Increments monotonically, but on same-millisecond randomness exhaustion, regenerates fresh randomness instead of raising an error or sleeping.
 
 ### Base32 Engine
 *   **Definition**: Crockford's Base32 translation layer.

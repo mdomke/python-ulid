@@ -14,6 +14,9 @@ from pydantic import ValidationError
 
 from ulid import base32
 from ulid import constants
+from ulid import LaxMonotonicPolicy
+from ulid import PureRandomPolicy
+from ulid import StrictMonotonicPolicy
 from ulid import ULID
 from ulid import ULIDGenerator
 
@@ -104,18 +107,21 @@ def test_generator_state_isolation() -> None:
     g1 = ULIDGenerator()
     g2 = ULIDGenerator()
 
+    assert isinstance(g1.policy, StrictMonotonicPolicy)
+    assert isinstance(g2.policy, StrictMonotonicPolicy)
+
     # Initially, both states should be untouched
-    assert g1.prev_timestamp == constants.MIN_TIMESTAMP
-    assert g2.prev_timestamp == constants.MIN_TIMESTAMP
+    assert g1.policy.prev_timestamp == constants.MIN_TIMESTAMP
+    assert g2.policy.prev_timestamp == constants.MIN_TIMESTAMP
 
     # Generating with g1 should update g1's state, but g2 should remain untouched
     g1.generate()
-    assert g1.prev_timestamp != constants.MIN_TIMESTAMP
-    assert g2.prev_timestamp == constants.MIN_TIMESTAMP
+    assert g1.policy.prev_timestamp != constants.MIN_TIMESTAMP
+    assert g2.policy.prev_timestamp == constants.MIN_TIMESTAMP
 
     # Generating with g2 should update g2's state independently
     g2.generate()
-    assert g2.prev_timestamp != constants.MIN_TIMESTAMP
+    assert g2.policy.prev_timestamp != constants.MIN_TIMESTAMP
 
 
 def assert_sorted(seq: list[Any]) -> None:
@@ -432,3 +438,46 @@ def test_pydantic_protocol() -> None:
     assert {
         "type": "null",
     } in model_json_schema["properties"]["ulid"]["anyOf"]
+
+
+def test_pure_random_policy() -> None:
+    # Ensure PureRandomPolicy generates non-monotonic fresh randomness
+    custom_ts = 123456789
+    rand1 = b"1" * constants.RANDOMNESS_LEN
+    rand2 = b"2" * constants.RANDOMNESS_LEN
+    rands = [rand1, rand2]
+
+    # Iterator to return our mocks
+    iterator = iter(rands)
+    generator = ULIDGenerator(
+        clock=lambda: custom_ts,
+        randomness=lambda _: next(iterator),
+        policy=PureRandomPolicy(),
+    )
+
+    ulid1 = generator.generate()
+    ulid2 = generator.generate()
+
+    assert ulid1.bytes[constants.TIMESTAMP_LEN :] == rand1
+    assert ulid2.bytes[constants.TIMESTAMP_LEN :] == rand2
+
+
+def test_lax_monotonic_policy() -> None:
+    # Under LaxMonotonicPolicy, normal operations increase monotonically
+    custom_ts = 123456789
+    generator = ULIDGenerator(
+        clock=lambda: custom_ts,
+        policy=LaxMonotonicPolicy(),
+    )
+    ulid1 = generator.generate()
+    ulid2 = generator.generate()
+    assert ulid1 < ulid2
+
+    # Mocking same-millisecond overflow
+    # Set the state of the lax policy to MAX_RANDOMNESS
+    assert isinstance(generator.policy, LaxMonotonicPolicy)
+    generator.policy.prev_randomness = constants.MAX_RANDOMNESS
+
+    # Generating again should regenerate fresh randomness instead of raising ValueError or sleeping
+    ulid3 = generator.generate()
+    assert ulid3 is not None
