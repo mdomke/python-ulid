@@ -12,9 +12,14 @@ from freezegun import freeze_time
 from pydantic import BaseModel
 from pydantic import ValidationError
 
+import ulid as ulid_pkg
 from ulid import base32
 from ulid import constants
+from ulid import LaxMonotonicPolicy
+from ulid import PureRandomPolicy
+from ulid import StrictMonotonicPolicy
 from ulid import ULID
+from ulid import ULIDGenerator
 
 
 def utcnow() -> datetime:
@@ -80,10 +85,44 @@ def test_z_real_time_monotonic_sorting() -> None:
 
 @freeze_time()
 def test_same_millisecond_overflow() -> None:
-    ULID.provider.prev_timestamp = ULID.provider.timestamp()
-    ULID.provider.prev_randomness = constants.MAX_RANDOMNESS
+    generator = ULIDGenerator(randomness=lambda _: constants.MAX_RANDOMNESS)
+    generator.generate()
     with pytest.raises(ValueError, match="Randomness within same millisecond exhausted"):
-        ULID()
+        generator.generate()
+
+
+def test_generator_custom_clock_and_randomness() -> None:
+    custom_ts = 123456789
+    custom_rand = b"1234567890"
+    generator = ULIDGenerator(
+        clock=lambda: custom_ts,
+        randomness=lambda _: custom_rand,
+    )
+    ulid = generator.generate()
+    assert ulid.milliseconds == custom_ts
+    assert ulid.bytes[constants.TIMESTAMP_LEN :] == custom_rand
+
+
+def test_generator_state_isolation() -> None:
+    # Ensure two generators do not share state
+    g1 = ULIDGenerator()
+    g2 = ULIDGenerator()
+
+    assert isinstance(g1.policy, StrictMonotonicPolicy)
+    assert isinstance(g2.policy, StrictMonotonicPolicy)
+
+    # Initially, both states should be untouched
+    assert g1.policy.prev_timestamp == constants.MIN_TIMESTAMP
+    assert g2.policy.prev_timestamp == constants.MIN_TIMESTAMP
+
+    # Generating with g1 should update g1's state, but g2 should remain untouched
+    g1.generate()
+    assert g1.policy.prev_timestamp != constants.MIN_TIMESTAMP
+    assert g2.policy.prev_timestamp == constants.MIN_TIMESTAMP
+
+    # Generating with g2 should update g2's state independently
+    g2.generate()
+    assert g2.policy.prev_timestamp != constants.MIN_TIMESTAMP
 
 
 def assert_sorted(seq: list[Any]) -> None:
@@ -400,3 +439,72 @@ def test_pydantic_protocol() -> None:
     assert {
         "type": "null",
     } in model_json_schema["properties"]["ulid"]["anyOf"]
+
+
+def test_pure_random_policy() -> None:
+    # Ensure PureRandomPolicy generates non-monotonic fresh randomness
+    custom_ts = 123456789
+    rand1 = b"1" * constants.RANDOMNESS_LEN
+    rand2 = b"2" * constants.RANDOMNESS_LEN
+    rands = [rand1, rand2]
+
+    # Iterator to return our mocks
+    iterator = iter(rands)
+    generator = ULIDGenerator(
+        clock=lambda: custom_ts,
+        randomness=lambda _: next(iterator),
+        policy=PureRandomPolicy(),
+    )
+
+    ulid1 = generator.generate()
+    ulid2 = generator.generate()
+
+    assert ulid1.bytes[constants.TIMESTAMP_LEN :] == rand1
+    assert ulid2.bytes[constants.TIMESTAMP_LEN :] == rand2
+
+
+def test_lax_monotonic_policy() -> None:
+    # Under LaxMonotonicPolicy, normal operations increase monotonically
+    custom_ts = 123456789
+    generator = ULIDGenerator(
+        clock=lambda: custom_ts,
+        policy=LaxMonotonicPolicy(),
+    )
+    ulid1 = generator.generate()
+    ulid2 = generator.generate()
+    assert ulid1 < ulid2
+
+    # Mocking same-millisecond overflow
+    # Set the state of the lax policy to MAX_RANDOMNESS
+    assert isinstance(generator.policy, LaxMonotonicPolicy)
+    generator.policy.prev_randomness = constants.MAX_RANDOMNESS
+
+    # Generating again should regenerate fresh randomness instead of raising ValueError or sleeping
+    ulid3 = generator.generate()
+    assert isinstance(ulid3, ULID)
+
+
+def test_default_generator_is_strict() -> None:
+    # The default generator is public and enforces strict monotonicity out of the box
+    assert isinstance(ulid_pkg.default_generator, ULIDGenerator)
+    assert isinstance(ulid_pkg.default_generator.policy, StrictMonotonicPolicy)
+
+
+def test_default_generator_swappable(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reassigning default_generator routes ULID() and the from_* constructors through it.
+    # monkeypatch restores the original default at teardown, keeping tests isolated.
+    custom_ts = 123456789
+    custom_rand = b"1234567890"
+    custom = ULIDGenerator(clock=lambda: custom_ts, randomness=lambda _: custom_rand)
+    monkeypatch.setattr(ulid_pkg, "default_generator", custom)
+
+    # ULID() draws both timestamp (via the clock) and randomness from the swapped generator
+    now_ulid = ULID()
+    assert now_ulid.milliseconds == custom_ts
+    assert now_ulid.bytes[constants.TIMESTAMP_LEN :] == custom_rand
+
+    # Explicit-timestamp constructors keep their own timestamp but still draw randomness
+    # from the swapped generator (each distinct timestamp yields fresh randomness).
+    assert ULID.from_timestamp(1000).bytes[constants.TIMESTAMP_LEN :] == custom_rand
+    assert ULID.from_datetime(utcnow()).bytes[constants.TIMESTAMP_LEN :] == custom_rand
+    assert ULID.parse(2000).bytes[constants.TIMESTAMP_LEN :] == custom_rand

@@ -165,6 +165,64 @@ timestamp, then :math:`r_2 = r_1 + 1`.
 
 .. monotonic-end
 
+.. generators-begin
+
+Generators and policies
+-----------------------
+
+Every ``ULID`` is produced by a ``ULIDGenerator``, which samples a clock for the timestamp,
+sources entropy for the randomness, and enforces a *monotonicity policy*. The bare ``ULID()``
+constructor and the ``ULID.from_*`` factory methods delegate to a shared module-level
+``default_generator``.
+
+For most use cases the default is all you need. To customize generation — a different clock, a
+custom entropy source, or another monotonicity policy — create your own ``ULIDGenerator`` and
+call ``generate()``
+
+.. code-block:: pycon
+
+   >>> from ulid import ULIDGenerator
+   >>> generator = ULIDGenerator()
+   >>> generator.generate()
+   ULID(01HB0N8Q4RCE7YB1M2VZK9WX3T)
+
+Choosing a monotonicity policy
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A policy decides how the randomness is resolved when multiple ULIDs are generated within the same
+millisecond. Three policies are available:
+
+* ``StrictMonotonicPolicy`` *(default)* — increments the randomness by 1 on a same-millisecond
+  collision and raises ``ValueError`` if the randomness is exhausted. This is the behaviour
+  described under `Monotonic Support`_.
+* ``LaxMonotonicPolicy`` — increments like the strict policy, but regenerates fresh randomness
+  instead of raising when the randomness is exhausted.
+* ``PureRandomPolicy`` — ignores previous state and always draws fresh randomness, maximizing
+  entropy at the cost of same-millisecond sort order.
+
+.. code-block:: pycon
+
+   >>> from ulid import ULIDGenerator, PureRandomPolicy
+   >>> generator = ULIDGenerator(policy=PureRandomPolicy())
+   >>> generator.generate()
+   ULID(01HB0N9F3TA5KDQ6ZE0WYV7MRC)
+
+Overriding the default generator
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To make ``ULID()`` and the ``ULID.from_*`` constructors use a custom generator globally, reassign
+``ulid.default_generator``
+
+.. code-block:: pycon
+
+   >>> import ulid
+   >>> from ulid import ULID, ULIDGenerator, LaxMonotonicPolicy
+   >>> ulid.default_generator = ULIDGenerator(policy=LaxMonotonicPolicy())
+   >>> ULID()  # now generated with the lax policy
+   ULID(01HB0NB7X2M4C8VKQ0ZF5WD9RA)
+
+.. generators-end
+
 .. cli-begin
 
 Command line interface
