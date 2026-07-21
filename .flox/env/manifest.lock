@@ -8,7 +8,7 @@
       }
     },
     "hook": {
-      "on-activate": "  uv python install 3.14\n\n  export PATH=\"$FLOX_ENV_PROJECT/.flox/bin:$PATH\"\n  export PYTHON_DIR=\"$FLOX_ENV_PROJECT/.venv\"\n  if [ ! -d \"${PYTHON_DIR}\" ]; then\n    echo \"Creating python virtual environment in ${PYTHON_DIR}\"\n    uv venv \"${PYTHON_DIR}\"\n  fi\n\n  # Quietly activate venv and install packages in a subshell so\n  # that the venv can be freshly activated in the profile section.\n  (\n    source \"${PYTHON_DIR}/bin/activate\"\n    uv sync --active\n\n    if [ ! -e \"${FLOX_ENV_PROJECT}/.git/hooks/pre-commit\" ]; then\n      prek install\n    fi\n  )\n"
+      "on-activate": "  uv python install 3.14\n\n  export PATH=\"$FLOX_ENV_PROJECT/.flox/bin:$PATH\"\n  export PYTHON_DIR=\"$FLOX_ENV_PROJECT/.venv\"\n  if [ ! -d \"${PYTHON_DIR}\" ]; then\n    echo \"Creating python virtual environment in ${PYTHON_DIR}\"\n    uv venv \"${PYTHON_DIR}\"\n  fi\n\n  # Quietly activate venv and install packages in a subshell so\n  # that the venv can be freshly activated in the profile section.\n  (\n    source \"${PYTHON_DIR}/bin/activate\"\n    uv sync --active --all-extras --all-groups\n\n    if [ ! -e \"${FLOX_ENV_PROJECT}/.git/hooks/pre-commit\" ]; then\n      prek install\n    fi\n  )\n"
     },
     "profile": {
       "bash": "  export PATH=\"$FLOX_ENV_PROJECT/.flox/bin:$PATH\"\n  source \"${PYTHON_DIR}/bin/activate\"\n  echo \"✅ Activated Python virtual environment\" >&2\n",

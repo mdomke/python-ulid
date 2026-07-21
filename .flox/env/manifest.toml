@@ -38,7 +38,7 @@ on-activate = """
   # that the venv can be freshly activated in the profile section.
   (
     source "${PYTHON_DIR}/bin/activate"
-    uv sync --active
+    uv sync --active --all-extras --all-groups
 
     if [ ! -e "${FLOX_ENV_PROJECT}/.git/hooks/pre-commit" ]; then
       prek install
