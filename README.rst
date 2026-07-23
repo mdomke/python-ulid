@@ -24,8 +24,8 @@
       <a href="https://python-ulid.readthedocs.io">
          <img src="https://readthedocs.org/projects/python-ulid/badge/?version=latest&style=flat-square" />
       </a>
-      <a href="https://black.readthedocs.io/en/stable/index.html">
-         <img src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square" />
+      <a href="https://github.com/astral-sh/ruff">
+         <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json&style=flat-square" />
       </a>
    </p>
 
