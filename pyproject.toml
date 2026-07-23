@@ -112,12 +112,13 @@ preset = "strict"
 project-excludes = ["docs"]
 
 [tool.poe.tasks]
-test = "uv run --extra pydantic coverage run -m pytest"
-check-code = "ruff check"
-check-fmt = "ruff format --check"
+test = "uv run --extra pydantic pytest --cov --cov-report=term-missing"
+check-code = "uv run ruff check"
+check-fmt = "uv run ruff format --check"
 check-types = "uv run --extra pydantic pyrefly check"
-check-docs = "doc8 docs/source"
-fmt = "ruff format"
+check-docs = "uv run doc8 docs/source"
+fmt = "uv run ruff format"
+fix = "uv run ruff check --fix"
 build = "uv build"
 cov-combine = "coverage combine"
 cov-xml = "coverage xml"
@@ -152,6 +153,7 @@ dev = [
     "prek==0.4.*",
     "pyrefly==1.1.*",
     "pytest==9.1.*",
+    "pytest-cov==7.1.*",
     "ruff==0.15.*",
 ]
 doc = [
