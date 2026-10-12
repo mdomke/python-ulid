@@ -177,6 +177,12 @@ def test_idempotency() -> None:
     assert ULID.parse(ulid.bytes) == ulid
 
 
+def test_from_str_is_case_insensitive() -> None:
+    ulid = ULID()
+    assert ULID.from_str(str(ulid).lower()) == ulid
+    assert ULID.parse(str(ulid).lower()) == ulid
+
+
 def test_to_uuid4() -> None:
     ulid = ULID()
     uuid = ulid.to_uuid4()
@@ -350,6 +356,7 @@ Params = bytes | str | int | float
         (ULID.from_str, "not-enough"),  # invalid length
         (ULID.from_str, 123),  # inavlid type
         (ULID.from_str, "notavalidulidnotavalidulid"),  # invalid alphabet
+        (ULID.from_str, "0" * 25 + "u"),  # excluded letter in lower case
         (ULID.from_str, "Z" * 26),  # invalid timestamp
         (ULID.from_int, "not-an-int"),  # invalid type
         (ULID.from_uuid, "not-a-uuid"),  # invalid type
