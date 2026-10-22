@@ -5,6 +5,14 @@ Changelog
 
 Versions follow `Semantic Versioning <http://www.semver.org>`_
 
+Unreleased
+----------
+
+Fixed
+~~~~~
+* Print generated and converted values when using ``python -m ulid``, matching the
+  ``ulid`` console command.
+
 `4.0.1`_ - 2026-07-20
 ---------------------
 Changed
