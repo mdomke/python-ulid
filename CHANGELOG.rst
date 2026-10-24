@@ -12,6 +12,8 @@ Fixed
 ~~~~~
 * Print generated and converted values when using ``python -m ulid``, matching the
   ``ulid`` console command.
+* Build distributions with core metadata 2.4, keeping them compatible with the
+  package validation tools used in CI.
 
 `4.0.1`_ - 2026-07-20
 ---------------------
