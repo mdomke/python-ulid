@@ -4,7 +4,7 @@ import uuid
 from collections.abc import Callable
 from datetime import datetime
 from datetime import timedelta
-from datetime import timezone
+from datetime import UTC
 from typing import Any
 
 import pytest
@@ -23,7 +23,7 @@ from ulid import ULIDGenerator
 
 
 def utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def datetimes_almost_equal(a: datetime, b: datetime) -> None:
@@ -389,7 +389,7 @@ def test_ulid_min_input(constructor: Callable[[Params], ULID], value: Params) ->
     [
         (ULID, b"\xff" * 16),
         (ULID.from_timestamp, 281474976710655),
-        (ULID.from_datetime, datetime.max.replace(tzinfo=timezone.utc)),
+        (ULID.from_datetime, datetime.max.replace(tzinfo=UTC)),
         (ULID.from_bytes, b"\xff" * 16),
         (ULID.from_str, "7" + "Z" * 25),
         (ULID.from_hex, "f" * 32),

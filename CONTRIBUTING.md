@@ -33,7 +33,7 @@ If you have [Flox](https://flox.dev/) installed, setting up your environment is 
 If Flox is not an option, you can set up your environment manually. We use [uv](https://github.com/astral-sh/uv) for fast, robust package and dependency management.
 
 1. **Prerequisites**:
-   - **Python**: `>= 3.10`
+   - **Python**: `>= 3.11`
    - **uv**: Install via `curl -LsSf https://astral.sh/uv/install.sh | sh` (or your preferred package manager)
 
 2. **Fork and clone** the repository:

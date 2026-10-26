@@ -7,7 +7,8 @@ import time
 import uuid
 from collections.abc import Callable
 from datetime import datetime
-from datetime import timezone
+from datetime import UTC
+from importlib.metadata import version
 from threading import Lock
 from typing import Any
 from typing import cast
@@ -25,21 +26,11 @@ from ulid import constants
 
 
 if TYPE_CHECKING:  # pragma: no cover
-    import sys
+    from typing import Self
 
     from pydantic import GetCoreSchemaHandler
     from pydantic import ValidatorFunctionWrapHandler
     from pydantic_core import CoreSchema
-
-    if sys.version_info >= (3, 11):
-        from typing import Self
-    else:
-        from typing_extensions import Self
-
-try:
-    from importlib.metadata import version
-except ImportError:  # pragma: no cover
-    from importlib_metadata import version  # type: ignore
 
 
 __version__ = version("python-ulid")
@@ -413,7 +404,7 @@ class ULID:
             >>> ulid.datetime
             datetime.datetime(2020, 4, 30, 14, 33, 27, 560000, tzinfo=datetime.timezone.utc)
         """
-        return datetime.fromtimestamp(self.timestamp, timezone.utc)
+        return datetime.fromtimestamp(self.timestamp, UTC)
 
     @functools.cached_property
     def hex(self) -> str:

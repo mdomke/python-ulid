@@ -7,8 +7,14 @@ Versions follow `Semantic Versioning <http://www.semver.org>`_
 
 `Unreleased`_
 -------------
+Changed
+~~~~~~~
+* Dropped support for Python 3.10.
+
 Fixed
 ~~~~~
+* The ``typing-extensions`` dependency is now also installed on Python 3.11, where it is required
+  for ``typing_extensions.override``.
 * :meth:`.ULID.from_str` accepts lower case strings again, as the ULID spec defines the string
   representation as case insensitive. Lower case input has been rejected since 2.6.0.
 
