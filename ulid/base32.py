@@ -7,6 +7,8 @@ from ulid import constants
 # https://github.com/RobThree/NUlid/blob/89f5a9fc827d191ae5adafe42547575ed3a47723/NUlid/Ulid.cs#L168
 
 ENCODE: str = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
+# The ULID spec defines the string representation as case insensitive.
+DECODE_ALPHABET: str = ENCODE + ENCODE.lower()
 DECODE: Sequence[int] = [
     0xFF,
     0xFF,
@@ -194,7 +196,7 @@ def encode_randomness(binary: bytes) -> str:
 def decode(encoded: str) -> bytes:
     if len(encoded) != constants.REPR_LEN:
         raise ValueError("Encoded ULID has to be exactly 26 characters long.")
-    if any((c not in ENCODE) for c in encoded):
+    if any((c not in DECODE_ALPHABET) for c in encoded):
         raise ValueError(f"Encoded ULID can only consist of letters in {ENCODE}.")
     return decode_timestamp(encoded[: constants.TIMESTAMP_REPR_LEN]) + decode_randomness(
         encoded[constants.TIMESTAMP_REPR_LEN :]
