@@ -5,15 +5,18 @@ Changelog
 
 Versions follow `Semantic Versioning <http://www.semver.org>`_
 
-Unreleased
-----------
+_`Unreleased`_
+--------------
+Changed
+~~~~~~~
+* Dropped support for Python 3.10.
 
 Fixed
 ~~~~~
+* The ``typing-extensions`` dependency is now also installed on Python 3.11, where it is required
+  for ``typing_extensions.override``.
 * Print generated and converted values when using ``python -m ulid``, matching the
   ``ulid`` console command.
-* Build distributions with core metadata 2.4, keeping them compatible with the
-  package validation tools used in CI.
 
 `4.0.1`_ - 2026-07-20
 ---------------------
@@ -275,6 +278,7 @@ Changed
 * The package now has no external dependencies.
 * The test-coverage has been raised to 100%.
 
+.. _Unreleased: https://github.com/mdomke/python-ulid/compare/4.0.1...main
 .. _4.0.1: https://github.com/mdomke/python-ulid/compare/4.0.0...4.0.1
 .. _4.0.0: https://github.com/mdomke/python-ulid/compare/3.2.1...4.0.0
 .. _3.2.1: https://github.com/mdomke/python-ulid/compare/3.2.0...3.2.1

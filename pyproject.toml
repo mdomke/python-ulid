@@ -7,7 +7,7 @@ name = "python-ulid"
 description = "Universally unique lexicographically sortable identifier"
 dynamic = ["version", "readme"]
 license = "MIT"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [
     { name = "Martin Domke", email = "mail@martindomke.net" },
 ]
@@ -19,7 +19,6 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS :: MacOS X",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -27,7 +26,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
 ]
 dependencies = [
-    "typing-extensions; python_version < '3.11'",
+    "typing-extensions; python_version < '3.12'",
 ]
 
 [project.urls]
@@ -62,7 +61,7 @@ exclude = [
 
 [tool.ruff]
 extend = ".ruff_defaults.toml"
-target-version = "py310"
+target-version = "py311"
 line-length = 100
 
 [tool.ruff.format]
