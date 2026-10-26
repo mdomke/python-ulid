@@ -5,8 +5,8 @@ Changelog
 
 Versions follow `Semantic Versioning <http://www.semver.org>`_
 
-_`Unreleased`_
---------------
+`Unreleased`_
+-------------
 Changed
 ~~~~~~~
 * Dropped support for Python 3.10.
@@ -17,6 +17,8 @@ Fixed
   for ``typing_extensions.override``.
 * Print generated and converted values when using ``python -m ulid``, matching the
   ``ulid`` console command.
+* :meth:`.ULID.from_str` accepts lower case strings again, as the ULID spec defines the string
+  representation as case insensitive. Lower case input has been rejected since 2.6.0.
 
 `4.0.1`_ - 2026-07-20
 ---------------------
@@ -278,7 +280,7 @@ Changed
 * The package now has no external dependencies.
 * The test-coverage has been raised to 100%.
 
-.. _Unreleased: https://github.com/mdomke/python-ulid/compare/4.0.1...main
+.. _Unreleased: https://github.com/mdomke/python-ulid/compare/4.0.1...HEAD
 .. _4.0.1: https://github.com/mdomke/python-ulid/compare/4.0.0...4.0.1
 .. _4.0.0: https://github.com/mdomke/python-ulid/compare/3.2.1...4.0.0
 .. _3.2.1: https://github.com/mdomke/python-ulid/compare/3.2.0...3.2.1
