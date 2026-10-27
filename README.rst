@@ -22,7 +22,7 @@
          <img src="https://img.shields.io/github/actions/workflow/status/mdomke/python-ulid/lint-and-test.yml?style=flat-square&brach=main" />
       </a>
       <a href="https://python-ulid.readthedocs.io">
-         <img src="https://readthedocs.org/projects/python-ulid/badge/?version=latest&style=flat-square" />
+         <img src="https://app.readthedocs.org/projects/python-ulid/badge/?version=latest&style=flat-square" />
       </a>
       <a href="https://github.com/astral-sh/ruff">
          <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json&style=flat-square" />
