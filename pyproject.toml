@@ -49,12 +49,10 @@ ulid = "ulid.__main__:entrypoint"
 source = "vcs"
 
 [tool.hatch.build.targets.wheel]
-core-metadata-version = "2.4"
 packages = [
     "ulid",
 ]
 [tool.hatch.build.targets.sdist]
-core-metadata-version = "2.4"
 exclude = [
     ".flox",
 ]
