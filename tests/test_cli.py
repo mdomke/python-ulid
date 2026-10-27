@@ -33,7 +33,7 @@ def test_parse_show(option: str):
         assert ulid.hex in output
         assert str(int(ulid)) in output
         assert str(ulid.timestamp) in output
-        assert str(ulid.datetime.isoformat()) in output
+        assert ulid.datetime.isoformat() in output
 
 
 @pytest.mark.parametrize(

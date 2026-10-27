@@ -45,7 +45,11 @@ def make_parser(prog: str | None = None) -> argparse.ArgumentParser:
             width=min(shutil.get_terminal_size().columns - 2, 127),
         ),
     )
-    parser.set_defaults(func=lambda _: parser.print_help())
+
+    def help(*_args: Any) -> None:
+        parser.print_help()
+
+    parser.set_defaults(func=help)
     parser.add_argument("--version", "-V", action="version", version=ulid.__version__)
 
     subparsers = parser.add_subparsers(title="subcommands")

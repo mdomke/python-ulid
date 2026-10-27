@@ -146,18 +146,18 @@ max-line-length = 100
 
 [dependency-groups]
 dev = [
-    "coverage==7.15.*",
+    "coverage==7.17.*",
     "freezegun==1.5.*",
-    "poethepoet==0.48.*",
-    "prek==0.4.*",
-    "pyrefly==1.1.*",
+    "poethepoet==0.49.*",
+    "prek==0.5.*",
+    "pyrefly==1.4.*",
     "pytest==9.1.*",
     "pytest-cov==7.1.*",
-    "ruff==0.15.*",
+    "ruff==0.17.*",
 ]
 doc = [
     "doc8>=2.0.0",
-    "sphinx==8.1.*",
+    "sphinx<9.0",
 ]
 
 [tool.hatch.metadata.hooks.fancy-pypi-readme]
