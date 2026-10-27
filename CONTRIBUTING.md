@@ -110,8 +110,7 @@ To maintain a clean, readable, and highly maintainable codebase, we enforce the 
 - **Static Analysis**: Our configuration has `disallow_untyped_defs = true` set for Mypy and uses strict `pyrefly` checks. Untyped or partially-typed code will fail the lint pipelines.
 - **Example**:
   ```python
-  def generate_ulid(timestamp: float | None = None) -> ULID:
-      ...
+  def generate_ulid(timestamp: float | None = None) -> ULID: ...
   ```
 
 ### 2. Ruff Formatting & Linting
