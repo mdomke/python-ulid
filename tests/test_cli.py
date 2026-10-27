@@ -1,3 +1,6 @@
+import subprocess
+import sys
+
 import pytest
 
 import ulid.__main__ as cli
@@ -79,3 +82,49 @@ def test_build(option: str):
     ulid_out = ULID.from_str(output)
     if includes_timestamp:
         assert ulid_out.datetime == ulid.datetime
+
+
+@pytest.mark.parametrize(
+    ("args", "stdin", "expected"),
+    [
+        (["build", "--from-int", "0"], None, "00000000000000000000000000\n"),
+        (["build", "--from-int", "-"], "0\n", "00000000000000000000000000\n"),
+        (["show", "--int", "00000000000000000000000000"], None, "0\n"),
+        (["show", "--int", "-"], "00000000000000000000000000\n", "0\n"),
+    ],
+)
+def test_module_outputs_result(args: list[str], stdin: str | None, expected: str) -> None:
+    result = subprocess.run(
+        [sys.executable, "-m", "ulid", *args],
+        input=stdin,
+        capture_output=True,
+        text=True,
+        check=True,
+        timeout=10,
+    )
+    assert result.stdout == expected
+    assert result.stderr == ""
+
+
+@pytest.mark.parametrize("args", [[], ["--help"]])
+def test_module_help(args: list[str]) -> None:
+    result = subprocess.run(
+        [sys.executable, "-m", "ulid", *args],
+        capture_output=True,
+        text=True,
+        check=True,
+        timeout=10,
+    )
+    assert result.stdout.startswith("usage: python -m ulid")
+    assert not result.stdout.endswith("None\n")
+    assert result.stderr == ""
+
+
+def test_console_entrypoint(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(sys, "argv", ["ulid", "build", "--from-int", "0"])
+    cli.entrypoint()
+    captured = capsys.readouterr()
+    assert captured.out == "00000000000000000000000000\n"
+    assert captured.err == ""

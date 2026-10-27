@@ -163,10 +163,10 @@ def show(args: argparse.Namespace) -> str:
     ).strip()
 
 
-def entrypoint() -> None:  # pragma: no cover
-    if (value := main(sys.argv[1:])) is not None:
+def entrypoint(prog: str | None = None) -> None:  # pragma: no cover
+    if (value := main(sys.argv[1:], prog)) is not None:
         print(value)  # noqa: T201
 
 
 if __name__ == "__main__":  # pragma: no cover
-    main(sys.argv[1:], "python -m ulid")
+    entrypoint("python -m ulid")

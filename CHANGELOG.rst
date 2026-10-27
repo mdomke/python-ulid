@@ -15,6 +15,8 @@ Fixed
 ~~~~~
 * The ``typing-extensions`` dependency is now also installed on Python 3.11, where it is required
   for ``typing_extensions.override``.
+* Print generated and converted values when using ``python -m ulid``, matching the
+  ``ulid`` console command.
 * :meth:`.ULID.from_str` accepts lower case strings again, as the ULID spec defines the string
   representation as case insensitive. Lower case input has been rejected since 2.6.0.
 
