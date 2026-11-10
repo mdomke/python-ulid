@@ -65,13 +65,16 @@ class BaseMonotonicPolicy(abc.ABC):
     def __init__(self) -> None:
         self.prev_timestamp = constants.MIN_TIMESTAMP
         self.prev_randomness = constants.MIN_RANDOMNESS
+        self._initialized = False
 
     def resolve_randomness(
         self,
         timestamp: int,
         randomness_source: RandomnessSource,
     ) -> bytes:
-        if timestamp == self.prev_timestamp:
+        # Subclasses that initialize the existing public state without super()
+        # keep treating that state as seeded, as they did before this marker existed.
+        if getattr(self, "_initialized", True) and timestamp == self.prev_timestamp:
             if self.prev_randomness == constants.MAX_RANDOMNESS:
                 randomness = self._on_overflow(timestamp, randomness_source)
             else:
@@ -81,6 +84,7 @@ class BaseMonotonicPolicy(abc.ABC):
 
         self.prev_randomness = randomness
         self.prev_timestamp = timestamp
+        self._initialized = True
         return randomness
 
     @staticmethod

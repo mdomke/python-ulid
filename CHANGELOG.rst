@@ -8,6 +8,12 @@ Versions follow `Semantic Versioning <http://www.semver.org>`_
 `Unreleased`_
 -------------
 
+Fixed
+~~~~~
+* Draw fresh randomness for the first identifier at timestamp zero with
+  :class:`.StrictMonotonicPolicy` and :class:`.LaxMonotonicPolicy`, instead of treating the initial
+  state as an existing epoch identifier.
+
 `4.1.0`_ - 2026-10-27
 ---------------------
 Changed
