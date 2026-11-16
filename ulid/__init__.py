@@ -8,7 +8,6 @@ import uuid
 from collections.abc import Callable
 from datetime import datetime
 from datetime import UTC
-from importlib.metadata import version
 from threading import Lock
 from typing import Any
 from typing import cast
@@ -21,6 +20,7 @@ try:
 except ImportError:
     from typing_extensions import override  # type: ignore
 
+from ulid import _version
 from ulid import base32
 from ulid import constants
 
@@ -33,7 +33,9 @@ if TYPE_CHECKING:  # pragma: no cover
     from pydantic_core import CoreSchema
 
 
-__version__ = version("python-ulid")
+# Generated at build time so that the version is available even without package metadata,
+# e.g. in applications frozen with cx_Freeze or PyInstaller.
+__version__ = _version.__version__
 
 
 RandomnessSource = Callable[[int], bytes]

@@ -52,6 +52,9 @@ ulid = "ulid.__main__:entrypoint"
 [tool.hatch.version]
 source = "vcs"
 
+[tool.hatch.build.hooks.vcs]
+version-file = "ulid/_version.py"
+
 [tool.hatch.build.targets.wheel]
 packages = [
     "ulid",

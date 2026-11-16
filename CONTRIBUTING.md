@@ -99,6 +99,16 @@ If you want to run all checks against your staged or unstaged files manually:
   uv run prek run --all-files
   ```
 
+### Troubleshooting: `cannot import name '_version' from 'ulid'`
+
+The package version is written to `ulid/_version.py` when the package is built or installed, and the
+file is not tracked by Git. If it is missing (e.g. after `git clean -X`), `import ulid` fails. Reinstall
+the package into your environment to regenerate it:
+
+```bash
+uv sync --reinstall-package python-ulid
+```
+
 ---
 
 ## 🎨 Coding Standards
