@@ -12,6 +12,8 @@ Fixed
 ~~~~~
 * :meth:`.ULID.from_datetime` and :meth:`.ULID.from_timestamp` no longer land one millisecond early
   when a value on an exact millisecond multiplies to just below that integer as a float.
+* :meth:`.ULID.from_datetime` and :meth:`.ULID.from_timestamp` raise a :exc:`ValueError` for values
+  before the Unix epoch instead of a bare :exc:`OverflowError`.
 
 `4.1.0`_ - 2026-10-27
 ---------------------

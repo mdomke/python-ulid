@@ -355,6 +355,23 @@ def test_ulid_from_timestamp_overflow() -> None:
         ULID.from_timestamp(constants.MAX_TIMESTAMP + 1)
 
 
+@pytest.mark.parametrize("value", [-1, -1.0, -0.001])
+def test_ulid_from_timestamp_underflow(value: float) -> None:
+    with pytest.raises(ValueError, match="Value is below minimum possible timestamp"):
+        ULID.from_timestamp(value)
+
+
+def test_ulid_from_datetime_before_epoch() -> None:
+    with pytest.raises(ValueError, match="Value is below minimum possible timestamp"):
+        ULID.from_datetime(datetime(1969, 7, 20, tzinfo=UTC))
+
+
+def test_generator_rejects_negative_clock() -> None:
+    generator = ULIDGenerator(clock=lambda: -1)
+    with pytest.raises(ValueError, match="Value is below minimum possible timestamp"):
+        generator.generate()
+
+
 Params = bytes | str | int | float
 
 
