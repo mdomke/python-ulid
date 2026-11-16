@@ -8,6 +8,10 @@ Versions follow `Semantic Versioning <http://www.semver.org>`_
 `Unreleased`_
 -------------
 
+Added
+~~~~~
+* Added support for Python 3.15.
+
 Fixed
 ~~~~~
 * :meth:`.ULID.from_datetime` and :meth:`.ULID.from_timestamp` no longer land one millisecond early
