@@ -337,6 +337,19 @@ def test_ulid_from_timestamp() -> None:
     assert ulid1.timestamp == ulid2.timestamp
 
 
+@pytest.mark.parametrize("milliseconds", [1078625331860, 1097375394952])
+def test_ulid_from_exact_milliseconds(milliseconds: int) -> None:
+    # Both values multiply back to just below the integer: x.860 * 1000 == x859.9999...
+    seconds = milliseconds / constants.MILLISECS_IN_SECS
+    assert ULID.from_timestamp(seconds).milliseconds == milliseconds
+    assert ULID.from_datetime(datetime.fromtimestamp(seconds, UTC)).milliseconds == milliseconds
+
+
+def test_ulid_timestamp_keeps_truncating_sub_milliseconds() -> None:
+    expected = 1000999
+    assert ULID.from_timestamp(1000.9999).milliseconds == expected
+
+
 def test_ulid_from_timestamp_overflow() -> None:
     with pytest.raises(ValueError, match="Value exceeds maximum possible timestamp"):
         ULID.from_timestamp(constants.MAX_TIMESTAMP + 1)

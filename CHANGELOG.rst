@@ -13,6 +13,8 @@ Fixed
 * Draw fresh randomness for the first identifier at timestamp zero with
   :class:`.StrictMonotonicPolicy` and :class:`.LaxMonotonicPolicy`, instead of treating the initial
   state as an existing epoch identifier.
+* :meth:`.ULID.from_datetime` and :meth:`.ULID.from_timestamp` no longer land one millisecond early
+  when a value on an exact millisecond multiplies to just below that integer as a float.
 
 `4.1.0`_ - 2026-10-27
 ---------------------
