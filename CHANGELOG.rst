@@ -11,6 +11,9 @@ Versions follow `Semantic Versioning <http://www.semver.org>`_
 Added
 ~~~~~
 * Added support for Python 3.15.
+* :class:`~ulid.sqlalchemy.ULIDType`, a SQLAlchemy column type for :class:`.ULID` values that can
+  also be used with SQLModel. It stores values as UUID by default, or as binary or string. Install
+  it with the new ``sqlalchemy`` extra (``pip install python-ulid[sqlalchemy]``).
 
 Fixed
 ~~~~~
