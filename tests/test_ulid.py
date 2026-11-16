@@ -471,6 +471,33 @@ def test_ulid_max_input(constructor: Callable[[Params], ULID], value: Params) ->
     constructor(value)
 
 
+@pytest.mark.parametrize(
+    "value",
+    [
+        "x" * constants.BYTES_LEN,
+        bytearray(constants.BYTES_LEN),
+        memoryview(b"\x00" * constants.BYTES_LEN),
+        123,
+    ],
+)
+def test_ulid_constructor_rejects_non_bytes(value: object) -> None:
+    with pytest.raises(TypeError, match="Value has to be of type bytes"):
+        ULID(value)  # type: ignore[arg-type]
+
+
+def test_ulid_constructor_accepts_bytes() -> None:
+    raw = bytes(range(constants.BYTES_LEN))
+    ulid = ULID(raw)
+    assert ulid.bytes == raw
+    assert ulid == ULID.from_bytes(raw)
+    assert hash(ulid) == hash(ULID.from_bytes(raw))
+
+
+def test_ulid_constructor_rejects_wrong_length() -> None:
+    with pytest.raises(ValueError, match="exactly 16 bytes"):
+        ULID(b"\x00" * (constants.BYTES_LEN - 1))
+
+
 def test_pydantic_protocol() -> None:
     ulid = ULID()
 

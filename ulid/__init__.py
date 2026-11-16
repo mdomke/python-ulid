@@ -261,6 +261,7 @@ class ULID:
         value (bytes, None):  A sequence of 16 bytes representing an encoded ULID.
 
     Raises:
+        TypeError: If the provided value is not :class:`bytes`.
         ValueError: If the provided value is not a valid encoded ULID.
     """
 
@@ -268,8 +269,11 @@ class ULID:
         self,
         value: bytes | None = None,
     ) -> None:
-        if value is not None and len(value) != constants.BYTES_LEN:
-            raise ValueError("ULID has to be exactly 16 bytes long.")
+        if value is not None:
+            if not isinstance(value, bytes):
+                raise TypeError("Value has to be of type bytes")
+            if len(value) != constants.BYTES_LEN:
+                raise ValueError("ULID has to be exactly 16 bytes long.")
         if value is None:
             self.bytes: bytes = default_generator.generate().bytes
         else:

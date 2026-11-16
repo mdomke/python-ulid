@@ -17,6 +17,9 @@ Added
 
 Fixed
 ~~~~~
+* The :class:`.ULID` constructor now rejects values that are not :class:`bytes` with a
+  :exc:`TypeError`. A 16-character string or a ``bytearray`` was previously accepted and produced
+  an object whose ``str()`` failed or that was unhashable.
 * Pydantic validation of unsupported values such as ``dict``, ``float`` or an out-of-range
   ``int`` now raises ``pydantic.ValidationError`` instead of leaking :exc:`TypeError` or
   :exc:`OverflowError`.
