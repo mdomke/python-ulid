@@ -42,6 +42,9 @@ Repository = "https://github.com/mdomke/python-ulid"
 pydantic = [
     "pydantic>=2.0"
 ]
+sqlalchemy = [
+    "sqlalchemy>=2.0",
+]
 
 [project.scripts]
 ulid = "ulid.__main__:entrypoint"
@@ -112,10 +115,10 @@ preset = "strict"
 project-excludes = ["docs"]
 
 [tool.poe.tasks]
-test = "uv run --extra pydantic pytest --cov --cov-report=term-missing"
+test = "uv run --extra pydantic --extra sqlalchemy pytest --cov --cov-report=term-missing"
 check-code = "uv run ruff check"
 check-fmt = "uv run ruff format --check"
-check-types = "uv run --extra pydantic pyrefly check"
+check-types = "uv run --extra pydantic --extra sqlalchemy pyrefly check"
 check-docs = "uv run doc8 docs/source"
 fmt = "uv run ruff format"
 fix = "uv run ruff check --fix"
@@ -155,6 +158,7 @@ dev = [
     "pytest",
     "pytest-cov",
     "ruff",
+    "sqlmodel",
 ]
 doc = [
     "doc8>=2.0.0",
