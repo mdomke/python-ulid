@@ -8,6 +8,11 @@ Versions follow `Semantic Versioning <http://www.semver.org>`_
 `Unreleased`_
 -------------
 
+Fixed
+~~~~~
+* :meth:`.ULID.from_datetime` and :meth:`.ULID.from_timestamp` no longer land one millisecond early
+  when a value on an exact millisecond multiplies to just below that integer as a float.
+
 `4.1.0`_ - 2026-10-27
 ---------------------
 Changed

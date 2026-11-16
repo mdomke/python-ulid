@@ -188,13 +188,18 @@ class ULIDGenerator:
     def _default_randomness(_timestamp: int) -> bytes:
         return os.urandom(constants.RANDOMNESS_LEN)
 
+    @staticmethod
+    def _seconds_to_milliseconds(seconds: float) -> int:
+        # Round off the float error first, or x.860 s truncates to x859 ms.
+        return int(round(seconds * constants.MILLISECS_IN_SECS, 3))
+
     def _normalize_timestamp(self, value: float | datetime | None = None) -> int:
         if value is None:
             value = self.clock()
         elif isinstance(value, datetime):
-            value = int(value.timestamp() * constants.MILLISECS_IN_SECS)
+            value = self._seconds_to_milliseconds(value.timestamp())
         elif isinstance(value, float):
-            value = int(value * constants.MILLISECS_IN_SECS)
+            value = self._seconds_to_milliseconds(value)
         if value > constants.MAX_TIMESTAMP:
             raise ValueError("Value exceeds maximum possible timestamp")
         return value
