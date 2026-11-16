@@ -17,6 +17,9 @@ Added
 
 Fixed
 ~~~~~
+* :meth:`.ULID.parse` now treats any integer in the unsigned 128-bit range as a full ULID
+  integer, instead of guessing from the number of decimal digits. Previously only integers with
+  exactly 37 digits were accepted, so ``ULID.parse(int(ulid))`` failed for most ULIDs.
 * :meth:`.ULID.from_datetime` and :meth:`.ULID.from_timestamp` no longer land one millisecond early
   when a value on an exact millisecond multiplies to just below that integer as a float.
 * :meth:`.ULID.from_datetime` and :meth:`.ULID.from_timestamp` raise a :exc:`ValueError` for values

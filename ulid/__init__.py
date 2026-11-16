@@ -354,6 +354,10 @@ class ULID:
         .. note::
             This method should only be used when the caller is trying to parse a ULID from
             a value when they're unsure what format/primitive type it will be given in.
+
+            Integer values up to ``MAX_TIMESTAMP`` are interpreted as millisecond timestamps,
+            while larger integers up to ``2**128 - 1`` are interpreted as the 128-bit integer
+            representation of a ULID.
         """
         if isinstance(value, ULID):
             return cast("Self", value)
@@ -369,9 +373,11 @@ class ULID:
                 return cls.from_str(value)
             raise ValueError(f"Cannot parse ULID from string of length {len_value}")
         if isinstance(value, int):
-            if len(str(value)) == constants.INT_REPR_LEN:
-                return cls.from_int(value)
-            return cls.from_timestamp(value)
+            if not 0 <= value < 1 << (constants.BYTES_LEN * 8):
+                raise ValueError("Cannot parse ULID from an integer outside the 128-bit range")
+            if value <= constants.MAX_TIMESTAMP:
+                return cls.from_timestamp(value)
+            return cls.from_int(value)
         if isinstance(value, float):
             return cls.from_timestamp(value)
         if isinstance(value, datetime):
