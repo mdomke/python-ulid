@@ -200,6 +200,8 @@ class ULIDGenerator:
             value = self._seconds_to_milliseconds(value.timestamp())
         elif isinstance(value, float):
             value = self._seconds_to_milliseconds(value)
+        if value < constants.MIN_TIMESTAMP:
+            raise ValueError("Value is below minimum possible timestamp")
         if value > constants.MAX_TIMESTAMP:
             raise ValueError("Value exceeds maximum possible timestamp")
         return value
