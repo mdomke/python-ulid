@@ -475,8 +475,6 @@ def test_ulid_max_input(constructor: Callable[[Params], ULID], value: Params) ->
     "value",
     [
         "x" * constants.BYTES_LEN,
-        bytearray(constants.BYTES_LEN),
-        memoryview(b"\x00" * constants.BYTES_LEN),
         123,
     ],
 )
@@ -485,17 +483,33 @@ def test_ulid_constructor_rejects_non_bytes(value: object) -> None:
         ULID(value)  # type: ignore[arg-type]
 
 
-def test_ulid_constructor_accepts_bytes() -> None:
+@pytest.mark.parametrize(
+    "value",
+    [
+        bytes(range(constants.BYTES_LEN)),
+        bytearray(range(constants.BYTES_LEN)),
+        memoryview(bytes(range(constants.BYTES_LEN))),
+    ],
+)
+def test_ulid_constructor_accepts_bytes_like(value: object) -> None:
     raw = bytes(range(constants.BYTES_LEN))
-    ulid = ULID(raw)
+    ulid = ULID(value)  # type: ignore[arg-type]
+    assert isinstance(ulid.bytes, bytes)
     assert ulid.bytes == raw
     assert ulid == ULID.from_bytes(raw)
     assert hash(ulid) == hash(ULID.from_bytes(raw))
 
 
-def test_ulid_constructor_rejects_wrong_length() -> None:
+@pytest.mark.parametrize(
+    "value",
+    [
+        b"\x00" * (constants.BYTES_LEN - 1),
+        memoryview(b"\x00" * (constants.BYTES_LEN - 1)),
+    ],
+)
+def test_ulid_constructor_rejects_wrong_length(value: object) -> None:
     with pytest.raises(ValueError, match="exactly 16 bytes"):
-        ULID(b"\x00" * (constants.BYTES_LEN - 1))
+        ULID(value)  # type: ignore[arg-type]
 
 
 def test_pydantic_protocol() -> None:
