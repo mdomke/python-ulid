@@ -258,9 +258,11 @@ class ULID:
         '01E75PVKXA3GFABX1M1J9NZZNF'
 
     Args:
-        value (bytes, None):  A sequence of 16 bytes representing an encoded ULID.
+        value (bytes, None):  A sequence of 16 bytes representing an encoded ULID. Bytes-like
+            values (:class:`bytearray` and :class:`memoryview`) are converted to :class:`bytes`.
 
     Raises:
+        TypeError: If the provided value is not :class:`bytes` or a bytes-like object.
         ValueError: If the provided value is not a valid encoded ULID.
     """
 
@@ -268,8 +270,13 @@ class ULID:
         self,
         value: bytes | None = None,
     ) -> None:
-        if value is not None and len(value) != constants.BYTES_LEN:
-            raise ValueError("ULID has to be exactly 16 bytes long.")
+        if value is not None:
+            if isinstance(value, (bytearray, memoryview)):
+                value = bytes(value)
+            elif not isinstance(value, bytes):
+                raise TypeError("Value has to be of type bytes")
+            if len(value) != constants.BYTES_LEN:
+                raise ValueError("ULID has to be exactly 16 bytes long.")
         if value is None:
             self.bytes: bytes = default_generator.generate().bytes
         else:
