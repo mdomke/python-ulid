@@ -103,8 +103,13 @@ def make_parser(prog: str | None = None) -> argparse.ArgumentParser:
 
 
 def main(argv: Sequence[str], prog: str | None = None) -> str:
-    args = make_parser(prog).parse_args(argv)
-    return args.func(args)
+    parser = make_parser(prog)
+    args = parser.parse_args(argv)
+    try:
+        return args.func(args)
+    except ValueError as err:
+        # Report invalid input like argparse does for invalid arguments, without a traceback.
+        parser.exit(2, f"{parser.prog}: error: {err}\n")
 
 
 def from_value_or_stdin(value: str, convert: Callable[[str], Any] | None = None) -> Any:
