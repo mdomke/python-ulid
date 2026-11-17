@@ -177,6 +177,17 @@ def test_idempotency() -> None:
     assert ULID.parse(ulid.bytes) == ulid
 
 
+@pytest.mark.parametrize("value", [0, 2**128 - 1])
+def test_ulid_from_int_bounds(value: int) -> None:
+    assert int(ULID.from_int(value)) == value
+
+
+@pytest.mark.parametrize("value", [-1, 2**128, 2**129])
+def test_ulid_from_int_out_of_range(value: int) -> None:
+    with pytest.raises(ValueError, match="outside the 128-bit range of a ULID"):
+        ULID.from_int(value)
+
+
 def test_from_str_is_case_insensitive() -> None:
     ulid = ULID()
     assert ULID.from_str(str(ulid).lower()) == ulid
