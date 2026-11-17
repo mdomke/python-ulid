@@ -351,9 +351,17 @@ class ULID:
 
     @classmethod
     def from_int(cls, value: int) -> Self:
-        """Create a new :class:`ULID`-object from an `int`."""
+        """Create a new :class:`ULID`-object from an `int`.
+
+        Raises:
+            TypeError: If the value is not an `int`.
+            ValueError: If the value is outside the unsigned 128-bit range (``0`` to
+                ``2**128 - 1``).
+        """
         if not isinstance(value, int):
             raise TypeError("Value has to be of type int")
+        if not 0 <= value < 1 << (constants.BYTES_LEN * 8):
+            raise ValueError("Value is outside the 128-bit range of a ULID")
         return cls(int.to_bytes(value, constants.BYTES_LEN, "big"))
 
     @classmethod
@@ -607,6 +615,6 @@ class ULID:
                 ulid = value
             else:
                 ulid = cls.from_bytes(value)
-        except (TypeError, ValueError, OverflowError) as err:
+        except (TypeError, ValueError) as err:
             raise PydanticCustomError("ulid_format", "Unrecognized format") from err
         return handler(ulid)

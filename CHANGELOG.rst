@@ -31,6 +31,8 @@ Fixed
   when a value on an exact millisecond multiplies to just below that integer as a float.
 * :meth:`.ULID.from_datetime` and :meth:`.ULID.from_timestamp` raise a :exc:`ValueError` for values
   before the Unix epoch instead of a bare :exc:`OverflowError`.
+* :meth:`.ULID.from_int` raises a :exc:`ValueError` for integers outside the unsigned 128-bit
+  range instead of a bare :exc:`OverflowError`.
 * ``import ulid`` no longer fails when the package metadata is missing, e.g. in applications frozen
   with cx_Freeze or PyInstaller. The version is now written into the package at build time.
 

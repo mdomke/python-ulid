@@ -128,7 +128,5 @@ def _to_ulid(value: object) -> ULID:
     if isinstance(value, (bytes, bytearray, memoryview)):
         return ULID.from_bytes(bytes(value))
     if isinstance(value, int) and not isinstance(value, bool):
-        if not 0 <= value < 1 << (constants.BYTES_LEN * 8):
-            raise ValueError("Value is out of range for a ULID")
         return ULID.from_int(value)
     raise TypeError(f"Cannot convert value of type {type(value).__name__} to ULID")
