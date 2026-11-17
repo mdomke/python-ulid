@@ -7,6 +7,10 @@ import ulid.__main__ as cli
 from ulid import ULID
 
 
+# Exit status argparse uses for invalid command-line input.
+USAGE_ERROR = 2
+
+
 @pytest.mark.parametrize(
     "option", ["", "uuid", "uuid4", "uuid7", "hex", "int", "timestamp", "datetime"]
 )
@@ -104,6 +108,46 @@ def test_module_outputs_result(args: list[str], stdin: str | None, expected: str
     )
     assert result.stdout == expected
     assert result.stderr == ""
+
+
+@pytest.mark.parametrize(
+    ("args", "message"),
+    [
+        (["build", "--from-int", "abc"], "invalid literal for int()"),
+        (["build", "--from-int=-1"], "Value is outside the 128-bit range of a ULID"),
+        (["build", "--from-str", "not-a-ulid"], "ULID has to be exactly 26 characters long."),
+        (["build", "--from-hex", "zz"], "non-hexadecimal number"),
+        (["build", "--from-timestamp=-1"], "Value is below minimum possible timestamp"),
+        (["build", "--from-datetime", "yesterday"], "Invalid isoformat string"),
+        (["build", "--from-uuid", "not-a-uuid"], "badly formed hexadecimal UUID string"),
+        (["show", "not-a-ulid"], "ULID has to be exactly 26 characters long."),
+    ],
+)
+def test_invalid_input_reports_error_without_traceback(
+    capsys: pytest.CaptureFixture[str], args: list[str], message: str
+) -> None:
+    with pytest.raises(SystemExit) as exc_info:
+        cli.main(args, prog="ulid")
+    assert exc_info.value.code == USAGE_ERROR
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err.startswith("ulid: error: ")
+    assert message in captured.err
+    assert "Traceback" not in captured.err
+
+
+def test_module_invalid_input_exits_with_error() -> None:
+    result = subprocess.run(
+        [sys.executable, "-m", "ulid", "show", "not-a-ulid"],
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=10,
+    )
+    assert result.returncode == USAGE_ERROR
+    assert result.stdout == ""
+    assert result.stderr.startswith("python -m ulid: error: ")
+    assert "Traceback" not in result.stderr
 
 
 @pytest.mark.parametrize("args", [[], ["--help"]])

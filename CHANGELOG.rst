@@ -33,6 +33,8 @@ Fixed
   before the Unix epoch instead of a bare :exc:`OverflowError`.
 * :meth:`.ULID.from_int` raises a :exc:`ValueError` for integers outside the unsigned 128-bit
   range instead of a bare :exc:`OverflowError`.
+* The ``ulid`` command line tool reports invalid input as a short error message with exit status
+  2 instead of a Python traceback.
 * ``import ulid`` no longer fails when the package metadata is missing, e.g. in applications frozen
   with cx_Freeze or PyInstaller. The version is now written into the package at build time.
 
