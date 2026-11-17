@@ -4,7 +4,7 @@
 
    <p align="center">
       <br />
-      <a href=""https://python-ulid.readthedocs.io>
+      <a href="https://python-ulid.readthedocs.io">
          <img src="./logo.png" width="360" alt="ulid" />
       </a>
       <br />
@@ -19,10 +19,7 @@
          <img src="https://img.shields.io/codecov/c/github/mdomke/python-ulid.svg?style=flat-square" />
       </a>
       <a href="https://github.com/mdomke/python-ulid/actions?query=workflow%3Alint-and-test">
-         <img src="https://img.shields.io/github/actions/workflow/status/mdomke/python-ulid/lint-and-test.yml?style=flat-square&brach=main" />
-      </a>
-      <a href="https://python-ulid.readthedocs.io">
-         <img src="https://readthedocs.org/projects/python-ulid/badge/?version=latest&style=flat-square" />
+         <img src="https://img.shields.io/github/actions/workflow/status/mdomke/python-ulid/lint-and-test.yml?style=flat-square&branch=main" />
       </a>
       <a href="https://github.com/astral-sh/ruff">
          <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json&style=flat-square" />
@@ -58,6 +55,8 @@ For more information have a look at the original
 `specification <https://github.com/alizain/ulid#specification>`_.
 
 .. teaser-end
+
+The full documentation is available at `python-ulid.readthedocs.io <https://python-ulid.readthedocs.io>`_.
 
 .. installation-begin
 
