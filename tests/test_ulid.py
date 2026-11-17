@@ -183,6 +183,47 @@ def test_from_str_is_case_insensitive() -> None:
     assert ULID.parse(str(ulid).lower()) == ulid
 
 
+@pytest.mark.parametrize(
+    ("timestamp", "randomness"),
+    [
+        (0, b"\xff" * constants.RANDOMNESS_LEN),
+        (1, b"\x00" * constants.RANDOMNESS_LEN),
+        (1_000_000, b"\x12" * constants.RANDOMNESS_LEN),
+        (10**12, b"\x00" * constants.RANDOMNESS_LEN),
+        (10**13, b"\xff" * constants.RANDOMNESS_LEN),
+        (constants.MAX_TIMESTAMP, b"\x00" * constants.RANDOMNESS_LEN),
+    ],
+)
+def test_parse_int_roundtrips_for_any_ulid_integer(timestamp: int, randomness: bytes) -> None:
+    ulid = ULID.from_bytes(timestamp.to_bytes(constants.TIMESTAMP_LEN, "big") + randomness)
+    assert ULID.parse(int(ulid)) == ulid
+    assert int(ULID.parse(int(ulid))) == int(ulid)
+
+
+def test_parse_int_roundtrip_for_generated_ulid() -> None:
+    ulid = ULID()
+    assert ULID.parse(int(ulid)) == ulid
+
+
+def test_parse_int_uses_timestamp_within_timestamp_range() -> None:
+    assert ULID.parse(0).milliseconds == 0
+    assert ULID.parse(1).milliseconds == 1
+    assert ULID.parse(constants.MAX_TIMESTAMP).milliseconds == constants.MAX_TIMESTAMP
+
+
+@pytest.mark.parametrize("value", [constants.MAX_TIMESTAMP + 1, 2**48, 10**36, 2**128 - 1])
+def test_parse_int_uses_full_128_bit_representation(value: int) -> None:
+    parsed = ULID.parse(value)
+    assert parsed == ULID.from_int(value)
+    assert int(parsed) == value
+
+
+@pytest.mark.parametrize("value", [-1, 2**128, 2**129])
+def test_parse_int_out_of_range(value: int) -> None:
+    with pytest.raises(ValueError, match="outside the 128-bit range"):
+        ULID.parse(value)
+
+
 def test_to_uuid4() -> None:
     ulid = ULID()
     uuid = ulid.to_uuid4()
