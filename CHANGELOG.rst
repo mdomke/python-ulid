@@ -17,6 +17,9 @@ Added
 
 Fixed
 ~~~~~
+* Pydantic validation of unsupported values such as ``dict``, ``float`` or an out-of-range
+  ``int`` now raises ``pydantic.ValidationError`` instead of leaking :exc:`TypeError` or
+  :exc:`OverflowError`.
 * :meth:`.ULID.parse` now treats any integer in the unsigned 128-bit range as a full ULID
   integer, instead of guessing from the number of decimal digits. Previously only integers with
   exactly 37 digits were accepted, so ``ULID.parse(int(ulid))`` failed for most ULIDs.

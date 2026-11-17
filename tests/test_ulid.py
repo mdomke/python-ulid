@@ -519,6 +519,45 @@ def test_pydantic_protocol() -> None:
     } in model_json_schema["properties"]["ulid"]["anyOf"]
 
 
+class PydanticModel(BaseModel):
+    ulid: ULID
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        {},
+        [],
+        object(),
+        1.5,
+        2**128,
+        -1,
+        bytearray(constants.BYTES_LEN),
+        b"not-enough",
+        "not-a-ulid",
+    ],
+)
+def test_pydantic_invalid_values_raise_validation_error(value: Any) -> None:
+    with pytest.raises(ValidationError):
+        PydanticModel(ulid=value)
+
+
+def test_pydantic_invalid_value_uses_custom_error() -> None:
+    empty: Any = {}
+    with pytest.raises(ValidationError) as exc_info:
+        PydanticModel(ulid=empty)
+    error = exc_info.value.errors()[0]
+    assert error["type"] == "ulid_format"
+    assert error["msg"] == "Unrecognized format"
+
+
+def test_pydantic_still_accepts_every_valid_representation() -> None:
+    ulid = ULID()
+    values: list[Any] = [ulid, str(ulid), int(ulid), bytes(ulid)]
+    for value in values:
+        assert PydanticModel(ulid=value).ulid == ulid
+
+
 def test_pure_random_policy() -> None:
     # Ensure PureRandomPolicy generates non-monotonic fresh randomness
     custom_ts = 123456789
