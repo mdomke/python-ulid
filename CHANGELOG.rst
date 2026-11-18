@@ -12,7 +12,8 @@ Fixed
 ~~~~~
 * Draw fresh randomness for the first identifier at timestamp zero with
   :class:`.StrictMonotonicPolicy` and :class:`.LaxMonotonicPolicy`, instead of treating the initial
-  state as an existing epoch identifier.
+  state as an existing epoch identifier. The ``prev_timestamp`` attribute of a fresh
+  :class:`.BaseMonotonicPolicy` is now ``-1`` instead of ``0``.
 
 `4.2.0`_ - 2026-11-17
 ---------------------
