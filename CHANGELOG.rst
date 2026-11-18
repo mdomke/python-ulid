@@ -8,6 +8,12 @@ Versions follow `Semantic Versioning <http://www.semver.org>`_
 `Unreleased`_
 -------------
 
+Fixed
+~~~~~
+* Draw fresh randomness for the first identifier at timestamp zero with
+  :class:`.StrictMonotonicPolicy` and :class:`.LaxMonotonicPolicy`, instead of treating the initial
+  state as an existing epoch identifier.
+
 `4.2.0`_ - 2026-11-17
 ---------------------
 Added
@@ -19,9 +25,6 @@ Added
 
 Fixed
 ~~~~~
-* Draw fresh randomness for the first identifier at timestamp zero with
-  :class:`.StrictMonotonicPolicy` and :class:`.LaxMonotonicPolicy`, instead of treating the initial
-  state as an existing epoch identifier.
 * The :class:`.ULID` constructor now accepts :class:`bytes` and bytes-like values (``bytearray``
   and ``memoryview``), which are stored as immutable :class:`bytes`. A 16-character string or an
   integer was previously accepted and produced an object whose ``str()`` failed or that was
