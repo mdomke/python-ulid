@@ -60,21 +60,22 @@ class MonotonicityPolicy(Protocol):
 
 
 class BaseMonotonicPolicy(abc.ABC):
-    """Base class for stateful monotonic policies."""
+    """Base class for stateful monotonic policies.
+
+    ``prev_timestamp`` is -1 until the first successful randomness resolution.
+    Restoring ``prev_timestamp`` and ``prev_randomness`` seeds the previous ULID state.
+    """
 
     def __init__(self) -> None:
-        self.prev_timestamp = constants.MIN_TIMESTAMP
+        self.prev_timestamp = -1
         self.prev_randomness = constants.MIN_RANDOMNESS
-        self._initialized = False
 
     def resolve_randomness(
         self,
         timestamp: int,
         randomness_source: RandomnessSource,
     ) -> bytes:
-        # Subclasses that initialize the existing public state without super()
-        # keep treating that state as seeded, as they did before this marker existed.
-        if getattr(self, "_initialized", True) and timestamp == self.prev_timestamp:
+        if timestamp == self.prev_timestamp:
             if self.prev_randomness == constants.MAX_RANDOMNESS:
                 randomness = self._on_overflow(timestamp, randomness_source)
             else:
@@ -84,7 +85,6 @@ class BaseMonotonicPolicy(abc.ABC):
 
         self.prev_randomness = randomness
         self.prev_timestamp = timestamp
-        self._initialized = True
         return randomness
 
     @staticmethod
