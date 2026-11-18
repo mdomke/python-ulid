@@ -50,3 +50,13 @@ satisfying the :class:`MonotonicityPolicy` protocol can be used; stateful polici
 
 .. autoclass:: PureRandomPolicy
    :members:
+
+
+SQLAlchemy
+----------
+
+.. module:: ulid.sqlalchemy
+
+Requires the optional ``sqlalchemy`` dependency (``pip install python-ulid[sqlalchemy]``).
+
+.. autoclass:: ULIDType

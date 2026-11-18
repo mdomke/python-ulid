@@ -8,7 +8,6 @@ import uuid
 from collections.abc import Callable
 from datetime import datetime
 from datetime import UTC
-from importlib.metadata import version
 from threading import Lock
 from typing import Any
 from typing import cast
@@ -21,6 +20,7 @@ try:
 except ImportError:
     from typing_extensions import override  # type: ignore
 
+from ulid import _version
 from ulid import base32
 from ulid import constants
 
@@ -33,7 +33,9 @@ if TYPE_CHECKING:  # pragma: no cover
     from pydantic_core import CoreSchema
 
 
-__version__ = version("python-ulid")
+# Generated at build time so that the version is available even without package metadata,
+# e.g. in applications frozen with cx_Freeze or PyInstaller.
+__version__ = _version.__version__
 
 
 RandomnessSource = Callable[[int], bytes]
@@ -204,6 +206,8 @@ class ULIDGenerator:
             value = self._seconds_to_milliseconds(value.timestamp())
         elif isinstance(value, float):
             value = self._seconds_to_milliseconds(value)
+        if value < constants.MIN_TIMESTAMP:
+            raise ValueError("Value is below minimum possible timestamp")
         if value > constants.MAX_TIMESTAMP:
             raise ValueError("Value exceeds maximum possible timestamp")
         return value
@@ -258,9 +262,11 @@ class ULID:
         '01E75PVKXA3GFABX1M1J9NZZNF'
 
     Args:
-        value (bytes, None):  A sequence of 16 bytes representing an encoded ULID.
+        value (bytes, None):  A sequence of 16 bytes representing an encoded ULID. Bytes-like
+            values (:class:`bytearray` and :class:`memoryview`) are converted to :class:`bytes`.
 
     Raises:
+        TypeError: If the provided value is not :class:`bytes` or a bytes-like object.
         ValueError: If the provided value is not a valid encoded ULID.
     """
 
@@ -268,8 +274,13 @@ class ULID:
         self,
         value: bytes | None = None,
     ) -> None:
-        if value is not None and len(value) != constants.BYTES_LEN:
-            raise ValueError("ULID has to be exactly 16 bytes long.")
+        if value is not None:
+            if isinstance(value, (bytearray, memoryview)):
+                value = bytes(value)
+            elif not isinstance(value, bytes):
+                raise TypeError("Value has to be of type bytes")
+            if len(value) != constants.BYTES_LEN:
+                raise ValueError("ULID has to be exactly 16 bytes long.")
         if value is None:
             self.bytes: bytes = default_generator.generate().bytes
         else:
@@ -344,9 +355,17 @@ class ULID:
 
     @classmethod
     def from_int(cls, value: int) -> Self:
-        """Create a new :class:`ULID`-object from an `int`."""
+        """Create a new :class:`ULID`-object from an `int`.
+
+        Raises:
+            TypeError: If the value is not an `int`.
+            ValueError: If the value is outside the unsigned 128-bit range (``0`` to
+                ``2**128 - 1``).
+        """
         if not isinstance(value, int):
             raise TypeError("Value has to be of type int")
+        if not 0 <= value < 1 << (constants.BYTES_LEN * 8):
+            raise ValueError("Value is outside the 128-bit range of a ULID")
         return cls(int.to_bytes(value, constants.BYTES_LEN, "big"))
 
     @classmethod
@@ -356,6 +375,10 @@ class ULID:
         .. note::
             This method should only be used when the caller is trying to parse a ULID from
             a value when they're unsure what format/primitive type it will be given in.
+
+            Integer values up to ``MAX_TIMESTAMP`` are interpreted as millisecond timestamps,
+            while larger integers up to ``2**128 - 1`` are interpreted as the 128-bit integer
+            representation of a ULID.
         """
         if isinstance(value, ULID):
             return cast("Self", value)
@@ -371,9 +394,11 @@ class ULID:
                 return cls.from_str(value)
             raise ValueError(f"Cannot parse ULID from string of length {len_value}")
         if isinstance(value, int):
-            if len(str(value)) == constants.INT_REPR_LEN:
-                return cls.from_int(value)
-            return cls.from_timestamp(value)
+            if not 0 <= value < 1 << (constants.BYTES_LEN * 8):
+                raise ValueError("Cannot parse ULID from an integer outside the 128-bit range")
+            if value <= constants.MAX_TIMESTAMP:
+                return cls.from_timestamp(value)
+            return cls.from_int(value)
         if isinstance(value, float):
             return cls.from_timestamp(value)
         if isinstance(value, datetime):
@@ -594,6 +619,6 @@ class ULID:
                 ulid = value
             else:
                 ulid = cls.from_bytes(value)
-        except ValueError as err:
+        except (TypeError, ValueError) as err:
             raise PydanticCustomError("ulid_format", "Unrecognized format") from err
         return handler(ulid)

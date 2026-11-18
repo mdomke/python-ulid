@@ -178,10 +178,62 @@ def test_idempotency() -> None:
     assert ULID.parse(ulid.bytes) == ulid
 
 
+@pytest.mark.parametrize("value", [0, 2**128 - 1])
+def test_ulid_from_int_bounds(value: int) -> None:
+    assert int(ULID.from_int(value)) == value
+
+
+@pytest.mark.parametrize("value", [-1, 2**128, 2**129])
+def test_ulid_from_int_out_of_range(value: int) -> None:
+    with pytest.raises(ValueError, match="outside the 128-bit range of a ULID"):
+        ULID.from_int(value)
+
+
 def test_from_str_is_case_insensitive() -> None:
     ulid = ULID()
     assert ULID.from_str(str(ulid).lower()) == ulid
     assert ULID.parse(str(ulid).lower()) == ulid
+
+
+@pytest.mark.parametrize(
+    ("timestamp", "randomness"),
+    [
+        (0, b"\xff" * constants.RANDOMNESS_LEN),
+        (1, b"\x00" * constants.RANDOMNESS_LEN),
+        (1_000_000, b"\x12" * constants.RANDOMNESS_LEN),
+        (10**12, b"\x00" * constants.RANDOMNESS_LEN),
+        (10**13, b"\xff" * constants.RANDOMNESS_LEN),
+        (constants.MAX_TIMESTAMP, b"\x00" * constants.RANDOMNESS_LEN),
+    ],
+)
+def test_parse_int_roundtrips_for_any_ulid_integer(timestamp: int, randomness: bytes) -> None:
+    ulid = ULID.from_bytes(timestamp.to_bytes(constants.TIMESTAMP_LEN, "big") + randomness)
+    assert ULID.parse(int(ulid)) == ulid
+    assert int(ULID.parse(int(ulid))) == int(ulid)
+
+
+def test_parse_int_roundtrip_for_generated_ulid() -> None:
+    ulid = ULID()
+    assert ULID.parse(int(ulid)) == ulid
+
+
+def test_parse_int_uses_timestamp_within_timestamp_range() -> None:
+    assert ULID.parse(0).milliseconds == 0
+    assert ULID.parse(1).milliseconds == 1
+    assert ULID.parse(constants.MAX_TIMESTAMP).milliseconds == constants.MAX_TIMESTAMP
+
+
+@pytest.mark.parametrize("value", [constants.MAX_TIMESTAMP + 1, 2**48, 10**36, 2**128 - 1])
+def test_parse_int_uses_full_128_bit_representation(value: int) -> None:
+    parsed = ULID.parse(value)
+    assert parsed == ULID.from_int(value)
+    assert int(parsed) == value
+
+
+@pytest.mark.parametrize("value", [-1, 2**128, 2**129])
+def test_parse_int_out_of_range(value: int) -> None:
+    with pytest.raises(ValueError, match="outside the 128-bit range"):
+        ULID.parse(value)
 
 
 def test_to_uuid4() -> None:
@@ -356,6 +408,23 @@ def test_ulid_from_timestamp_overflow() -> None:
         ULID.from_timestamp(constants.MAX_TIMESTAMP + 1)
 
 
+@pytest.mark.parametrize("value", [-1, -1.0, -0.001])
+def test_ulid_from_timestamp_underflow(value: float) -> None:
+    with pytest.raises(ValueError, match="Value is below minimum possible timestamp"):
+        ULID.from_timestamp(value)
+
+
+def test_ulid_from_datetime_before_epoch() -> None:
+    with pytest.raises(ValueError, match="Value is below minimum possible timestamp"):
+        ULID.from_datetime(datetime(1969, 7, 20, tzinfo=UTC))
+
+
+def test_generator_rejects_negative_clock() -> None:
+    generator = ULIDGenerator(clock=lambda: -1)
+    with pytest.raises(ValueError, match="Value is below minimum possible timestamp"):
+        generator.generate()
+
+
 Params = bytes | str | int | float
 
 
@@ -414,6 +483,47 @@ def test_ulid_max_input(constructor: Callable[[Params], ULID], value: Params) ->
     constructor(value)
 
 
+@pytest.mark.parametrize(
+    "value",
+    [
+        "x" * constants.BYTES_LEN,
+        123,
+    ],
+)
+def test_ulid_constructor_rejects_non_bytes(value: object) -> None:
+    with pytest.raises(TypeError, match="Value has to be of type bytes"):
+        ULID(value)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        bytes(range(constants.BYTES_LEN)),
+        bytearray(range(constants.BYTES_LEN)),
+        memoryview(bytes(range(constants.BYTES_LEN))),
+    ],
+)
+def test_ulid_constructor_accepts_bytes_like(value: object) -> None:
+    raw = bytes(range(constants.BYTES_LEN))
+    ulid = ULID(value)  # type: ignore[arg-type]
+    assert isinstance(ulid.bytes, bytes)
+    assert ulid.bytes == raw
+    assert ulid == ULID.from_bytes(raw)
+    assert hash(ulid) == hash(ULID.from_bytes(raw))
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        b"\x00" * (constants.BYTES_LEN - 1),
+        memoryview(b"\x00" * (constants.BYTES_LEN - 1)),
+    ],
+)
+def test_ulid_constructor_rejects_wrong_length(value: object) -> None:
+    with pytest.raises(ValueError, match="exactly 16 bytes"):
+        ULID(value)  # type: ignore[arg-type]
+
+
 def test_pydantic_protocol() -> None:
     ulid = ULID()
 
@@ -460,6 +570,45 @@ def test_pydantic_protocol() -> None:
     assert {
         "type": "null",
     } in model_json_schema["properties"]["ulid"]["anyOf"]
+
+
+class PydanticModel(BaseModel):
+    ulid: ULID
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        {},
+        [],
+        object(),
+        1.5,
+        2**128,
+        -1,
+        bytearray(constants.BYTES_LEN),
+        b"not-enough",
+        "not-a-ulid",
+    ],
+)
+def test_pydantic_invalid_values_raise_validation_error(value: Any) -> None:
+    with pytest.raises(ValidationError):
+        PydanticModel(ulid=value)
+
+
+def test_pydantic_invalid_value_uses_custom_error() -> None:
+    empty: Any = {}
+    with pytest.raises(ValidationError) as exc_info:
+        PydanticModel(ulid=empty)
+    error = exc_info.value.errors()[0]
+    assert error["type"] == "ulid_format"
+    assert error["msg"] == "Unrecognized format"
+
+
+def test_pydantic_still_accepts_every_valid_representation() -> None:
+    ulid = ULID()
+    values: list[Any] = [ulid, str(ulid), int(ulid), bytes(ulid)]
+    for value in values:
+        assert PydanticModel(ulid=value).ulid == ulid
 
 
 def test_pure_random_policy() -> None:

@@ -4,7 +4,7 @@
 
    <p align="center">
       <br />
-      <a href=""https://python-ulid.readthedocs.io>
+      <a href="https://python-ulid.readthedocs.io">
          <img src="./logo.png" width="360" alt="ulid" />
       </a>
       <br />
@@ -19,10 +19,7 @@
          <img src="https://img.shields.io/codecov/c/github/mdomke/python-ulid.svg?style=flat-square" />
       </a>
       <a href="https://github.com/mdomke/python-ulid/actions?query=workflow%3Alint-and-test">
-         <img src="https://img.shields.io/github/actions/workflow/status/mdomke/python-ulid/lint-and-test.yml?style=flat-square&brach=main" />
-      </a>
-      <a href="https://python-ulid.readthedocs.io">
-         <img src="https://app.readthedocs.org/projects/python-ulid/badge/?version=latest&style=flat-square" />
+         <img src="https://img.shields.io/github/actions/workflow/status/mdomke/python-ulid/lint-and-test.yml?style=flat-square&branch=main" />
       </a>
       <a href="https://github.com/astral-sh/ruff">
          <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json&style=flat-square" />
@@ -59,6 +56,8 @@ For more information have a look at the original
 
 .. teaser-end
 
+The full documentation is available at `python-ulid.readthedocs.io <https://python-ulid.readthedocs.io>`_.
+
 .. installation-begin
 
 Installation
@@ -75,6 +74,12 @@ to include Pydantic support install the optional dependency like so
 .. code-block:: bash
 
   $ pip install python-ulid[pydantic]
+
+and for the SQLAlchemy column type
+
+.. code-block:: bash
+
+  $ pip install python-ulid[sqlalchemy]
 
 .. installation-end
 
@@ -150,6 +155,55 @@ The ``ULID`` class can be directly used for the popular data validation library
   model = Model(ulid="not-a-ulid")  # Raises ValidationError
 
 .. pydantic-end
+
+.. sqlalchemy-begin
+
+SQLAlchemy and SQLModel integration
+-----------------------------------
+
+The ``ULIDType`` column type stores ``ULID`` values with
+`SQLAlchemy <https://www.sqlalchemy.org/>`_ (version 2.0 or newer). Values are bound from
+``ULID``, ``UUID``, ``bytes``, ``int`` or any string representation and always loaded as ``ULID``.
+Pass ``default=ULID`` to generate a new identifier for every inserted row
+
+.. code-block:: python
+
+  from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+  from ulid import ULID
+  from ulid.sqlalchemy import ULIDType
+
+
+  class Base(DeclarativeBase):
+    pass
+
+
+  class Item(Base):
+    __tablename__ = "items"
+
+    id: Mapped[ULID] = mapped_column(ULIDType(), primary_key=True, default=ULID)
+    name: Mapped[str]
+
+By default the value is stored as a UUID: a native ``UUID`` column where the database has one
+(e.g. PostgreSQL) and ``CHAR(32)`` otherwise. Use ``ULIDType(storage="binary")`` for a
+``BINARY(16)`` column or ``ULIDType(storage="string")`` for the 26 character ULID string in a
+``CHAR(26)`` column. All storages keep the database sort order identical to the ULID order, except
+the native ``UNIQUEIDENTIFIER`` type on SQL Server.
+
+`SQLModel <https://sqlmodel.tiangolo.com/>`_ models can use ``ULID`` as a field type directly,
+since it is a Pydantic type. Only the column type has to be passed explicitly
+
+.. code-block:: python
+
+  from sqlmodel import Field, SQLModel
+  from ulid import ULID
+  from ulid.sqlalchemy import ULIDType
+
+
+  class Hero(SQLModel, table=True):
+    id: ULID = Field(default_factory=ULID, primary_key=True, sa_type=ULIDType)
+    name: str
+
+.. sqlalchemy-end
 
 .. monotonic-begin
 

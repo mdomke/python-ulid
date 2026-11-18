@@ -15,3 +15,5 @@ __pycache__
 /dist/
 /build/
 /docs/build
+
+/ulid/_version.py

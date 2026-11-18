@@ -8,13 +8,43 @@ Versions follow `Semantic Versioning <http://www.semver.org>`_
 `Unreleased`_
 -------------
 
+`4.2.0`_ - 2026-11-17
+---------------------
+Added
+~~~~~
+* Added support for Python 3.15.
+* :class:`~ulid.sqlalchemy.ULIDType`, a SQLAlchemy column type for :class:`.ULID` values that can
+  also be used with SQLModel. It stores values as UUID by default, or as binary or string. Install
+  it with the new ``sqlalchemy`` extra (``pip install python-ulid[sqlalchemy]``).
+
 Fixed
 ~~~~~
 * Draw fresh randomness for the first identifier at timestamp zero with
   :class:`.StrictMonotonicPolicy` and :class:`.LaxMonotonicPolicy`, instead of treating the initial
   state as an existing epoch identifier.
+* The :class:`.ULID` constructor now accepts :class:`bytes` and bytes-like values (``bytearray``
+  and ``memoryview``), which are stored as immutable :class:`bytes`. A 16-character string or an
+  integer was previously accepted and produced an object whose ``str()`` failed or that was
+  unhashable, so other types now raise :exc:`TypeError`
+  `@KuljeetSinghXDA <https://github.com/KuljeetSinghXDA>`_.
+* Pydantic validation of unsupported values such as ``dict``, ``float`` or an out-of-range
+  ``int`` now raises ``pydantic.ValidationError`` instead of leaking :exc:`TypeError` or
+  :exc:`OverflowError` `@KuljeetSinghXDA <https://github.com/KuljeetSinghXDA>`_.
+* :meth:`.ULID.parse` now treats any integer in the unsigned 128-bit range as a full ULID
+  integer, instead of guessing from the number of decimal digits. Previously only integers with
+  exactly 37 digits were accepted, so ``ULID.parse(int(ulid))`` failed for most ULIDs
+  `@KuljeetSinghXDA <https://github.com/KuljeetSinghXDA>`_.
 * :meth:`.ULID.from_datetime` and :meth:`.ULID.from_timestamp` no longer land one millisecond early
-  when a value on an exact millisecond multiplies to just below that integer as a float.
+  when a value on an exact millisecond multiplies to just below that integer as a float
+  `@arieleven <https://github.com/arieleven>`_.
+* :meth:`.ULID.from_datetime` and :meth:`.ULID.from_timestamp` raise a :exc:`ValueError` for values
+  before the Unix epoch instead of a bare :exc:`OverflowError`.
+* :meth:`.ULID.from_int` raises a :exc:`ValueError` for integers outside the unsigned 128-bit
+  range instead of a bare :exc:`OverflowError`.
+* The ``ulid`` command line tool reports invalid input as a short error message with exit status
+  2 instead of a Python traceback.
+* ``import ulid`` no longer fails when the package metadata is missing, e.g. in applications frozen
+  with cx_Freeze or PyInstaller. The version is now written into the package at build time.
 
 `4.1.0`_ - 2026-10-27
 ---------------------
@@ -292,7 +322,8 @@ Changed
 * The package now has no external dependencies.
 * The test-coverage has been raised to 100%.
 
-.. _Unreleased: https://github.com/mdomke/python-ulid/compare/4.1.0...HEAD
+.. _Unreleased: https://github.com/mdomke/python-ulid/compare/4.2.0...HEAD
+.. _4.2.0: https://github.com/mdomke/python-ulid/compare/4.1.0...4.2.0
 .. _4.1.0: https://github.com/mdomke/python-ulid/compare/4.0.1...4.1.0
 .. _4.0.1: https://github.com/mdomke/python-ulid/compare/4.0.0...4.0.1
 .. _4.0.0: https://github.com/mdomke/python-ulid/compare/3.2.1...4.0.0
