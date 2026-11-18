@@ -62,10 +62,14 @@ class MonotonicityPolicy(Protocol):
 
 
 class BaseMonotonicPolicy(abc.ABC):
-    """Base class for stateful monotonic policies."""
+    """Base class for stateful monotonic policies.
+
+    ``prev_timestamp`` is -1 until the first successful randomness resolution.
+    Restoring ``prev_timestamp`` and ``prev_randomness`` seeds the previous ULID state.
+    """
 
     def __init__(self) -> None:
-        self.prev_timestamp = constants.MIN_TIMESTAMP
+        self.prev_timestamp = -1
         self.prev_randomness = constants.MIN_RANDOMNESS
 
     def resolve_randomness(
